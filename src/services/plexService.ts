@@ -5,7 +5,7 @@ const getStoredClientId = () => {
   const key = 'plex_client_id';
   let id = localStorage.getItem(key);
   if (!id) {
-    id = 'plex-audio-pwa-' + Math.random().toString(36).substring(2, 11) + '-' + Date.now().toString(36);
+    id = 'lesenacht-pwa-' + Math.random().toString(36).substring(2, 11) + '-' + Date.now().toString(36);
     localStorage.setItem(key, id);
   }
   return id;
@@ -13,7 +13,7 @@ const getStoredClientId = () => {
 
 const PLEX_CLIENT_ID = getStoredClientId();
 const PLEX_HEADERS = {
-  'X-Plex-Product': 'PlexAudio',
+  'X-Plex-Product': 'Lesenacht',
   'X-Plex-Version': '1.0.0',
   'X-Plex-Client-Identifier': PLEX_CLIENT_ID,
   'X-Plex-Device': 'Web Browser',

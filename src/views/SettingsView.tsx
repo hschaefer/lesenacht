@@ -118,7 +118,7 @@ export function SettingsView() {
       // Use authAppUrl if Plex provides it (newer API) or fallback to manual construction
       const authUrl = newPin.authAppUrl 
         ? `${newPin.authAppUrl}&clientID=${clientId}` 
-        : `https://app.plex.tv/auth/#!?clientID=${clientId}&code=${newPin.code}&context[device][product]=PlexAudio`;
+        : `https://app.plex.tv/auth/#!?clientID=${clientId}&code=${newPin.code}&context[device][product]=Lesenacht`;
         
       window.open(authUrl, 'Plex Login', 'width=600,height=700');
     } catch (err) {
@@ -283,7 +283,7 @@ export function SettingsView() {
             <span className="text-sm text-ink">{LAST_UPDATED}</span>
           </div>
           <div className="pt-2 border-t border-white/5 text-[10px] text-slate-500 text-center uppercase tracking-widest leading-relaxed">
-            PlexAudio • Designed for focused listening
+            Lesenacht • Designed for focused listening
           </div>
         </div>
       </section>

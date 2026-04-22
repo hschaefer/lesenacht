@@ -79,7 +79,7 @@ export function HomeView({
         <div className="w-20 h-20 glass rounded-full flex items-center justify-center text-slate-500 mb-2">
           <BookOpen size={40} />
         </div>
-        <h2 className="text-xl font-bold text-ink">Welcome to PlexAudio</h2>
+        <h2 className="text-xl font-bold text-ink">Welcome to Lesenacht</h2>
         <p className="text-slate-500 text-sm max-w-[250px]">
           {!authToken ? "Please sign in with Plex" : "Please select a server and library"} in the settings to start listening.
         </p>
