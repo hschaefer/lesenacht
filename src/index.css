@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-accent: #f97316;
+  --color-surface: var(--surface);
+  --color-border-subtle: var(--border-subtle);
+}
+
+@layer base {
+  :root {
+    --bg: #f8fafc;
+    --ink: #0f172a;
+    --surface: rgba(255, 255, 255, 0.7);
+    --border-subtle: rgba(0, 0, 0, 0.05);
+  }
+
+  .dark {
+    --bg: #0f1115;
+    --ink: #e2e8f0;
+    --surface: rgba(26, 29, 35, 0.6);
+    --border-subtle: rgba(255, 255, 255, 0.05);
+  }
+
+  body {
+    @apply bg-bg text-ink antialiased overflow-x-hidden transition-colors duration-300;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.glass {
+  background: var(--color-surface);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.book-card {
+  @apply bg-white dark:bg-slate-900 border border-black/5 dark:border-white/5 shadow-md dark:shadow-none;
+}
+
+.accent-text { color: var(--color-accent); }
+.accent-bg { background-color: var(--color-accent); }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+input[type="range"] {
+  @apply cursor-pointer;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+

@@ -1,0 +1,174 @@
+import React, { useState, useEffect } from 'react';
+import { 
+  Home as HomeIcon, 
+  Library as LibraryIcon, 
+  Settings as SettingsIcon,
+  Play,
+  Pause,
+  SkipBack,
+  SkipForward,
+  ChevronUp,
+  Search,
+  BookOpen
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { useAuthStore, usePlayerStore } from './store/useStore';
+import { HomeView } from './views/HomeView';
+import { LibraryView } from './views/LibraryView';
+import { SettingsView } from './views/SettingsView';
+import { BookDetailView } from './views/BookDetailView';
+import { NowPlayingView } from './views/NowPlayingView';
+import { MiniPlayer } from './components/MiniPlayer';
+import { AudioController } from './components/AudioController';
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState<'home' | 'library' | 'settings'>('home');
+  const [selectedBookKey, setSelectedBookKey] = useState<string | null>(null);
+  const [selectedAuthorKey, setSelectedAuthorKey] = useState<string | null>(null);
+  const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
+  
+  const { authToken, selectedLibrary, theme } = useAuthStore();
+  const { currentBook } = usePlayerStore();
+
+  // Apply theme to document
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
+    }
+  }, [theme]);
+  
+  const handleSelectAuthor = (key: string | null) => {
+    setSelectedAuthorKey(key);
+    setSelectedBookKey(null);
+    setActiveTab('library');
+  };
+
+  const handleSelectBook = (key: string | null) => {
+    setSelectedBookKey(key);
+    if (key) {
+      setSelectedAuthorKey(null);
+    }
+  };
+
+  useEffect(() => {
+    // We'll let the views handle their own empty states now
+    // based on whether authToken and selectedLibrary are present
+  }, [authToken, selectedLibrary]);
+
+  const renderContent = () => {
+    if (selectedBookKey) {
+      return (
+        <BookDetailView 
+          ratingKey={selectedBookKey} 
+          onBack={() => setSelectedBookKey(null)} 
+          onSelectAuthor={handleSelectAuthor}
+        />
+      );
+    }
+
+    switch (activeTab) {
+      case 'home':
+        return <HomeView onSelectBook={handleSelectBook} onSelectAuthor={handleSelectAuthor} />;
+      case 'library':
+        return (
+          <LibraryView 
+            onSelectBook={handleSelectBook} 
+            initialAuthorKey={selectedAuthorKey}
+            onAuthorBack={() => setSelectedAuthorKey(null)}
+          />
+        );
+      case 'settings':
+        return <SettingsView />;
+      default:
+        return <HomeView onSelectBook={handleSelectBook} onSelectAuthor={handleSelectAuthor} />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-bg text-ink font-sans selection:bg-accent/30">
+      <main className="pb-32 px-4 pt-6 max-w-lg mx-auto">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={selectedBookKey || selectedAuthorKey || activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {renderContent()}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Navigation Bar */}
+      <nav className="fixed bottom-0 left-0 right-0 glass border-t border-white/5 pb-safe z-40">
+        <div className="max-w-lg mx-auto grid grid-cols-3 h-16">
+          <NavButton 
+            active={activeTab === 'home' && !selectedBookKey && !selectedAuthorKey} 
+            onClick={() => { setActiveTab('home'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
+            icon={<HomeIcon size={20} />}
+            label="Home"
+          />
+          <NavButton 
+            active={activeTab === 'library' && !selectedBookKey && !selectedAuthorKey} 
+            onClick={() => { setActiveTab('library'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
+            icon={<LibraryIcon size={20} />}
+            label="Library"
+          />
+          <NavButton 
+            active={activeTab === 'settings' && !selectedBookKey && !selectedAuthorKey} 
+            onClick={() => { setActiveTab('settings'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
+            icon={<SettingsIcon size={20} />}
+            label="Settings"
+          />
+        </div>
+      </nav>
+
+      {/* Mini Player */}
+      <AnimatePresence>
+        {currentBook && (
+          <MiniPlayer 
+            onClick={() => setIsNowPlayingOpen(true)} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Now Playing Fullscreen */}
+      <AnimatePresence>
+        {isNowPlayingOpen && (
+          <NowPlayingView 
+            onClose={() => setIsNowPlayingOpen(false)} 
+            onNavigateBook={(key) => {
+              handleSelectBook(key);
+              setIsNowPlayingOpen(false);
+            }}
+            onNavigateAuthor={(key) => {
+              handleSelectAuthor(key);
+              setIsNowPlayingOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
+
+      <AudioController />
+    </div>
+  );
+}
+
+function NavButton({ active, onClick, icon, label }: { active: boolean; onClick: () => void; icon: React.ReactNode; label: string }) {
+  return (
+    <button 
+      onClick={onClick}
+      className={`flex flex-col items-center justify-center space-y-1 transition-colors ${active ? 'accent-text' : 'text-slate-600 dark:text-slate-500 hover:text-black dark:hover:text-slate-300'}`}
+    >
+      {icon}
+      <span className="text-[10px] uppercase tracking-widest font-bold">{label}</span>
+    </button>
+  );
+}
