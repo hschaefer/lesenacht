@@ -1,6 +1,7 @@
 {
   "name": "lesenacht",
   "description": "A progressive web app for audiobook listening with Plex as a backend, featuring offline support and progress syncing.",
+  "updatedAt": "2026-04-23",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

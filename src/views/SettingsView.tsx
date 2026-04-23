@@ -27,8 +27,8 @@ export function SettingsView() {
   const [isAuthExpanded, setIsAuthExpanded] = useState(!authToken || !selectedServer || !selectedLibrary);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  const APP_VERSION = '1.2.0';
-  const LAST_UPDATED = '2026-04-22';
+  const APP_VERSION = '1.3.0';
+  const LAST_UPDATED = '2026-04-23';
 
   // Synchronize i18n with store
   useEffect(() => {
