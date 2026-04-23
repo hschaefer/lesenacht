@@ -5,7 +5,7 @@ import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
-export function SettingsView() {
+export function SettingsView({ onLogin, autoStartLogin }: { onLogin?: () => void, autoStartLogin?: boolean }) {
   const { t, i18n } = useTranslation();
   const { 
     authToken, 
@@ -30,6 +30,13 @@ export function SettingsView() {
   const APP_VERSION = '1.3.0';
   const LAST_UPDATED = '2026-04-23';
 
+  // Trigger login if autoStartLogin is true
+  useEffect(() => {
+    if (autoStartLogin && !authToken && !pin) {
+      handleLogin();
+    }
+  }, [autoStartLogin]);
+
   // Synchronize i18n with store
   useEffect(() => {
     if (language && i18n.language !== language) {
@@ -46,12 +53,13 @@ export function SettingsView() {
         if (token) {
           setAuthToken(token);
           setPin(null);
+          onLogin?.();
           clearInterval(interval);
         }
       }, 3000);
     }
     return () => clearInterval(interval);
-  }, [pin, authToken, setAuthToken]);
+  }, [pin, authToken, setAuthToken, onLogin]);
 
   // Fetch servers when token is available
   useEffect(() => {

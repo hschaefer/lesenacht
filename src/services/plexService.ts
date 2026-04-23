@@ -84,8 +84,12 @@ export const plexService = {
       return response.data;
     } else {
       // Use proxy on web to avoid CORS
-      const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-      const response = await axios.get(proxyUrl);
+      const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}`;
+      const response = await axios.get(proxyUrl, {
+        headers: {
+          'X-Plex-Token': token
+        }
+      });
       return response.data;
     }
   },

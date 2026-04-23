@@ -2,15 +2,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
 import { motion } from 'motion/react';
-import { BookOpen, Clock } from 'lucide-react';
+import { BookOpen, Clock, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 export function HomeView({ 
   onSelectBook,
-  onSelectAuthor
+  onSelectAuthor,
+  onLogin
 }: { 
   onSelectBook: (key: string) => void;
   onSelectAuthor?: (key: string) => void;
+  onLogin?: () => void;
 }) {
   const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();
@@ -44,25 +46,22 @@ export function HomeView({
 
   const continueListening = useMemo(() => {
     // Get books that have local progress
-    // We check if the book has a last played track, and if that track has progress > 0
     return allBooks
       .filter(book => {
         const lastTrackKey = lastTrackByBook[book.ratingKey];
         if (!lastTrackKey) return false;
         
         const progress = progressMap[lastTrackKey];
-        // If we have progress and it's not finished
         if (!progress || progress.time <= 0) return false;
         
         const percent = (progress.time / progress.duration) * 100;
-        return percent < 95; // Only show if less than 95% complete
+        return percent < 95;
       })
       .sort((a, b) => {
         const lastTrackKeyA = lastTrackByBook[a.ratingKey];
         const lastTrackKeyB = lastTrackByBook[b.ratingKey];
         const timeA = progressMap[lastTrackKeyA || '']?.time || 0;
         const timeB = progressMap[lastTrackKeyB || '']?.time || 0;
-        // Ideally we'd have a 'lastPlayedAt' in progressMap to sort by actual recency
         return timeB - timeA;
       })
       .slice(0, 5);
@@ -77,14 +76,33 @@ export function HomeView({
 
   if (!authToken || !selectedLibrary) {
     return (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-        <div className="w-20 h-20 glass rounded-full flex items-center justify-center text-slate-500 mb-2">
-          <BookOpen size={40} />
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
+        <div className="w-24 h-24 glass rounded-[32px] flex items-center justify-center text-accent/80 mb-2 relative overflow-hidden group">
+          <BookOpen size={48} className="relative z-10 transition-transform group-hover:scale-110" />
+          <div className="absolute inset-0 bg-accent/10 opacity-50 group-hover:opacity-100 transition-opacity" />
         </div>
-        <h2 className="text-xl font-bold text-ink">{t('home.welcomeTo')}</h2>
-        <p className="text-ink-dim text-sm max-w-[250px]">
-          {!authToken ? t('home.signInPromptPlex') : t('home.signInPromptSelection')} {t('home.startListening')}
-        </p>
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-ink">{t('home.welcomeTo')}</h2>
+          <p className="text-ink-dim text-sm max-w-[280px] mx-auto leading-relaxed">
+            {!authToken 
+              ? t('home.signInPromptPlex') 
+              : t('home.signInPromptSelection')}
+          </p>
+        </div>
+        
+        {!authToken ? (
+          <button 
+            onClick={onLogin}
+            className="w-full max-w-[280px] py-4 px-6 accent-bg hover:opacity-90 active:scale-95 text-white rounded-2xl font-bold transition-all shadow-xl shadow-accent/20 flex items-center justify-center gap-3 mt-4"
+          >
+            <LogIn size={20} />
+            {t('settings.auth.loginWithPlex')}
+          </button>
+        ) : (
+          <p className="text-accent text-[10px] uppercase tracking-[0.2em] font-bold mt-4 animate-pulse">
+            {t('home.startListening')}
+          </p>
+        )}
       </div>
     );
   }

@@ -153,7 +153,7 @@ export function NowPlayingView({
       animate={{ y: 0 }}
       exit={{ y: '100%' }}
       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="fixed inset-0 bg-bg z-50 flex flex-col p-8 pb-12 overflow-hidden"
+      className="fixed inset-0 bg-bg z-50 flex flex-col pt-safe px-8 pb-12 overflow-hidden"
     >
       {/* Background Atmosphere */}
       <div className="absolute inset-0 overflow-hidden -z-10 opacity-30">

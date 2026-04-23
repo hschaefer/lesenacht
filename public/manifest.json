@@ -8,7 +8,7 @@
   "description": "Plex-powered audiobook player.",
   "icons": [
     {
-      "src": "/src/assets/images/lesenacht_app_icon_1776917081823.png",
+      "src": "/assets/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

@@ -2,14 +2,14 @@
 
 Lesenacht is a progressive web app designed for streaming and listening to audiobooks, utilizing your self-hosted Plex server as the backend.
 
-## ✨ Vibe Coded
+##  Vibe Coded
 
-This application is completely **vibe coded**. It was developed through natural language guidance and creative intuition, prioritizing a fluid development experience and emotional resonance over traditional rigid specifications.
+This application is completely **vibe coded ✨ **. If thats not for you, please move on.
 
 ## Features
 
 - **Plex Integration**: Connect to your Plex server to access your audiobook library.
-- **Progress Syncing**: Keep your position synced across devices.
+- **Local Progress Tracking**: Automatically saves your position in every audiobook locally on your device.
 - **Progressive Web App**: Optimized for use on mobile and desktop browsers with offline capabilities.
 
 ## Getting Started

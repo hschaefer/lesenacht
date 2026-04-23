@@ -68,3 +68,7 @@ input[type="range"] {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+.pt-safe {
+  padding-top: calc(1.5rem + env(safe-area-inset-top));
+}
+

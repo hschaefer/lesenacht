@@ -28,6 +28,7 @@ export default function App() {
   const [selectedBookKey, setSelectedBookKey] = useState<string | null>(null);
   const [selectedAuthorKey, setSelectedAuthorKey] = useState<string | null>(null);
   const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
+  const [loginInitiatedFromHome, setLoginInitiatedFromHome] = useState(false);
   
   const { authToken, selectedLibrary, theme, language } = useAuthStore();
   const { currentBook } = usePlayerStore();
@@ -79,7 +80,16 @@ export default function App() {
 
     switch (activeTab) {
       case 'home':
-        return <HomeView onSelectBook={handleSelectBook} onSelectAuthor={handleSelectAuthor} />;
+        return (
+          <HomeView 
+            onSelectBook={handleSelectBook} 
+            onSelectAuthor={handleSelectAuthor} 
+            onLogin={() => {
+              setLoginInitiatedFromHome(true);
+              setActiveTab('settings');
+            }}
+          />
+        );
       case 'library':
         return (
           <LibraryView 
@@ -89,15 +99,29 @@ export default function App() {
           />
         );
       case 'settings':
-        return <SettingsView />;
+        return (
+          <SettingsView 
+            onLogin={() => {
+              setLoginInitiatedFromHome(false);
+            }} 
+            autoStartLogin={loginInitiatedFromHome}
+          />
+        );
       default:
         return <HomeView onSelectBook={handleSelectBook} onSelectAuthor={handleSelectAuthor} />;
     }
   };
 
+  // Reset login initiative if user manually switches tabs
+  useEffect(() => {
+    if (activeTab !== 'settings' && loginInitiatedFromHome) {
+      setLoginInitiatedFromHome(false);
+    }
+  }, [activeTab, loginInitiatedFromHome]);
+
   return (
     <div className="fixed inset-0 flex flex-col bg-bg text-ink font-sans selection:bg-accent/30 overflow-hidden">
-      <main className="flex-1 overflow-y-auto pt-6 px-4 pb-32">
+      <main className="flex-1 overflow-y-auto pt-safe px-4 pb-32">
         <div className="max-w-lg mx-auto overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div
