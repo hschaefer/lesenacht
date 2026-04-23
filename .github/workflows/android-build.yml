@@ -31,12 +31,16 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '17'
-          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Build Android APK
         run: |
           npx cap sync
           cd android
+          # Regenerate wrapper if it's corrupt
+          gradle wrapper
           chmod +x gradlew
           ./gradlew assembleDebug
 
