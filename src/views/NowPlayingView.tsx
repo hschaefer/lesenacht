@@ -163,17 +163,17 @@ export function NowPlayingView({
       </div>
 
       <header className="flex items-center justify-between relative">
-        <button onClick={onClose} className="w-12 h-12 glass rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors">
+        <button onClick={onClose} className="w-12 h-12 glass rounded-full flex items-center justify-center text-ink-dim hover:text-ink transition-colors">
           <ChevronDown size={28} />
         </button>
         <div className="text-center">
-          <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-500">Currently Listening</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-ink-muted">Currently Listening</p>
           <h2 className="text-sm font-bold text-ink truncate max-w-[200px]">{currentBook.title}</h2>
         </div>
         <div className="relative">
           <button 
             onClick={() => setIsOptionsMenuOpen(!isOptionsMenuOpen)}
-            className={`w-12 h-12 glass rounded-full flex items-center justify-center transition-colors ${isOptionsMenuOpen ? 'text-accent' : 'text-slate-600 dark:text-slate-400'}`}
+            className={`w-12 h-12 glass rounded-full flex items-center justify-center transition-colors ${isOptionsMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'}`}
           >
             <MoreVertical size={24} />
           </button>
@@ -184,14 +184,14 @@ export function NowPlayingView({
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 top-14 w-48 glass rounded-2xl shadow-2xl z-50 p-2 border border-white/10"
+                className="absolute right-0 top-14 w-48 glass rounded-2xl shadow-2xl z-50 p-2"
               >
                 <button 
                   onClick={() => {
                     onNavigateBook?.(currentBook.ratingKey);
                     setIsOptionsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                 >
                   <BookOpen size={16} /> Go to Book
                 </button>
@@ -200,7 +200,7 @@ export function NowPlayingView({
                     if (currentBook.parentRatingKey) onNavigateAuthor?.(currentBook.parentRatingKey);
                     setIsOptionsMenuOpen(false);
                   }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                 >
                   <Library size={16} /> Go to Author
                 </button>
@@ -244,7 +244,7 @@ export function NowPlayingView({
         {/* Progress Bar */}
         <div className="space-y-2">
           <div 
-            className="relative h-2 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden group cursor-pointer"
+            className="relative h-2 w-full glass rounded-full overflow-hidden group cursor-pointer"
             onClick={(e) => {
               const rect = e.currentTarget.getBoundingClientRect();
               const x = e.clientX - rect.left;
@@ -257,11 +257,11 @@ export function NowPlayingView({
               style={{ width: `${progress}%` }}
             />
             <div 
-              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" 
+              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-ink rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" 
               style={{ left: `${progress}%` }}
             />
           </div>
-          <div className="flex justify-between text-[10px] font-mono text-slate-600 dark:text-slate-500 font-bold">
+          <div className="flex justify-between text-[10px] font-mono text-ink-muted font-bold">
             <span>{formatTime(currentTime)}</span>
             <span>-{formatTime(duration - currentTime)}</span>
           </div>
@@ -272,7 +272,7 @@ export function NowPlayingView({
           <button 
             onClick={handlePrevChapter}
             disabled={chapters.length === 0}
-            className="text-slate-500 dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors disabled:opacity-20"
+            className="text-ink-dim hover:text-ink transition-colors disabled:opacity-20"
             title="Previous Chapter"
           >
             <ChevronsLeft size={28} />
@@ -280,7 +280,7 @@ export function NowPlayingView({
           
           <button 
             onClick={() => setCurrentTime(Math.max(0, currentTime - 15))}
-            className="text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors active:scale-90"
+            className="text-ink-dim hover:text-ink transition-colors active:scale-90"
             title="Back 15s"
           >
             <RotateCcw size={32} />
@@ -295,7 +295,7 @@ export function NowPlayingView({
 
           <button 
             onClick={() => setCurrentTime(Math.min(duration, currentTime + 45))}
-            className="text-slate-600 dark:text-slate-300 hover:text-black dark:hover:text-white transition-colors active:scale-90"
+            className="text-ink-dim hover:text-ink transition-colors active:scale-90"
             title="Forward 45s"
           >
             <RotateCw size={32} />
@@ -304,7 +304,7 @@ export function NowPlayingView({
           <button 
             onClick={handleNextChapter}
             disabled={chapters.length === 0}
-            className="text-slate-500 dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors disabled:opacity-20"
+            className="text-ink-dim hover:text-ink transition-colors disabled:opacity-20"
             title="Next Chapter"
           >
             <ChevronsRight size={28} />
@@ -315,7 +315,7 @@ export function NowPlayingView({
         <div className="flex items-center justify-around px-4 py-2 glass rounded-3xl">
           <button 
             onClick={() => setIsSpeedMenuOpen(true)}
-            className={`flex flex-col items-center gap-1 transition-colors ${isSpeedMenuOpen ? 'text-accent' : 'text-slate-600 dark:text-slate-500 hover:text-black dark:hover:text-slate-300'}`}
+            className={`flex flex-col items-center gap-1 transition-colors ${isSpeedMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'}`}
           >
             <Settings2 size={24} />
             <span className="text-[9px] font-bold font-mono">{playbackSpeed}x</span>
@@ -327,7 +327,7 @@ export function NowPlayingView({
               setShowBookmarkFeedback(true);
               setTimeout(() => setShowBookmarkFeedback(false), 1500);
             }}
-            className={`flex flex-col items-center gap-1 transition-all duration-300 ${showBookmarkFeedback ? 'text-green-500 scale-110' : 'text-slate-600 dark:text-slate-500 hover:text-black dark:hover:text-slate-300'}`}
+            className={`flex flex-col items-center gap-1 transition-all duration-300 ${showBookmarkFeedback ? 'text-green-500 scale-110' : 'text-ink-dim hover:text-ink'}`}
           >
             {showBookmarkFeedback ? <Check size={24} /> : <Bookmark size={24} />}
             <span className="text-[9px] font-bold uppercase tracking-tighter">
@@ -338,7 +338,7 @@ export function NowPlayingView({
           <button 
             onClick={() => setIsChapterMenuOpen(true)}
             disabled={chapters.length === 0}
-            className={`flex flex-col items-center gap-1 transition-colors ${isChapterMenuOpen ? 'text-accent' : 'text-slate-600 dark:text-slate-500 hover:text-black dark:hover:text-slate-300'} disabled:opacity-20`}
+            className={`flex flex-col items-center gap-1 transition-colors ${isChapterMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'} disabled:opacity-20`}
           >
             <List size={24} />
             <span className="text-[9px] font-bold uppercase tracking-tighter">List</span>
@@ -346,7 +346,7 @@ export function NowPlayingView({
 
           <button 
             onClick={() => setIsSleepMenuOpen(true)}
-            className={`flex flex-col items-center gap-1 transition-colors ${sleepTimerEnd ? 'text-accent' : 'text-slate-600 dark:text-slate-500 hover:text-black dark:hover:text-slate-300'}`}
+            className={`flex flex-col items-center gap-1 transition-colors ${sleepTimerEnd ? 'text-accent' : 'text-ink-dim hover:text-ink'}`}
           >
             <Moon size={24} />
             <span className="text-[9px] font-bold font-mono uppercase tracking-tighter">
@@ -356,12 +356,12 @@ export function NowPlayingView({
         </div>
 
         {/* Volume */}
-        <div className="flex items-center gap-4 text-slate-700 dark:text-slate-600 pb-2">
+        <div className="flex items-center gap-4 text-ink-muted pb-2">
           <VolumeX size={16} />
           <input 
             type="range" min="0" max="1" step="0.01" 
             value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))}
-            className="flex-1 accent-accent h-1 bg-slate-200 dark:bg-white/10 rounded-full appearance-none outline-none"
+            className="flex-1 accent-accent h-1 bg-black/10 dark:bg-white/10 rounded-full appearance-none outline-none"
           />
           <Volume2 size={16} />
         </div>
@@ -372,13 +372,13 @@ export function NowPlayingView({
         {/* Speed Menu */}
         {isSpeedMenuOpen && (
           <Modal onClose={() => setIsSpeedMenuOpen(false)}>
-            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-slate-500 mb-6 text-center">Playback Speed</h3>
+            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-ink-muted mb-6 text-center">Playback Speed</h3>
             <div className="grid grid-cols-3 gap-4">
               {speeds.map(speed => (
                 <button
                   key={speed}
                   onClick={() => { setPlaybackSpeed(speed); setIsSpeedMenuOpen(false); }}
-                  className={`py-3 rounded-2xl font-mono text-sm font-bold border transition-all ${playbackSpeed === speed ? 'accent-bg border-accent text-white shadow-lg' : 'bg-white/5 border-white/10 text-slate-400'}`}
+                  className={`py-3 rounded-2xl font-mono text-sm font-bold border transition-all ${playbackSpeed === speed ? 'accent-bg border-accent text-white shadow-lg' : 'glass border-white/10 text-ink-dim hover:text-ink'}`}
                 >
                   {speed}x
                 </button>
@@ -390,13 +390,13 @@ export function NowPlayingView({
         {/* Sleep Menu */}
         {isSleepMenuOpen && (
           <Modal onClose={() => setIsSleepMenuOpen(false)}>
-            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-slate-500 mb-6 text-center">Sleep Timer</h3>
+            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-ink-muted mb-6 text-center">Sleep Timer</h3>
             <div className="grid grid-cols-3 gap-4">
               {sleepOptions.map(opt => (
                 <button
                   key={opt ?? 'off'}
                   onClick={() => { setSleepTimer(opt); setIsSleepMenuOpen(false); }}
-                  className="py-3 rounded-2xl font-mono text-sm font-bold border bg-white/5 border-white/10 text-slate-400"
+                  className="py-3 rounded-2xl font-mono text-sm font-bold border bg-white/5 border-white/10 text-ink-dim"
                 >
                   {opt ? `${opt}m` : 'Off'}
                 </button>
@@ -411,13 +411,13 @@ export function NowPlayingView({
             <div className="flex gap-2 p-1 glass rounded-2xl w-fit mx-auto mb-6">
               <button 
                 onClick={() => setActiveMenuTab('chapters')}
-                className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeMenuTab === 'chapters' ? 'accent-bg text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeMenuTab === 'chapters' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink'}`}
               >
                 Chapters
               </button>
               <button 
                 onClick={() => setActiveMenuTab('bookmarks')}
-                className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeMenuTab === 'bookmarks' ? 'accent-bg text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeMenuTab === 'bookmarks' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink'}`}
               >
                 Bookmarks
               </button>
@@ -432,13 +432,13 @@ export function NowPlayingView({
                     <button
                       key={chapter.index || idx}
                       onClick={() => { setCurrentTime(startTime); setIsChapterMenuOpen(false); }}
-                      className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${isActive ? 'bg-accent/20 border border-accent/30 text-accent' : 'bg-white/5 border border-white/5 text-slate-300'}`}
+                      className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${isActive ? 'bg-accent/20 border border-accent/30 text-accent' : 'glass border-white/5 text-ink-dim hover:text-ink'}`}
                     >
                       <div className="flex items-center gap-4 min-w-0">
                         <span className="text-[10px] font-mono">{(idx + 1).toString().padStart(2, '0')}</span>
                         <span className="text-sm font-medium truncate">{chapter.tag || chapter.title}</span>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500">{formatTime(startTime)}</span>
+                      <span className={`text-[10px] font-mono font-bold ${isActive ? 'text-accent' : 'text-ink-muted'}`}>{formatTime(startTime)}</span>
                     </button>
                   );
                 })
@@ -471,7 +471,7 @@ export function NowPlayingView({
                       </div>
                     ))}
                   {bookmarks.filter(b => b.trackKey === currentTrack.ratingKey).length === 0 && (
-                    <div className="text-center py-10 text-slate-500 italic text-sm">
+                    <div className="text-center py-10 text-ink-muted italic text-sm">
                       No bookmarks for this track.
                     </div>
                   )}

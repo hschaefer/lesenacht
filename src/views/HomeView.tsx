@@ -80,7 +80,7 @@ export function HomeView({
           <BookOpen size={40} />
         </div>
         <h2 className="text-xl font-bold text-ink">Welcome to Lesenacht</h2>
-        <p className="text-slate-500 text-sm max-w-[250px]">
+        <p className="text-ink-dim text-sm max-w-[250px]">
           {!authToken ? "Please sign in with Plex" : "Please select a server and library"} in the settings to start listening.
         </p>
       </div>
@@ -94,7 +94,7 @@ export function HomeView({
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-light tracking-tight text-ink">For You</h1>
-          <p className="text-slate-600 dark:text-slate-500 text-sm mt-1 uppercase tracking-widest font-bold">Recommended</p>
+          <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">Recommended</p>
         </div>
       </header>
 
@@ -107,7 +107,7 @@ export function HomeView({
         <>
           {continueListening.length > 0 && (
             <section className="space-y-4">
-              <h2 className="text-sm uppercase tracking-widest font-bold text-slate-600 dark:text-slate-400 flex items-center gap-2">
+              <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
                 <Clock size={16} /> Continue Listening <span className="w-1.5 h-1.5 rounded-full accent-bg animate-pulse"></span>
               </h2>
               <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
@@ -127,7 +127,7 @@ export function HomeView({
           )}
 
           <section className="space-y-4">
-            <h2 className="text-sm uppercase tracking-widest font-bold text-slate-600 dark:text-slate-400">Recently Added</h2>
+            <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim">Recently Added</h2>
             <div className="grid grid-cols-2 gap-4">
               {recentlyAdded.map(book => (
                 <BookCard 
@@ -217,7 +217,7 @@ function BookCard({
             e.stopPropagation();
             if (book.parentRatingKey) onSelectAuthor?.(book.parentRatingKey);
           }}
-          className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 break-all hover:accent-text transition-colors text-left w-full"
+          className="text-xs text-ink-dim line-clamp-1 break-all hover:accent-text transition-colors text-left"
         >
           {book.parentTitle || 'Unknown Author'}
         </button>

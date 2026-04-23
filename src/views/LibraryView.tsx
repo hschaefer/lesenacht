@@ -132,11 +132,11 @@ export function LibraryView({
   if (!authToken || !selectedLibrary) {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
-        <div className="w-20 h-20 glass rounded-full flex items-center justify-center text-slate-500 mb-2">
+        <div className="w-20 h-20 glass rounded-full flex items-center justify-center text-ink-muted mb-2">
           <Library size={40} />
         </div>
         <h2 className="text-xl font-bold text-ink">Library Setup Required</h2>
-        <p className="text-slate-500 text-sm max-w-[250px]">
+        <p className="text-ink-dim text-sm max-w-[250px]">
           {!authToken ? "Please sign in with Plex" : "Please select a server and library"} in the settings to view your collection.
         </p>
       </div>
@@ -152,13 +152,13 @@ export function LibraryView({
               setSelectedAuthor(null);
               onAuthorBack?.();
             }}
-            className="w-10 h-10 glass rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors"
+            className="w-10 h-10 glass rounded-full flex items-center justify-center text-ink-dim hover:text-ink transition-colors"
           >
             <ChevronLeft size={24} />
           </button>
           <div>
             <h1 className="text-2xl font-bold text-ink">{selectedAuthor.title}</h1>
-            <p className="text-slate-500 text-xs uppercase tracking-widest font-bold">Author Details</p>
+            <p className="text-ink-muted text-[10px] uppercase tracking-widest font-bold">Author Details</p>
           </div>
         </header>
 
@@ -173,10 +173,10 @@ export function LibraryView({
           <div className="flex-1 space-y-4">
             {selectedAuthor.summary && (
               <div className="glass rounded-2xl p-4 space-y-2">
-                <h3 className="text-[10px] uppercase tracking-widest font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
+                <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
                   <Info size={12} /> Biography / Summary
                 </h3>
-                <p className="text-xs text-slate-700 dark:text-slate-200 leading-relaxed max-h-32 overflow-y-auto pr-2 scrollbar-hide">
+                <p className="text-xs text-ink-dim leading-relaxed max-h-32 overflow-y-auto pr-2 scrollbar-hide">
                   {selectedAuthor.summary}
                 </p>
               </div>
@@ -185,7 +185,7 @@ export function LibraryView({
         </div>
 
         <section className="space-y-4">
-          <h2 className="text-sm uppercase tracking-widest font-bold text-slate-500 flex items-center gap-2">
+          <h2 className="text-sm uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
             <BookOpen size={16} /> Audiobooks
           </h2>
           {loading ? (
@@ -215,7 +215,7 @@ export function LibraryView({
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-light tracking-tight text-ink">Library</h1>
-          <p className="text-slate-500 text-sm mt-1 uppercase tracking-widest font-bold">
+          <p className="text-ink-muted text-[10px] mt-1 uppercase tracking-widest font-bold">
             {activeTab === 'books' ? `${books.length} Books` : `${authors.length} Authors`}
           </p>
         </div>
@@ -224,26 +224,26 @@ export function LibraryView({
       <div className="flex gap-2 p-1 glass rounded-2xl w-fit">
         <button 
           onClick={() => { setActiveTab('books'); setSearchQuery(''); }}
-          className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'books' ? 'accent-bg text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+          className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'books' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink-dim'}`}
         >
           Books
         </button>
         <button 
           onClick={() => { setActiveTab('authors'); setSearchQuery(''); }}
-          className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'authors' ? 'accent-bg text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+          className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'authors' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink-dim'}`}
         >
           Authors
         </button>
       </div>
 
       <div className="relative">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted" size={18} />
         <input 
           type="text" 
           placeholder={activeTab === 'books' ? "Search books..." : "Search authors..."} 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-full py-3 pl-12 pr-4 text-ink placeholder:text-slate-600 focus:outline-none focus:border-accent/50 transition-colors"
+          className="w-full glass rounded-full py-3 pl-12 pr-4 text-ink placeholder:text-ink-muted focus:outline-none focus:border-accent/50 transition-colors"
         />
       </div>
 
@@ -252,38 +252,38 @@ export function LibraryView({
         {activeTab === 'books' && (
           <>
             {/* Sort Controls */}
-            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+            <div className="flex items-center gap-2 glass p-1 rounded-xl">
               <button
                 onClick={() => setSortBy('title')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${sortBy === 'title' ? 'accent-bg text-white shadow-md' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${sortBy === 'title' ? 'accent-bg text-white shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
                 A-Z
               </button>
               <button
                 onClick={() => setSortBy('added')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${sortBy === 'added' ? 'accent-bg text-white shadow-md' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${sortBy === 'added' ? 'accent-bg text-white shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
                 <Clock size={12} /> Recent
               </button>
             </div>
 
             {/* Filter Controls */}
-            <div className="flex items-center gap-2 bg-white/5 p-1 rounded-xl border border-white/10">
+            <div className="flex items-center gap-2 glass p-1 rounded-xl">
               <button
                 onClick={() => setFilterBy('all')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'all' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'all' ? 'bg-ink text-bg shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
                 All
               </button>
               <button
                 onClick={() => setFilterBy('unread')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'unread' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'unread' ? 'bg-ink text-bg shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
                 Unread
               </button>
               <button
                 onClick={() => setFilterBy('read')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'read' ? 'bg-slate-700 text-white shadow-md' : 'text-slate-500 hover:text-slate-300'}`}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'read' ? 'bg-ink text-bg shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
                 Read
               </button>
@@ -345,7 +345,7 @@ export function LibraryView({
               )}
               
               {(activeTab === 'books' ? processedBooks : filteredAuthors).length === 0 && (activeTab === 'books' || searchQuery) && (
-                <div className="text-center py-20 text-slate-500">
+                <div className="text-center py-20 text-ink-muted">
                   <BookOpen size={48} className="mx-auto mb-4 opacity-20" />
                   <p>Nothing found matching your search.</p>
                 </div>
@@ -387,7 +387,7 @@ function AuthorItem({
       </div>
       <div className="flex-1 min-w-0 pr-4">
         <h3 className="text-sm font-bold text-ink line-clamp-1 break-all">{author.title}</h3>
-        <p className="text-[10px] text-slate-700 dark:text-slate-400 uppercase font-bold tracking-widest mt-0.5">
+        <p className="text-[10px] text-ink-muted uppercase font-bold tracking-widest mt-0.5">
           Author
         </p>
       </div>
@@ -436,12 +436,12 @@ function LibraryItem({
             e.stopPropagation();
             if (book.parentRatingKey) onSelectAuthor?.(book.parentRatingKey);
           }}
-          className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 break-all hover:accent-text transition-colors text-left"
+          className="text-xs text-ink-dim line-clamp-1 break-all hover:accent-text transition-colors text-left"
         >
           {book.parentTitle || 'Unknown Author'}
         </button>
         <div className="flex items-center gap-4 mt-1">
-          <span className="text-[10px] text-slate-700 dark:text-slate-500 uppercase font-bold tracking-tighter">
+          <span className="text-[10px] text-ink-muted uppercase font-bold tracking-tighter">
             {book.leafCount ? `${book.leafCount} Tracks` : 'Single Track'}
           </span>
           {(isRead || (book.viewCount && book.viewCount > 0)) && (

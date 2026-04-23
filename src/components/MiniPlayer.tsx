@@ -34,7 +34,7 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
         />
         <div className="flex-1 min-w-0">
           <h4 className="text-sm font-bold text-ink truncate">{currentBook.title}</h4>
-          <p className="text-xs text-slate-600 dark:text-slate-500 truncate">{currentBook.parentTitle || currentBook.grandparentTitle}</p>
+          <p className="text-xs text-ink-dim truncate">{currentBook.parentTitle || currentBook.grandparentTitle}</p>
         </div>
         <div className="flex items-center gap-2">
           <button 

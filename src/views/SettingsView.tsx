@@ -130,7 +130,7 @@ export function SettingsView() {
     <div className="space-y-8 pb-10">
       <header>
         <h1 className="text-3xl font-light tracking-tight text-ink">Settings</h1>
-        <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 uppercase tracking-widest font-bold">Preferences & Configuration</p>
+        <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">Preferences & Configuration</p>
       </header>
 
       {/* Authentication Section */}
@@ -139,10 +139,10 @@ export function SettingsView() {
           onClick={() => setIsAuthExpanded(!isAuthExpanded)}
           className="w-full flex items-center justify-between group"
         >
-          <h2 className="text-sm uppercase tracking-widest font-bold text-slate-400 flex items-center gap-2 group-hover:text-slate-200 transition-colors">
+          <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2 group-hover:text-ink-dim transition-colors">
             <LogIn size={16} /> Authentication
           </h2>
-          <div className="text-slate-500">
+          <div className="text-ink-muted">
             {isAuthExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
         </button>
@@ -185,7 +185,7 @@ export function SettingsView() {
 
               {authToken && (
                 <div className="space-y-4 pt-4 border-t border-white/5">
-                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-slate-600 dark:text-slate-500 flex items-center gap-2">
+                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
                     <Server size={14} /> Server Selection
                   </h3>
                   {loading ? (
@@ -199,7 +199,7 @@ export function SettingsView() {
                           className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between ${
                             selectedServer?.clientIdentifier === server.clientIdentifier 
                             ? 'bg-accent/10 border-accent/50 accent-text' 
-                            : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-black/20 dark:hover:border-white/20'
+                            : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-ink-dim hover:border-black/20 dark:hover:border-white/20'
                           }`}
                         >
                           <span className="font-medium">{server.name}</span>
@@ -208,14 +208,14 @@ export function SettingsView() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-500 text-sm italic">No online servers found.</p>
+                    <p className="text-ink-muted text-sm italic">No online servers found.</p>
                   )}
                 </div>
               )}
 
               {selectedServer && (
                 <div className="space-y-4 pt-4 border-t border-white/5">
-                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-slate-600 dark:text-slate-500 flex items-center gap-2">
+                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
                     <Library size={14} /> Library / Section
                   </h3>
                   {libraries.length > 0 ? (
@@ -227,7 +227,7 @@ export function SettingsView() {
                           className={`p-4 rounded-2xl border transition-all text-left flex items-center justify-between ${
                             selectedLibrary?.key === library.key 
                             ? 'bg-accent/10 border-accent/50 accent-text' 
-                            : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-black/20 dark:hover:border-white/20'
+                            : 'bg-black/5 dark:bg-white/5 border-black/10 dark:border-white/10 text-ink-dim hover:border-black/20 dark:hover:border-white/20'
                           }`}
                         >
                           <span className="font-medium">{library.title}</span>
@@ -236,7 +236,7 @@ export function SettingsView() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-slate-500 text-sm italic">No music/audiobook libraries found.</p>
+                    <p className="text-ink-muted text-sm italic">No music/audiobook libraries found.</p>
                   )}
                 </div>
               )}
@@ -247,7 +247,7 @@ export function SettingsView() {
 
       {/* Appearance Section */}
       <section className="space-y-4">
-        <h2 className="text-sm uppercase tracking-widest font-bold text-slate-400 flex items-center gap-2">
+        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
           <Monitor size={16} /> Appearance
         </h2>
         <div className="flex gap-2 p-1 glass rounded-2xl w-full">
@@ -259,7 +259,7 @@ export function SettingsView() {
             <button 
               key={item.id}
               onClick={() => setTheme(item.id as any)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${theme === item.id ? 'accent-bg text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'}`}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${theme === item.id ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink-dim'}`}
             >
               {item.icon}
               {item.label}
@@ -270,19 +270,19 @@ export function SettingsView() {
 
       {/* Info Section */}
       <section className="space-y-4 pt-6 border-t border-white/5">
-        <h2 className="text-sm uppercase tracking-widest font-bold text-slate-400 flex items-center gap-2">
+        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
           <Info size={16} /> Application Info
         </h2>
         <div className="p-4 glass rounded-2xl space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-600 dark:text-slate-500 font-bold uppercase tracking-wider">Version</span>
+            <span className="text-[10px] text-ink-dim font-bold uppercase tracking-wider">Version</span>
             <span className="text-sm font-mono text-ink bg-white/5 px-2 py-0.5 rounded-lg border border-white/10">{APP_VERSION}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-xs text-slate-600 dark:text-slate-500 font-bold uppercase tracking-wider">Last Updated</span>
+            <span className="text-[10px] text-ink-dim font-bold uppercase tracking-wider">Last Updated</span>
             <span className="text-sm text-ink">{LAST_UPDATED}</span>
           </div>
-          <div className="pt-2 border-t border-white/5 text-[10px] text-slate-500 text-center uppercase tracking-widest leading-relaxed">
+          <div className="pt-2 border-t border-white/5 text-[10px] text-ink-muted text-center uppercase tracking-widest leading-relaxed">
             Lesenacht • Designed for focused listening
           </div>
         </div>
@@ -312,12 +312,12 @@ export function SettingsView() {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-ink">Are you absolutely sure?</h3>
-              <p className="text-xs text-slate-500">This will sign you out and delete all bookmarks and playback history stored on this device.</p>
+              <p className="text-xs text-ink-dim">This will sign you out and delete all bookmarks and playback history stored on this device.</p>
             </div>
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowClearConfirm(false)}
-                className="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
+                className="flex-1 py-3 px-4 glass border border-white/10 text-ink-dim hover:text-ink rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
               >
                 Cancel
               </button>

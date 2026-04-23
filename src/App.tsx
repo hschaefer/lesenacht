@@ -164,7 +164,7 @@ function NavButton({ active, onClick, icon, label }: { active: boolean; onClick:
   return (
     <button 
       onClick={onClick}
-      className={`flex flex-col items-center justify-center space-y-1 transition-colors ${active ? 'accent-text' : 'text-slate-600 dark:text-slate-500 hover:text-black dark:hover:text-slate-300'}`}
+      className={`flex flex-col items-center justify-center space-y-1 transition-colors ${active ? 'accent-text' : 'text-ink-dim hover:text-ink'}`}
     >
       {icon}
       <span className="text-[10px] uppercase tracking-widest font-bold">{label}</span>

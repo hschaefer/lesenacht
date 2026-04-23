@@ -159,10 +159,10 @@ export function BookDetailView({
 
   if (!book) return (
     <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
-      <div className="text-slate-500 mb-4 opacity-20"><BookOpen size={64} /></div>
+      <div className="text-ink-muted mb-4 opacity-20"><BookOpen size={64} /></div>
       <h2 className="text-xl font-bold text-ink mb-2">Book Not Found</h2>
-      <p className="text-slate-500 text-sm mb-6">We couldn't retrieve the details for this audiobook.</p>
-      <button onClick={onBack} className="px-6 py-2 glass rounded-full text-sm font-bold uppercase tracking-widest text-slate-300">Go Back</button>
+      <p className="text-ink-dim text-sm mb-6">We couldn't retrieve the details for this audiobook.</p>
+      <button onClick={onBack} className="px-6 py-2 glass rounded-full text-xs font-bold uppercase tracking-widest text-ink-dim">Go Back</button>
     </div>
   );
 
@@ -188,17 +188,17 @@ export function BookDetailView({
   return (
     <div className="space-y-6 pb-20 overflow-x-hidden">
       <header className="flex items-center justify-between relative">
-        <button onClick={onBack} className="w-10 h-10 glass rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors">
+        <button onClick={onBack} className="w-10 h-10 glass rounded-full flex items-center justify-center text-ink-dim hover:text-ink transition-colors">
           <ChevronLeft size={24} />
         </button>
         <div className="flex gap-2">
-          <button className="w-10 h-10 glass rounded-full flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white transition-colors">
+          <button className="w-10 h-10 glass rounded-full flex items-center justify-center text-ink-dim hover:text-ink transition-colors">
             <Share2 size={20} />
           </button>
           <div className="relative">
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className={`w-10 h-10 glass rounded-full flex items-center justify-center transition-colors ${isMenuOpen ? 'text-accent' : 'text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white'}`}
+              className={`w-10 h-10 glass rounded-full flex items-center justify-center transition-colors ${isMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'}`}
             >
               <MoreVertical size={20} />
             </button>
@@ -208,20 +208,20 @@ export function BookDetailView({
                   initial={{ opacity: 0, y: 10, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                  className="absolute right-0 top-12 w-48 glass rounded-2xl shadow-2xl z-50 p-2 border border-white/10"
+                  className="absolute right-0 top-12 w-48 glass rounded-2xl shadow-2xl z-50 p-2"
                 >
                   <button 
                     onClick={() => {
                       if (book?.parentRatingKey) onSelectAuthor?.(book.parentRatingKey);
                       setIsMenuOpen(false);
                     }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                   >
                     <Info size={16} /> Go to Author
                   </button>
                   <button 
                     onClick={handleDownload}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors"
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                   >
                     <Download size={16} /> Download Book
                   </button>
@@ -258,16 +258,16 @@ export function BookDetailView({
         {hasProgress && (
           <div className="w-full max-w-xs space-y-2">
             <div className="flex justify-between items-end text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-slate-500">Progress</span>
+              <span className="text-ink-muted">Progress</span>
               <span className="accent-text">{Math.floor(progressPercent)}%</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-200 dark:bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full glass rounded-full overflow-hidden">
               <div 
                 className="h-full accent-bg shadow-[0_0_8px_rgba(234,88,12,0.4)] transition-all duration-700" 
                 style={{ width: `${Math.max(2, progressPercent)}%` }}
               />
             </div>
-            <div className="text-[10px] font-mono text-slate-600 flex justify-between">
+            <div className="text-[10px] font-mono text-ink-dim flex justify-between">
               <span>{formatTime(progressData?.time || 0)}</span>
               <span>{formatTime(progressData?.duration || 0)}</span>
             </div>
@@ -287,7 +287,7 @@ export function BookDetailView({
               onClick={handleToggleComplete}
               className={`p-3 rounded-full font-bold transition-all flex items-center gap-2 border ${
                 isFinished 
-                ? 'bg-white/5 border-white/10 text-slate-600 dark:text-slate-400 hover:text-black dark:hover:text-white' 
+                ? 'bg-white/5 border-white/10 text-ink-muted hover:text-ink' 
                 : 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20'
               }`}
               title={isFinished ? 'Mark as Unread' : 'Mark as Finished'}
@@ -302,10 +302,10 @@ export function BookDetailView({
       {/* Description / Summary Section */}
       {book.summary && (
         <section className="glass rounded-3xl p-6 space-y-3">
-          <h3 className="text-sm uppercase tracking-widest font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
+          <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
             <Info size={16} /> Summary
           </h3>
-          <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed text-justify">
+          <p className="text-sm text-ink-dim leading-relaxed text-justify">
             {book.summary}
           </p>
         </section>
@@ -314,7 +314,7 @@ export function BookDetailView({
       {/* Bookmarks Section */}
       {bookmarks.some(b => tracks.some(t => t.ratingKey === b.trackKey)) && (
         <section className="glass rounded-3xl p-6">
-          <h3 className="text-sm uppercase tracking-widest font-bold text-slate-500 mb-4 flex items-center gap-2">
+          <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-4 flex items-center gap-2">
             <Bookmark size={16} /> Bookmarks
           </h3>
           <div className="space-y-2">
@@ -326,16 +326,16 @@ export function BookDetailView({
                 return (
                   <div 
                     key={`${bookmark.trackKey}-${bookmark.date}`}
-                    className="flex items-center justify-between p-3 rounded-xl bg-white/5 group border border-white/5 hover:border-accent/20 transition-all"
+                    className="flex items-center justify-between p-3 rounded-xl glass group border border-white/5 hover:border-accent/20 transition-all"
                   >
                     <button 
                       onClick={() => handlePlayTrack(track, bookmark.time)}
                       className="flex-1 text-left min-w-0"
                     >
-                      <p className="text-sm font-medium text-slate-200 truncate group-hover:text-white transition-colors">
+                      <p className="text-sm font-medium text-ink-dim group-hover:text-ink transition-colors">
                         {bookmark.label || `Bookmark at ${formatTime(bookmark.time)}`}
                       </p>
-                      <p className="text-[10px] text-slate-500 font-mono mt-1 flex items-center gap-2">
+                      <p className="text-[10px] text-ink-muted font-mono mt-1 flex items-center gap-2">
                         {track?.title} • {formatTime(bookmark.time)}
                       </p>
                     </button>
@@ -344,7 +344,7 @@ export function BookDetailView({
                         e.stopPropagation();
                         removeBookmark(bookmark.trackKey, bookmark.date);
                       }}
-                      className="p-2 text-slate-600 hover:text-red-400 opacity-40 group-hover:opacity-100 transition-opacity"
+                      className="p-2 text-ink-muted hover:text-red-400 opacity-40 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -356,7 +356,7 @@ export function BookDetailView({
       )}
 
       <section className="glass rounded-3xl p-6">
-        <h3 className="text-sm uppercase tracking-widest font-bold text-slate-600 dark:text-slate-300 mb-3 flex items-center gap-2">
+        <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-3 flex items-center gap-2">
           <ListMusic size={16} /> Track List
         </h3>
         <div className="space-y-1">
@@ -372,27 +372,27 @@ export function BookDetailView({
               <div key={track.ratingKey} className="space-y-1">
                 <button
                   onClick={() => handlePlayTrack(track)}
-                  className={`w-full flex items-center gap-4 p-3 rounded-xl transition-colors text-left group ${isActive ? 'bg-accent/10' : 'hover:bg-white/5'}`}
+                  className={`w-full flex items-center gap-4 p-3 rounded-xl transition-colors text-left group ${isActive ? 'bg-accent/10' : 'hover:bg-ink/5'}`}
                 >
                   <div className="relative">
-                    <span className={`text-xs font-mono w-6 text-right block ${isActive ? 'accent-text' : 'text-slate-600'}`}>
+                    <span className={`text-xs font-mono w-6 text-right block ${isActive ? 'accent-text' : 'text-ink-muted'}`}>
                       {(i + 1).toString().padStart(2, '0')}
                     </span>
                     {trackPercent >= 95 && (
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-black shadow-sm" />
+                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-bg shadow-sm" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className={`text-sm font-medium truncate ${isActive ? 'accent-text' : 'text-slate-800 dark:text-slate-100 group-hover:text-black dark:group-hover:text-white'}`}>
+                    <h4 className={`text-sm font-medium truncate ${isActive ? 'accent-text' : 'text-ink group-hover:text-ink shadow-sm shadow-transparent'}`}>
                       {track.title}
                     </h4>
-                    <p className="text-[10px] text-slate-600 dark:text-slate-400 uppercase font-bold tracking-widest flex items-center gap-1">
+                    <p className="text-[10px] text-ink-muted uppercase font-bold tracking-widest flex items-center gap-1">
                       <Clock size={10} /> {Math.floor(track.duration / 60000)} min
                       {trackPercent > 0 && trackPercent < 95 && (
                         <span className="ml-2 accent-text font-mono truncate">{Math.floor(trackPercent)}%</span>
                       )}
                       {chapters.length > 0 && (
-                        <span className="ml-2 text-slate-600 truncate">• {chapters.length} Chapters</span>
+                        <span className="ml-2 text-ink-muted truncate">• {chapters.length} Chapters</span>
                       )}
                     </p>
                   </div>
@@ -422,12 +422,12 @@ export function BookDetailView({
                             e.stopPropagation();
                             handlePlayTrack(track, startTime);
                           }}
-                          className="w-full flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-white/5 transition-colors text-left group/ch"
+                          className="w-full flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-ink/5 transition-colors text-left group/ch"
                         >
-                          <span className="text-[10px] text-slate-500 font-mono truncate mr-2 group-hover/ch:text-slate-300 transition-colors">
+                          <span className="text-[10px] text-ink-muted font-mono truncate mr-2 group-hover/ch:text-ink-dim transition-colors">
                             {chapter.tag || chapter.title}
                           </span>
-                          <span className="text-[9px] font-mono text-slate-700 tabular-nums">
+                          <span className="text-[9px] font-mono text-ink-muted tabular-nums">
                             {formatTime(startTime)}
                           </span>
                         </button>
