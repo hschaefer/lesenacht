@@ -12,14 +12,24 @@ async function startServer() {
   // Proxy for Plex API calls to handle CORS
   app.get("/api/plex-proxy", async (req, res) => {
     const { url } = req.query;
-    const token = req.headers["x-plex-token"];
-
+    
     if (!url || typeof url !== "string") {
       return res.status(400).json({ error: "URL is required" });
     }
 
     // Sanitize URL for logging (remove potential tokens from query string)
     const sanitizeUrl = (u: string) => u.replace(/X-Plex-Token=[^&]+/g, "X-Plex-Token=REDACTED");
+
+    const plexHeaders: Record<string, string> = {
+      "Accept": "application/json",
+    };
+
+    // Forward all X-Plex headers
+    Object.keys(req.headers).forEach(key => {
+      if (key.toLowerCase().startsWith('x-plex-')) {
+        plexHeaders[key] = req.headers[key] as string;
+      }
+    });
 
     try {
       // We don't log the full URL to avoid potential tokens in it
@@ -28,10 +38,7 @@ async function startServer() {
       const response = await axios({
         method: "get",
         url: url,
-        headers: {
-          "X-Plex-Token": (token as string) || "",
-          "Accept": "application/json, text/plain, */*",
-        },
+        headers: plexHeaders,
         timeout: 10000, // 10 second timeout
       });
       res.send(response.data);

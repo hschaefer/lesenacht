@@ -72,70 +72,124 @@ export const plexService = {
   async fetch(url: string, token: string) {
     const isNative = Capacitor.isNativePlatform();
     
-    if (isNative) {
-      // Direct call on native platforms (No CORS restrictions)
-      const response = await axios.get(url, {
-        headers: {
-          ...PLEX_HEADERS,
-          'X-Plex-Token': token,
-          'Accept': 'application/json'
+    try {
+      if (isNative) {
+        // Direct call on native platforms (No CORS restrictions)
+        const response = await axios.get(url, {
+          headers: {
+            ...PLEX_HEADERS,
+            'X-Plex-Token': token,
+            'Accept': 'application/json'
+          }
+        });
+        return response.data;
+      } else {
+        // Use proxy on web to avoid CORS
+        const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}`;
+        const response = await axios.get(proxyUrl, {
+          headers: {
+            ...PLEX_HEADERS,
+            'X-Plex-Token': token,
+            'Accept': 'application/json'
+          }
+        });
+        
+        // If the response is a string (like HTML from a fallback), it's an error
+        if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {
+          throw new Error('Proxy returned HTML instead of JSON. The proxy endpoint might be missing or misconfigured.');
         }
-      });
-      return response.data;
-    } else {
-      // Use proxy on web to avoid CORS
-      const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}`;
-      const response = await axios.get(proxyUrl, {
-        headers: {
-          'X-Plex-Token': token
-        }
-      });
-      return response.data;
+        
+        return response.data;
+      }
+    } catch (error: any) {
+      console.error(`Plex Fetch Error for ${url}:`, error.message);
+      throw error;
     }
   },
 
   async getLibrarySections(baseUrl: string, token: string) {
-    const url = `${baseUrl}/library/sections`;
-    const data = await this.fetch(url, token);
-    return data.MediaContainer.Directory;
+    try {
+      const url = `${baseUrl}/library/sections`;
+      const data = await this.fetch(url, token);
+      
+      if (!data?.MediaContainer) {
+        console.error('Invalid Plex response: missing MediaContainer', data);
+        return [];
+      }
+      
+      return data.MediaContainer.Directory || [];
+    } catch (error) {
+      console.error('Failed to get library sections:', error);
+      return [];
+    }
   },
 
   async getLibraryItems(baseUrl: string, sectionId: string, token: string) {
-    // We want to fetch Albums as they represent individual audiobooks
-    const url = `${baseUrl}/library/sections/${sectionId}/albums`;
-    const data = await this.fetch(url, token);
-    return data.MediaContainer.Metadata || [];
+    try {
+      // We want to fetch Albums as they represent individual audiobooks
+      const url = `${baseUrl}/library/sections/${sectionId}/albums`;
+      const data = await this.fetch(url, token);
+      return data?.MediaContainer?.Metadata || [];
+    } catch (error) {
+      console.error('Failed to get library items:', error);
+      return [];
+    }
   },
 
   async getLibraryArtists(baseUrl: string, sectionId: string, token: string) {
-    const url = `${baseUrl}/library/sections/${sectionId}/all?type=8`; // type 8 is Artist in Music library
-    const data = await this.fetch(url, token);
-    return data.MediaContainer.Metadata || [];
+    try {
+      const url = `${baseUrl}/library/sections/${sectionId}/all?type=8`; // type 8 is Artist in Music library
+      const data = await this.fetch(url, token);
+      return data?.MediaContainer?.Metadata || [];
+    } catch (error) {
+      console.error('Failed to get library artists:', error);
+      return [];
+    }
   },
 
   async getArtistAlbums(baseUrl: string, ratingKey: string, token: string) {
-    const url = `${baseUrl}/library/metadata/${ratingKey}/children`;
-    const data = await this.fetch(url, token);
-    return data.MediaContainer.Metadata || [];
+    try {
+      const url = `${baseUrl}/library/metadata/${ratingKey}/children`;
+      const data = await this.fetch(url, token);
+      return data?.MediaContainer?.Metadata || [];
+    } catch (error) {
+      console.error('Failed to get artist albums:', error);
+      return [];
+    }
   },
 
   async getTrackMetadata(baseUrl: string, ratingKey: string, token: string) {
-    const url = `${baseUrl}/library/metadata/${ratingKey}?includeChapters=1`;
-    const data = await this.fetch(url, token);
-    return data.MediaContainer.Metadata?.[0] || null;
+    try {
+      const url = `${baseUrl}/library/metadata/${ratingKey}?includeChapters=1`;
+      const data = await this.fetch(url, token);
+      return data?.MediaContainer?.Metadata?.[0] || null;
+    } catch (error) {
+      console.error('Failed to get track metadata:', error);
+      return null;
+    }
   },
 
   async getItemDetails(baseUrl: string, ratingKey: string, token: string) {
-    // For artist/album types, we usually want children (tracks)
-    const url = `${baseUrl}/library/metadata/${ratingKey}/children`;
-    const data = await this.fetch(url, token);
-    return data.MediaContainer.Metadata || [];
+    try {
+      // For artist/album types, we usually want children (tracks)
+      const url = `${baseUrl}/library/metadata/${ratingKey}/children`;
+      const data = await this.fetch(url, token);
+      return data?.MediaContainer?.Metadata || [];
+    } catch (error) {
+      console.error('Failed to get item details:', error);
+      return [];
+    }
   },
 
   async getItemMetadata(baseUrl: string, ratingKey: string, token: string) {
-    const url = `${baseUrl}/library/metadata/${ratingKey}`;
-    const data = await this.fetch(url, token);
-    return data.MediaContainer.Metadata?.[0] || null;
+    try {
+      const url = `${baseUrl}/library/metadata/${ratingKey}`;
+      const data = await this.fetch(url, token);
+      return data?.MediaContainer?.Metadata?.[0] || null;
+    } catch (error) {
+      console.error('Failed to get item metadata:', error);
+      return null;
+    }
   },
 
   getMediaUrl(baseUrl: string, partKey: string, token: string) {
