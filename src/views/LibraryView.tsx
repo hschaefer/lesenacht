@@ -385,8 +385,8 @@ function AuthorItem({
           alt={author.title}
         />
       </div>
-      <div className="flex-1 min-w-0 pr-2">
-        <h3 className="text-sm font-bold text-ink truncate">{author.title}</h3>
+      <div className="flex-1 min-w-0 pr-4">
+        <h3 className="text-sm font-bold text-ink line-clamp-1 break-all">{author.title}</h3>
         <p className="text-[10px] text-slate-700 dark:text-slate-400 uppercase font-bold tracking-widest mt-0.5">
           Author
         </p>
@@ -429,14 +429,14 @@ function LibraryItem({
           alt={book.title}
         />
       </div>
-      <div className="flex-1 min-w-0 pr-2">
-        <h3 className="text-sm font-bold text-ink truncate">{book.title}</h3>
+      <div className="flex-1 min-w-0 pr-4">
+        <h3 className="text-sm font-bold text-ink line-clamp-1 break-all">{book.title}</h3>
         <button 
           onClick={(e) => {
             e.stopPropagation();
             if (book.parentRatingKey) onSelectAuthor?.(book.parentRatingKey);
           }}
-          className="text-xs text-slate-600 dark:text-slate-400 truncate hover:accent-text transition-colors text-left"
+          className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 break-all hover:accent-text transition-colors text-left"
         >
           {book.parentTitle || 'Unknown Author'}
         </button>

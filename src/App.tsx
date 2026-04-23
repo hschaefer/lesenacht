@@ -56,11 +56,6 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    // We'll let the views handle their own empty states now
-    // based on whether authToken and selectedLibrary are present
-  }, [authToken, selectedLibrary]);
-
   const renderContent = () => {
     if (selectedBookKey) {
       return (
@@ -91,23 +86,25 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-bg text-ink font-sans selection:bg-accent/30">
-      <main className="pb-32 px-4 pt-6 max-w-lg mx-auto">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={selectedBookKey || selectedAuthorKey || activeTab}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            {renderContent()}
-          </motion.div>
-        </AnimatePresence>
+    <div className="fixed inset-0 flex flex-col bg-bg text-ink font-sans selection:bg-accent/30 overflow-hidden">
+      <main className="flex-1 overflow-y-auto pt-6 px-4 pb-32">
+        <div className="max-w-lg mx-auto overflow-x-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={selectedBookKey || selectedAuthorKey || activeTab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {renderContent()}
+            </motion.div>
+          </AnimatePresence>
+        </div>
       </main>
 
       {/* Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 glass border-t border-white/5 pb-safe z-40">
+      <nav className="fixed bottom-0 left-0 right-0 glass border-t border-white/5 pb-[env(safe-area-inset-bottom)] z-40">
         <div className="max-w-lg mx-auto grid grid-cols-3 h-16">
           <NavButton 
             active={activeTab === 'home' && !selectedBookKey && !selectedAuthorKey} 
@@ -133,9 +130,11 @@ export default function App() {
       {/* Mini Player */}
       <AnimatePresence>
         {currentBook && (
-          <MiniPlayer 
-            onClick={() => setIsNowPlayingOpen(true)} 
-          />
+          <div className="fixed bottom-16 left-0 right-0 z-30">
+            <div className="max-w-lg mx-auto">
+              <MiniPlayer onClick={() => setIsNowPlayingOpen(true)} />
+            </div>
+          </div>
         )}
       </AnimatePresence>
 

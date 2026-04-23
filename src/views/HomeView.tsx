@@ -201,12 +201,12 @@ function BookCard({
           <BookOpen className="text-white" size={20} />
         </div>
       </div>
-      <div className="mt-3">
+      <div className="mt-3 pr-4">
         {/* Audiobook Title is now book.title (Album Name) */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="text-sm font-bold text-ink truncate line-clamp-1 flex-1">{book.title}</h3>
+          <h3 className="text-sm font-bold text-ink line-clamp-1 break-all flex-1">{book.title}</h3>
           {progressPercent > 0 && (
-            <span className="text-[10px] accent-text font-bold whitespace-nowrap">
+            <span className="text-[10px] accent-text font-bold whitespace-nowrap ml-1">
               {Math.floor(progressPercent)}%
             </span>
           )}
@@ -217,7 +217,7 @@ function BookCard({
             e.stopPropagation();
             if (book.parentRatingKey) onSelectAuthor?.(book.parentRatingKey);
           }}
-          className="text-xs text-slate-600 dark:text-slate-400 truncate hover:accent-text transition-colors text-left w-full"
+          className="text-xs text-slate-600 dark:text-slate-400 line-clamp-1 break-all hover:accent-text transition-colors text-left w-full"
         >
           {book.parentTitle || 'Unknown Author'}
         </button>
