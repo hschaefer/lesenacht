@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { Capacitor } from '@capacitor/core';
 
 // Use a stored UUID or generate a new one for this browser
 const getStoredClientId = () => {
@@ -16,8 +17,8 @@ const PLEX_HEADERS = {
   'X-Plex-Product': 'Lesenacht',
   'X-Plex-Version': '1.0.0',
   'X-Plex-Client-Identifier': PLEX_CLIENT_ID,
-  'X-Plex-Device': 'Web Browser',
-  'X-Plex-Platform': 'PWA',
+  'X-Plex-Device': Capacitor.getPlatform() === 'web' ? 'Web Browser' : 'Mobile App',
+  'X-Plex-Platform': Capacitor.getPlatform(),
 };
 
 export interface PlexPin {
@@ -68,57 +69,69 @@ export const plexService = {
     return response.data;
   },
 
+  async fetch(url: string, token: string) {
+    const isNative = Capacitor.isNativePlatform();
+    
+    if (isNative) {
+      // Direct call on native platforms (No CORS restrictions)
+      const response = await axios.get(url, {
+        headers: {
+          ...PLEX_HEADERS,
+          'X-Plex-Token': token,
+          'Accept': 'application/json'
+        }
+      });
+      return response.data;
+    } else {
+      // Use proxy on web to avoid CORS
+      const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
+      const response = await axios.get(proxyUrl);
+      return response.data;
+    }
+  },
+
   async getLibrarySections(baseUrl: string, token: string) {
     const url = `${baseUrl}/library/sections`;
-    const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-    const response = await axios.get(proxyUrl);
-    return response.data.MediaContainer.Directory;
+    const data = await this.fetch(url, token);
+    return data.MediaContainer.Directory;
   },
 
   async getLibraryItems(baseUrl: string, sectionId: string, token: string) {
     // We want to fetch Albums as they represent individual audiobooks
     const url = `${baseUrl}/library/sections/${sectionId}/albums`;
-    const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-    const response = await axios.get(proxyUrl);
-    // Standard library response is in Metadata 
-    // For /albums it will contain the list of books
-    return response.data.MediaContainer.Metadata || [];
+    const data = await this.fetch(url, token);
+    return data.MediaContainer.Metadata || [];
   },
 
   async getLibraryArtists(baseUrl: string, sectionId: string, token: string) {
     const url = `${baseUrl}/library/sections/${sectionId}/all?type=8`; // type 8 is Artist in Music library
-    const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-    const response = await axios.get(proxyUrl);
-    return response.data.MediaContainer.Metadata || [];
+    const data = await this.fetch(url, token);
+    return data.MediaContainer.Metadata || [];
   },
 
   async getArtistAlbums(baseUrl: string, ratingKey: string, token: string) {
     const url = `${baseUrl}/library/metadata/${ratingKey}/children`;
-    const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-    const response = await axios.get(proxyUrl);
-    return response.data.MediaContainer.Metadata || [];
+    const data = await this.fetch(url, token);
+    return data.MediaContainer.Metadata || [];
   },
 
   async getTrackMetadata(baseUrl: string, ratingKey: string, token: string) {
     const url = `${baseUrl}/library/metadata/${ratingKey}?includeChapters=1`;
-    const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-    const response = await axios.get(proxyUrl);
-    return response.data.MediaContainer.Metadata?.[0] || null;
+    const data = await this.fetch(url, token);
+    return data.MediaContainer.Metadata?.[0] || null;
   },
 
   async getItemDetails(baseUrl: string, ratingKey: string, token: string) {
     // For artist/album types, we usually want children (tracks)
     const url = `${baseUrl}/library/metadata/${ratingKey}/children`;
-    const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-    const response = await axios.get(proxyUrl);
-    return response.data.MediaContainer.Metadata || [];
+    const data = await this.fetch(url, token);
+    return data.MediaContainer.Metadata || [];
   },
 
   async getItemMetadata(baseUrl: string, ratingKey: string, token: string) {
     const url = `${baseUrl}/library/metadata/${ratingKey}`;
-    const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}&token=${token}`;
-    const response = await axios.get(proxyUrl);
-    return response.data.MediaContainer.Metadata?.[0] || null;
+    const data = await this.fetch(url, token);
+    return data.MediaContainer.Metadata?.[0] || null;
   },
 
   getMediaUrl(baseUrl: string, partKey: string, token: string) {

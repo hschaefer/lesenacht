@@ -36,6 +36,32 @@ Lesenacht is a progressive web app designed for streaming and listening to audio
 
 This will start the development server. Access the app at `http://localhost:3000`.
 
+## Mobile App (Android)
+
+This project uses **Capacitor** to turn the web application into a native Android app.
+
+### Prerequisites for Android
+- [Android Studio](https://developer.android.com/studio) installed on your local machine.
+- Android SDK and build tools configured.
+
+### Android Commands
+- **First-time setup**:
+  ```bash
+  npm run cap:add
+  ```
+- **Sync web changes to Android**:
+  Run this every time you make changes to your React code that you want to see in the app:
+  ```bash
+  npm run cap:sync
+  ```
+- **Open in Android Studio**:
+  ```bash
+  npm run cap:open
+  ```
+
+### Native vs Web
+On Android, the app communicates directly with the Plex API, bypassing the CORS proxy used in the web version for better performance and reliability.
+
 ## Self-Hosting / Deployment
 
 To build the application for production:

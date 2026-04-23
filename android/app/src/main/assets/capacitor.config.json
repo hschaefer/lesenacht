@@ -1,0 +1,8 @@
+{
+	"appId": "io.lesenacht.app",
+	"appName": "Lesenacht",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	}
+}
