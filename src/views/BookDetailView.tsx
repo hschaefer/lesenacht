@@ -17,6 +17,7 @@ import {
   Download
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 export function BookDetailView({ 
   ratingKey, 
@@ -27,6 +28,7 @@ export function BookDetailView({
   onBack: () => void; 
   onSelectAuthor?: (key: string) => void;
 }) {
+  const { t } = useTranslation();
   const { authToken, selectedServer } = useAuthStore();
   const { 
     setCurrentBook, 
@@ -160,9 +162,9 @@ export function BookDetailView({
   if (!book) return (
     <div className="flex flex-col items-center justify-center h-[60vh] text-center p-8">
       <div className="text-ink-muted mb-4 opacity-20"><BookOpen size={64} /></div>
-      <h2 className="text-xl font-bold text-ink mb-2">Book Not Found</h2>
-      <p className="text-ink-dim text-sm mb-6">We couldn't retrieve the details for this audiobook.</p>
-      <button onClick={onBack} className="px-6 py-2 glass rounded-full text-xs font-bold uppercase tracking-widest text-ink-dim">Go Back</button>
+      <h2 className="text-xl font-bold text-ink mb-2">{t('library.bookNotFound')}</h2>
+      <p className="text-ink-dim text-sm mb-6">{t('library.retrieveDetailsError')}</p>
+      <button onClick={onBack} className="px-6 py-2 glass rounded-full text-xs font-bold uppercase tracking-widest text-ink-dim">{t('library.goBack')}</button>
     </div>
   );
 
@@ -217,13 +219,13 @@ export function BookDetailView({
                     }}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                   >
-                    <Info size={16} /> Go to Author
+                    <Info size={16} /> {t('library.goToAuthor')}
                   </button>
                   <button 
                     onClick={handleDownload}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                   >
-                    <Download size={16} /> Download Book
+                    <Download size={16} /> {t('library.downloadBook')}
                   </button>
                 </motion.div>
               )}
@@ -258,7 +260,7 @@ export function BookDetailView({
         {hasProgress && (
           <div className="w-full max-w-xs space-y-2">
             <div className="flex justify-between items-end text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-ink-muted">Progress</span>
+              <span className="text-ink-muted">{t('library.progress')}</span>
               <span className="accent-text">{Math.floor(progressPercent)}%</span>
             </div>
             <div className="h-1.5 w-full glass rounded-full overflow-hidden">
@@ -279,7 +281,7 @@ export function BookDetailView({
             onClick={() => handlePlayTrack(tracks[0])}
             className="px-8 py-3 accent-bg rounded-full font-bold text-white shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
           >
-            <Play size={18} fill="currentColor" /> {hasProgress ? 'Continue' : 'Listen Now'}
+            <Play size={18} fill="currentColor" /> {hasProgress ? t('library.continue') : t('library.listenNow')}
           </button>
           
           {(hasProgress || isFinished) && (
@@ -290,10 +292,10 @@ export function BookDetailView({
                 ? 'bg-white/5 border-white/10 text-ink-muted hover:text-ink' 
                 : 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20'
               }`}
-              title={isFinished ? 'Mark as Unread' : 'Mark as Finished'}
+              title={isFinished ? t('library.markAsUnread') : t('library.markAsFinished')}
             >
               {isFinished ? <RotateCcw size={20} /> : <CheckCircle2 size={20} />}
-              <span className="text-xs uppercase tracking-widest">{isFinished ? 'Reset' : 'Finish'}</span>
+              <span className="text-xs uppercase tracking-widest">{isFinished ? t('library.reset') : t('library.finish')}</span>
             </button>
           )}
         </div>
@@ -303,7 +305,7 @@ export function BookDetailView({
       {book.summary && (
         <section className="glass rounded-3xl p-6 space-y-3">
           <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
-            <Info size={16} /> Summary
+            <span className="flex items-center gap-2"><Info size={16} /> {t('library.summary')}</span>
           </h3>
           <p className="text-sm text-ink-dim leading-relaxed text-justify">
             {book.summary}
@@ -315,7 +317,7 @@ export function BookDetailView({
       {bookmarks.some(b => tracks.some(t => t.ratingKey === b.trackKey)) && (
         <section className="glass rounded-3xl p-6">
           <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-4 flex items-center gap-2">
-            <Bookmark size={16} /> Bookmarks
+            <Bookmark size={16} /> {t('library.bookmarks')}
           </h3>
           <div className="space-y-2">
             {bookmarks
@@ -333,7 +335,7 @@ export function BookDetailView({
                       className="flex-1 text-left min-w-0"
                     >
                       <p className="text-sm font-medium text-ink-dim group-hover:text-ink transition-colors">
-                        {bookmark.label || `Bookmark at ${formatTime(bookmark.time)}`}
+                        {bookmark.label || `${t('player.bookmarks')} at ${formatTime(bookmark.time)}`}
                       </p>
                       <p className="text-[10px] text-ink-muted font-mono mt-1 flex items-center gap-2">
                         {track?.title} • {formatTime(bookmark.time)}
@@ -357,7 +359,7 @@ export function BookDetailView({
 
       <section className="glass rounded-3xl p-6">
         <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-3 flex items-center gap-2">
-          <ListMusic size={16} /> Track List
+          <ListMusic size={16} /> {t('library.trackList')}
         </h3>
         <div className="space-y-1">
           {tracks.map((track, i) => {
@@ -387,12 +389,12 @@ export function BookDetailView({
                       {track.title}
                     </h4>
                     <p className="text-[10px] text-ink-muted uppercase font-bold tracking-widest flex items-center gap-1">
-                      <Clock size={10} /> {Math.floor(track.duration / 60000)} min
+                      <Clock size={10} /> {Math.floor(track.duration / 60000)} {t('library.min')}
                       {trackPercent > 0 && trackPercent < 95 && (
                         <span className="ml-2 accent-text font-mono truncate">{Math.floor(trackPercent)}%</span>
                       )}
                       {chapters.length > 0 && (
-                        <span className="ml-2 text-ink-muted truncate">• {chapters.length} Chapters</span>
+                        <span className="ml-2 text-ink-muted truncate">• {t('library.chaptersCount', { count: chapters.length })}</span>
                       )}
                     </p>
                   </div>

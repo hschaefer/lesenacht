@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
-import { Search, Filter, BookOpen, Clock, ListFilter, Users, ChevronLeft, Info, Library } from 'lucide-react';
+import { Search, Filter, BookOpen, Clock, ListFilter, Users, ChevronLeft, Info, Library as LibraryIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 type Tab = 'books' | 'authors';
 type SortOption = 'title' | 'added';
@@ -17,6 +18,7 @@ export function LibraryView({
   initialAuthorKey?: string | null;
   onAuthorBack?: () => void;
 }) {
+  const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();
   const [activeTab, setActiveTab] = useState<Tab>('books');
   const [books, setBooks] = useState<any[]>([]);
@@ -133,11 +135,11 @@ export function LibraryView({
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
         <div className="w-20 h-20 glass rounded-full flex items-center justify-center text-ink-muted mb-2">
-          <Library size={40} />
+          <LibraryIcon size={40} />
         </div>
-        <h2 className="text-xl font-bold text-ink">Library Setup Required</h2>
+        <h2 className="text-xl font-bold text-ink">{t('library.setupRequired')}</h2>
         <p className="text-ink-dim text-sm max-w-[250px]">
-          {!authToken ? "Please sign in with Plex" : "Please select a server and library"} in the settings to view your collection.
+          {!authToken ? t('home.signInPromptPlex') : t('home.signInPromptSelection')} {t('library.viewCollectionPrompt')}
         </p>
       </div>
     );
@@ -158,7 +160,7 @@ export function LibraryView({
           </button>
           <div>
             <h1 className="text-2xl font-bold text-ink">{selectedAuthor.title}</h1>
-            <p className="text-ink-muted text-[10px] uppercase tracking-widest font-bold">Author Details</p>
+            <p className="text-ink-muted text-[10px] uppercase tracking-widest font-bold">{t('library.authorDetails')}</p>
           </div>
         </header>
 
@@ -174,7 +176,7 @@ export function LibraryView({
             {selectedAuthor.summary && (
               <div className="glass rounded-2xl p-4 space-y-2">
                 <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
-                  <Info size={12} /> Biography / Summary
+                  <Info size={12} /> {t('library.biography')}
                 </h3>
                 <p className="text-xs text-ink-dim leading-relaxed max-h-32 overflow-y-auto pr-2 scrollbar-hide">
                   {selectedAuthor.summary}
@@ -186,7 +188,7 @@ export function LibraryView({
 
         <section className="space-y-4">
           <h2 className="text-sm uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
-            <BookOpen size={16} /> Audiobooks
+            <BookOpen size={16} /> {t('library.audiobooks')}
           </h2>
           {loading ? (
             <div className="space-y-3">
@@ -214,9 +216,11 @@ export function LibraryView({
     <div className="space-y-6 pb-20">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-light tracking-tight text-ink">Library</h1>
+          <h1 className="text-3xl font-light tracking-tight text-ink">{t('library.title')}</h1>
           <p className="text-ink-muted text-[10px] mt-1 uppercase tracking-widest font-bold">
-            {activeTab === 'books' ? `${books.length} Books` : `${authors.length} Authors`}
+            {activeTab === 'books' 
+              ? t('library.booksCount', { count: books.length }) 
+              : t('library.authorsCount', { count: authors.length })}
           </p>
         </div>
       </header>
@@ -226,13 +230,13 @@ export function LibraryView({
           onClick={() => { setActiveTab('books'); setSearchQuery(''); }}
           className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'books' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink-dim'}`}
         >
-          Books
+          {t('library.books')}
         </button>
         <button 
           onClick={() => { setActiveTab('authors'); setSearchQuery(''); }}
           className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'authors' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink-dim'}`}
         >
-          Authors
+          {t('library.authors')}
         </button>
       </div>
 
@@ -240,7 +244,7 @@ export function LibraryView({
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-muted" size={18} />
         <input 
           type="text" 
-          placeholder={activeTab === 'books' ? "Search books..." : "Search authors..."} 
+          placeholder={activeTab === 'books' ? t('library.searchBooks') : t('library.searchAuthors')} 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-full glass rounded-full py-3 pl-12 pr-4 text-ink placeholder:text-ink-muted focus:outline-none focus:border-accent/50 transition-colors"
@@ -257,13 +261,13 @@ export function LibraryView({
                 onClick={() => setSortBy('title')}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${sortBy === 'title' ? 'accent-bg text-white shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
-                A-Z
+                {t('library.az')}
               </button>
               <button
                 onClick={() => setSortBy('added')}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 ${sortBy === 'added' ? 'accent-bg text-white shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
-                <Clock size={12} /> Recent
+                <Clock size={12} /> {t('library.recent')}
               </button>
             </div>
 
@@ -273,19 +277,19 @@ export function LibraryView({
                 onClick={() => setFilterBy('all')}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'all' ? 'bg-ink text-bg shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
-                All
+                {t('library.all')}
               </button>
               <button
                 onClick={() => setFilterBy('unread')}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'unread' ? 'bg-ink text-bg shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
-                Unread
+                {t('library.unread')}
               </button>
               <button
                 onClick={() => setFilterBy('read')}
                 className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${filterBy === 'read' ? 'bg-ink text-bg shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
               >
-                Read
+                {t('library.read')}
               </button>
             </div>
           </>
@@ -347,7 +351,7 @@ export function LibraryView({
               {(activeTab === 'books' ? processedBooks : filteredAuthors).length === 0 && (activeTab === 'books' || searchQuery) && (
                 <div className="text-center py-20 text-ink-muted">
                   <BookOpen size={48} className="mx-auto mb-4 opacity-20" />
-                  <p>Nothing found matching your search.</p>
+                  <p>{t('library.nothingFound')}</p>
                 </div>
               )}
             </motion.div>
@@ -370,6 +374,7 @@ function AuthorItem({
   onClick: () => void;
   key?: string;
 }) {
+  const { t } = useTranslation();
   const thumbUrl = plexService.getThumbUrl(baseUrl, author.thumb, authToken, 120, 120);
   
   return (
@@ -388,7 +393,7 @@ function AuthorItem({
       <div className="flex-1 min-w-0 pr-4">
         <h3 className="text-sm font-bold text-ink line-clamp-1 break-all">{author.title}</h3>
         <p className="text-[10px] text-ink-muted uppercase font-bold tracking-widest mt-0.5">
-          Author
+          {t('library.author')}
         </p>
       </div>
     </motion.div>
@@ -409,6 +414,7 @@ function LibraryItem({
   onSelectAuthor?: (key: string) => void;
   key?: string;
 }) {
+  const { t } = useTranslation();
   const thumbUrl = plexService.getThumbUrl(baseUrl, book.thumb, authToken, 120, 120);
   const { progressMap, lastTrackByBook } = usePlayerStore();
 
@@ -438,17 +444,18 @@ function LibraryItem({
           }}
           className="text-xs text-ink-dim line-clamp-1 break-all hover:accent-text transition-colors text-left"
         >
-          {book.parentTitle || 'Unknown Author'}
+          {book.parentTitle || t('library.author')}
         </button>
         <div className="flex items-center gap-4 mt-1">
           <span className="text-[10px] text-ink-muted uppercase font-bold tracking-tighter">
-            {book.leafCount ? `${book.leafCount} Tracks` : 'Single Track'}
+            {book.leafCount ? t('library.tracks', { count: book.leafCount }) : t('library.singleTrack')}
           </span>
           {(isRead || (book.viewCount && book.viewCount > 0)) && (
-            <span className="text-[10px] accent-text uppercase font-bold tracking-tighter">Read</span>
+            <span className="text-[10px] accent-text uppercase font-bold tracking-tighter">{t('library.read')}</span>
           )}
         </div>
       </div>
     </motion.div>
   );
 }
+

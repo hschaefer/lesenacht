@@ -3,6 +3,7 @@ import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
 import { motion } from 'motion/react';
 import { BookOpen, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function HomeView({ 
   onSelectBook,
@@ -11,6 +12,7 @@ export function HomeView({
   onSelectBook: (key: string) => void;
   onSelectAuthor?: (key: string) => void;
 }) {
+  const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();
   const { progressMap, lastTrackByBook } = usePlayerStore();
   const [allBooks, setAllBooks] = useState<any[]>([]);
@@ -79,9 +81,9 @@ export function HomeView({
         <div className="w-20 h-20 glass rounded-full flex items-center justify-center text-slate-500 mb-2">
           <BookOpen size={40} />
         </div>
-        <h2 className="text-xl font-bold text-ink">Welcome to Lesenacht</h2>
+        <h2 className="text-xl font-bold text-ink">{t('home.welcomeTo')}</h2>
         <p className="text-ink-dim text-sm max-w-[250px]">
-          {!authToken ? "Please sign in with Plex" : "Please select a server and library"} in the settings to start listening.
+          {!authToken ? t('home.signInPromptPlex') : t('home.signInPromptSelection')} {t('home.startListening')}
         </p>
       </div>
     );
@@ -93,8 +95,8 @@ export function HomeView({
     <div className="space-y-8 pb-10">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-light tracking-tight text-ink">For You</h1>
-          <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">Recommended</p>
+          <h1 className="text-3xl font-light tracking-tight text-ink">{t('home.title')}</h1>
+          <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">{t('home.subtitle')}</p>
         </div>
       </header>
 
@@ -108,7 +110,7 @@ export function HomeView({
           {continueListening.length > 0 && (
             <section className="space-y-4">
               <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
-                <Clock size={16} /> Continue Listening <span className="w-1.5 h-1.5 rounded-full accent-bg animate-pulse"></span>
+                <Clock size={16} /> {t('home.continue')} <span className="w-1.5 h-1.5 rounded-full accent-bg animate-pulse"></span>
               </h2>
               <div className="flex gap-4 overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
                 {continueListening.map(book => (
@@ -127,7 +129,7 @@ export function HomeView({
           )}
 
           <section className="space-y-4">
-            <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim">Recently Added</h2>
+            <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim">{t('home.recentlyAdded')}</h2>
             <div className="grid grid-cols-2 gap-4">
               {recentlyAdded.map(book => (
                 <BookCard 

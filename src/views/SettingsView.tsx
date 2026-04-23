@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { plexService } from '../services/plexService';
 import { useAuthStore } from '../store/useStore';
-import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info } from 'lucide-react';
+import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info, Languages } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 
 export function SettingsView() {
+  const { t, i18n } = useTranslation();
   const { 
     authToken, 
     setAuthToken, 
@@ -14,6 +16,8 @@ export function SettingsView() {
     setSelectedLibrary,
     theme,
     setTheme,
+    language,
+    setLanguage,
     clearAllData
   } = useAuthStore();
   const [servers, setServers] = useState<any[]>([]);
@@ -25,6 +29,13 @@ export function SettingsView() {
 
   const APP_VERSION = '1.2.0';
   const LAST_UPDATED = '2026-04-22';
+
+  // Synchronize i18n with store
+  useEffect(() => {
+    if (language && i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language, i18n]);
 
   // Poll for token if login started
   useEffect(() => {
@@ -129,8 +140,8 @@ export function SettingsView() {
   return (
     <div className="space-y-8 pb-10">
       <header>
-        <h1 className="text-3xl font-light tracking-tight text-ink">Settings</h1>
-        <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">Preferences & Configuration</p>
+        <h1 className="text-3xl font-light tracking-tight text-ink">{t('settings.title')}</h1>
+        <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">{t('settings.subtitle')}</p>
       </header>
 
       {/* Authentication Section */}
@@ -139,10 +150,10 @@ export function SettingsView() {
           onClick={() => setIsAuthExpanded(!isAuthExpanded)}
           className="w-full flex items-center justify-between group"
         >
-          <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2 group-hover:text-ink-dim transition-colors">
-            <LogIn size={16} /> Authentication
+          <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2 group-hover:text-ink transition-colors">
+            <LogIn size={16} /> {t('settings.auth.title')}
           </h2>
-          <div className="text-ink-muted">
+          <div className="text-ink-dim group-hover:text-ink transition-colors">
             {isAuthExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </div>
         </button>
@@ -160,7 +171,7 @@ export function SettingsView() {
                   onClick={handleLogin}
                   className="w-full py-4 px-6 accent-bg hover:opacity-90 text-white rounded-2xl font-bold transition-all shadow-lg shadow-accent/20 flex items-center justify-center gap-3"
                 >
-                  {pin ? 'Waiting for Plex...' : 'Login with Plex'}
+                  {pin ? t('settings.auth.waitingForPlex') : t('settings.auth.loginWithPlex')}
                 </button>
               ) : (
                 <div className="p-4 glass rounded-2xl flex items-center justify-between">
@@ -168,7 +179,7 @@ export function SettingsView() {
                     <div className="w-10 h-10 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center">
                       <CheckCircle2 size={24} />
                     </div>
-                    <span className="font-medium text-ink">Signed in to Plex</span>
+                    <span className="font-medium text-ink">{t('settings.auth.signedIn')}</span>
                   </div>
                   <button 
                     onClick={() => {
@@ -178,15 +189,15 @@ export function SettingsView() {
                     }}
                     className="text-xs text-red-400 hover:text-red-300 font-bold uppercase tracking-widest"
                   >
-                    Sign Out
+                    {t('settings.auth.signOut')}
                   </button>
                 </div>
               )}
 
               {authToken && (
                 <div className="space-y-4 pt-4 border-t border-white/5">
-                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
-                    <Server size={14} /> Server Selection
+                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+                    <Server size={14} /> {t('settings.auth.serverSelection')}
                   </h3>
                   {loading ? (
                     <div className="animate-pulse h-12 glass rounded-xl"></div>
@@ -208,15 +219,15 @@ export function SettingsView() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-ink-muted text-sm italic">No online servers found.</p>
+                    <p className="text-ink-muted text-sm italic">{t('settings.auth.noServers')}</p>
                   )}
                 </div>
               )}
 
               {selectedServer && (
                 <div className="space-y-4 pt-4 border-t border-white/5">
-                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
-                    <Library size={14} /> Library / Section
+                  <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+                    <Library size={14} /> {t('settings.auth.librarySelection')}
                   </h3>
                   {libraries.length > 0 ? (
                     <div className="grid gap-2">
@@ -236,7 +247,7 @@ export function SettingsView() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-ink-muted text-sm italic">No music/audiobook libraries found.</p>
+                    <p className="text-ink-muted text-sm italic">{t('settings.auth.noLibraries')}</p>
                   )}
                 </div>
               )}
@@ -245,16 +256,39 @@ export function SettingsView() {
         </AnimatePresence>
       </section>
 
+      {/* Language Section shadow removal if any */}
+      <section className="space-y-4">
+        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+          <Languages size={16} /> {t('settings.language.title')}
+        </h2>
+        <div className="relative group">
+          <select 
+            value={language}
+            onChange={(e) => {
+              setLanguage(e.target.value);
+              i18n.changeLanguage(e.target.value);
+            }}
+            className="w-full h-12 glass rounded-2xl px-5 text-sm font-bold text-ink appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all lowercase tracking-widest"
+          >
+            <option value="en">{t('settings.language.en')}</option>
+            <option value="de">{t('settings.language.de')}</option>
+          </select>
+          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none group-hover:text-ink transition-colors">
+            <ChevronDown size={20} />
+          </div>
+        </div>
+      </section>
+
       {/* Appearance Section */}
       <section className="space-y-4">
-        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
-          <Monitor size={16} /> Appearance
+        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+          <Monitor size={16} /> {t('settings.appearance.title')}
         </h2>
         <div className="flex gap-2 p-1 glass rounded-2xl w-full">
           {[
-            { id: 'light', label: 'Light', icon: <Sun size={14} /> },
-            { id: 'dark', label: 'Dark', icon: <Moon size={14} /> },
-            { id: 'system', label: 'System', icon: <Monitor size={14} /> },
+            { id: 'light', label: t('settings.appearance.light'), icon: <Sun size={14} /> },
+            { id: 'dark', label: t('settings.appearance.dark'), icon: <Moon size={14} /> },
+            { id: 'system', label: t('settings.appearance.system'), icon: <Monitor size={14} /> },
           ].map((item) => (
             <button 
               key={item.id}
@@ -270,20 +304,20 @@ export function SettingsView() {
 
       {/* Info Section */}
       <section className="space-y-4 pt-6 border-t border-white/5">
-        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted flex items-center gap-2">
-          <Info size={16} /> Application Info
+        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+          <Info size={16} /> {t('settings.info.title')}
         </h2>
         <div className="p-4 glass rounded-2xl space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] text-ink-dim font-bold uppercase tracking-wider">Version</span>
+            <span className="text-[10px] text-ink-dim font-bold uppercase tracking-wider">{t('settings.info.version')}</span>
             <span className="text-sm font-mono text-ink bg-white/5 px-2 py-0.5 rounded-lg border border-white/10">{APP_VERSION}</span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-[10px] text-ink-dim font-bold uppercase tracking-wider">Last Updated</span>
+            <span className="text-[10px] text-ink-dim font-bold uppercase tracking-wider">{t('settings.info.lastUpdated')}</span>
             <span className="text-sm text-ink">{LAST_UPDATED}</span>
           </div>
           <div className="pt-2 border-t border-white/5 text-[10px] text-ink-muted text-center uppercase tracking-widest leading-relaxed">
-            Lesenacht • Designed for focused listening
+            {t('settings.info.tagline')}
           </div>
         </div>
       </section>
@@ -291,7 +325,7 @@ export function SettingsView() {
       {/* Data Section */}
       <section className="space-y-4 pt-6 border-t border-white/5">
         <h2 className="text-sm uppercase tracking-widest font-bold text-red-500/80 flex items-center gap-2">
-          <Trash2 size={16} /> Danger Zone
+          <Trash2 size={16} /> {t('settings.danger.title')}
         </h2>
         
         {!showClearConfirm ? (
@@ -299,7 +333,7 @@ export function SettingsView() {
             onClick={() => setShowClearConfirm(true)}
             className="w-full py-4 px-6 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-2xl font-bold transition-all flex items-center justify-center gap-3"
           >
-            <Trash2 size={18} /> Clear All Local Data
+            <Trash2 size={18} /> {t('settings.danger.clearData')}
           </button>
         ) : (
           <motion.div 
@@ -311,15 +345,15 @@ export function SettingsView() {
               <AlertTriangle size={48} />
             </div>
             <div className="space-y-1">
-              <h3 className="font-bold text-ink">Are you absolutely sure?</h3>
-              <p className="text-xs text-ink-dim">This will sign you out and delete all bookmarks and playback history stored on this device.</p>
+              <h3 className="font-bold text-ink">{t('settings.danger.confirmTitle')}</h3>
+              <p className="text-xs text-ink-dim">{t('settings.danger.confirmText')}</p>
             </div>
             <div className="flex gap-3">
               <button 
                 onClick={() => setShowClearConfirm(false)}
                 className="flex-1 py-3 px-4 glass border border-white/10 text-ink-dim hover:text-ink rounded-xl text-xs font-bold uppercase tracking-widest transition-all"
               >
-                Cancel
+                {t('settings.danger.cancel')}
               </button>
               <button 
                 onClick={() => {
@@ -328,7 +362,7 @@ export function SettingsView() {
                 }}
                 className="flex-1 py-3 px-4 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-lg shadow-red-600/30"
               >
-                Clear Everything
+                {t('settings.danger.clearEverything')}
               </button>
             </div>
           </motion.div>
@@ -337,3 +371,4 @@ export function SettingsView() {
     </div>
   );
 }
+

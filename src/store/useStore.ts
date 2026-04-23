@@ -125,11 +125,13 @@ interface AuthState {
   selectedServer: any | null;
   selectedLibrary: any | null;
   theme: 'light' | 'dark' | 'system';
+  language: string;
   
   setAuthToken: (token: string | null) => void;
   setSelectedServer: (server: any | null) => void;
   setSelectedLibrary: (library: any | null) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
+  setLanguage: (language: string) => void;
   clearAllData: () => void;
 }
 
@@ -140,17 +142,20 @@ export const useAuthStore = create<AuthState>()(
       selectedServer: null,
       selectedLibrary: null,
       theme: 'system',
+      language: 'en',
       
       setAuthToken: (token) => set({ authToken: token }),
       setSelectedServer: (server) => set({ selectedServer: server }),
       setSelectedLibrary: (library) => set({ selectedLibrary: library }),
       setTheme: (theme) => set({ theme }),
+      setLanguage: (language) => set({ language }),
       clearAllData: () => {
         set({ 
           authToken: null, 
           selectedServer: null, 
           selectedLibrary: null, 
-          theme: 'system' 
+          theme: 'system',
+          language: 'en'
         });
         usePlayerStore.setState({
           isPlaying: false,

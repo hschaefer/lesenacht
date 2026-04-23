@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
+import { useTranslation } from 'react-i18next';
 
 export function NowPlayingView({ 
   onClose,
@@ -36,6 +37,7 @@ export function NowPlayingView({
   onNavigateBook?: (key: string) => void;
   onNavigateAuthor?: (key: string) => void;
 }) {
+  const { t } = useTranslation();
   const { 
     currentBook, 
     currentTrack, 
@@ -167,7 +169,7 @@ export function NowPlayingView({
           <ChevronDown size={28} />
         </button>
         <div className="text-center">
-          <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-ink-muted">Currently Listening</p>
+          <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-ink-muted">{t('player.currentlyListening')}</p>
           <h2 className="text-sm font-bold text-ink truncate max-w-[200px]">{currentBook.title}</h2>
         </div>
         <div className="relative">
@@ -193,7 +195,7 @@ export function NowPlayingView({
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                 >
-                  <BookOpen size={16} /> Go to Book
+                  <BookOpen size={16} /> {t('player.goToBook')}
                 </button>
                 <button 
                   onClick={() => {
@@ -202,7 +204,7 @@ export function NowPlayingView({
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                 >
-                  <Library size={16} /> Go to Author
+                  <Library size={16} /> {t('player.goToAuthor')}
                 </button>
               </motion.div>
             )}
@@ -223,7 +225,7 @@ export function NowPlayingView({
           />
           {currentChapter && (
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-accent mb-1">Current Chapter</p>
+              <p className="text-[10px] uppercase tracking-widest font-bold text-accent mb-1">{t('player.currentChapter')}</p>
               <p className="text-white text-xs font-medium truncate">{currentChapter.tag || currentChapter.title}</p>
             </div>
           )}
@@ -273,7 +275,7 @@ export function NowPlayingView({
             onClick={handlePrevChapter}
             disabled={chapters.length === 0}
             className="text-ink-dim hover:text-ink transition-colors disabled:opacity-20"
-            title="Previous Chapter"
+            title={t('player.chapters')}
           >
             <ChevronsLeft size={28} />
           </button>
@@ -281,7 +283,7 @@ export function NowPlayingView({
           <button 
             onClick={() => setCurrentTime(Math.max(0, currentTime - 15))}
             className="text-ink-dim hover:text-ink transition-colors active:scale-90"
-            title="Back 15s"
+            title={t('player.back15')}
           >
             <RotateCcw size={32} />
           </button>
@@ -296,7 +298,7 @@ export function NowPlayingView({
           <button 
             onClick={() => setCurrentTime(Math.min(duration, currentTime + 45))}
             className="text-ink-dim hover:text-ink transition-colors active:scale-90"
-            title="Forward 45s"
+            title={t('player.forward45')}
           >
             <RotateCw size={32} />
           </button>
@@ -305,7 +307,7 @@ export function NowPlayingView({
             onClick={handleNextChapter}
             disabled={chapters.length === 0}
             className="text-ink-dim hover:text-ink transition-colors disabled:opacity-20"
-            title="Next Chapter"
+            title={t('player.chapters')}
           >
             <ChevronsRight size={28} />
           </button>
@@ -331,7 +333,7 @@ export function NowPlayingView({
           >
             {showBookmarkFeedback ? <Check size={24} /> : <Bookmark size={24} />}
             <span className="text-[9px] font-bold uppercase tracking-tighter">
-              {showBookmarkFeedback ? 'Saved' : 'Mark'}
+              {showBookmarkFeedback ? t('player.saved') : t('player.mark')}
             </span>
           </button>
 
@@ -341,7 +343,7 @@ export function NowPlayingView({
             className={`flex flex-col items-center gap-1 transition-colors ${isChapterMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'} disabled:opacity-20`}
           >
             <List size={24} />
-            <span className="text-[9px] font-bold uppercase tracking-tighter">List</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter">{t('player.list')}</span>
           </button>
 
           <button 
@@ -350,7 +352,7 @@ export function NowPlayingView({
           >
             <Moon size={24} />
             <span className="text-[9px] font-bold font-mono uppercase tracking-tighter">
-              {sleepTimerEnd ? formatSleepRemaining() : 'Sleep'}
+              {sleepTimerEnd ? formatSleepRemaining() : t('player.sleep')}
             </span>
           </button>
         </div>
@@ -372,7 +374,7 @@ export function NowPlayingView({
         {/* Speed Menu */}
         {isSpeedMenuOpen && (
           <Modal onClose={() => setIsSpeedMenuOpen(false)}>
-            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-ink-muted mb-6 text-center">Playback Speed</h3>
+            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-ink-muted mb-6 text-center">{t('player.playbackSpeed')}</h3>
             <div className="grid grid-cols-3 gap-4">
               {speeds.map(speed => (
                 <button
@@ -390,7 +392,7 @@ export function NowPlayingView({
         {/* Sleep Menu */}
         {isSleepMenuOpen && (
           <Modal onClose={() => setIsSleepMenuOpen(false)}>
-            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-ink-muted mb-6 text-center">Sleep Timer</h3>
+            <h3 className="text-xs uppercase tracking-[0.2em] font-bold text-ink-muted mb-6 text-center">{t('player.sleepTimer')}</h3>
             <div className="grid grid-cols-3 gap-4">
               {sleepOptions.map(opt => (
                 <button
@@ -398,7 +400,7 @@ export function NowPlayingView({
                   onClick={() => { setSleepTimer(opt); setIsSleepMenuOpen(false); }}
                   className="py-3 rounded-2xl font-mono text-sm font-bold border bg-white/5 border-white/10 text-ink-dim"
                 >
-                  {opt ? `${opt}m` : 'Off'}
+                  {opt ? t('player.minutes', { count: opt }) : t('player.off')}
                 </button>
               ))}
             </div>
@@ -413,13 +415,13 @@ export function NowPlayingView({
                 onClick={() => setActiveMenuTab('chapters')}
                 className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeMenuTab === 'chapters' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink'}`}
               >
-                Chapters
+                {t('player.chapters')}
               </button>
               <button 
                 onClick={() => setActiveMenuTab('bookmarks')}
                 className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeMenuTab === 'bookmarks' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink'}`}
               >
-                Bookmarks
+                {t('player.bookmarks')}
               </button>
             </div>
 
@@ -472,7 +474,7 @@ export function NowPlayingView({
                     ))}
                   {bookmarks.filter(b => b.trackKey === currentTrack.ratingKey).length === 0 && (
                     <div className="text-center py-10 text-ink-muted italic text-sm">
-                      No bookmarks for this track.
+                      {t('player.noBookmarks')}
                     </div>
                   )}
                 </div>

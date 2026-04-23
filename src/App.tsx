@@ -20,15 +20,25 @@ import { BookDetailView } from './views/BookDetailView';
 import { NowPlayingView } from './views/NowPlayingView';
 import { MiniPlayer } from './components/MiniPlayer';
 import { AudioController } from './components/AudioController';
+import { useTranslation } from 'react-i18next';
 
 export default function App() {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'home' | 'library' | 'settings'>('home');
   const [selectedBookKey, setSelectedBookKey] = useState<string | null>(null);
   const [selectedAuthorKey, setSelectedAuthorKey] = useState<string | null>(null);
   const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
   
-  const { authToken, selectedLibrary, theme } = useAuthStore();
+  const { authToken, selectedLibrary, theme, language } = useAuthStore();
   const { currentBook } = usePlayerStore();
+  const { i18n } = useTranslation();
+
+  // Sync i18n with stored language
+  useEffect(() => {
+    if (language && i18n.language !== language) {
+      i18n.changeLanguage(language);
+    }
+  }, [language, i18n]);
 
   // Apply theme to document
   useEffect(() => {
@@ -110,19 +120,19 @@ export default function App() {
             active={activeTab === 'home' && !selectedBookKey && !selectedAuthorKey} 
             onClick={() => { setActiveTab('home'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
             icon={<HomeIcon size={20} />}
-            label="Home"
+            label={t('common.home')}
           />
           <NavButton 
             active={activeTab === 'library' && !selectedBookKey && !selectedAuthorKey} 
             onClick={() => { setActiveTab('library'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
             icon={<LibraryIcon size={20} />}
-            label="Library"
+            label={t('common.library')}
           />
           <NavButton 
             active={activeTab === 'settings' && !selectedBookKey && !selectedAuthorKey} 
             onClick={() => { setActiveTab('settings'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
             icon={<SettingsIcon size={20} />}
-            label="Settings"
+            label={t('common.settings')}
           />
         </div>
       </nav>

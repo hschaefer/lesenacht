@@ -1,0 +1,123 @@
+{
+  "common": {
+    "home": "Home",
+    "library": "Library",
+    "settings": "Settings",
+    "nowPlaying": "Now Playing"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Preferences & Configuration",
+    "auth": {
+      "title": "Authentication",
+      "loginWithPlex": "Login with Plex",
+      "waitingForPlex": "Waiting for Plex...",
+      "signedIn": "Signed in to Plex",
+      "signOut": "Sign Out",
+      "serverSelection": "Server Selection",
+      "librarySelection": "Library / Section",
+      "noServers": "No online servers found.",
+      "noLibraries": "No music/audiobook libraries found."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "language": {
+      "title": "Language",
+      "en": "english",
+      "de": "german"
+    },
+    "info": {
+      "title": "Application Info",
+      "version": "Version",
+      "lastUpdated": "Last Updated",
+      "tagline": "Lesenacht • Designed for focused listening"
+    },
+    "danger": {
+      "title": "Danger Zone",
+      "clearData": "Clear All Local Data",
+      "confirmTitle": "Are you absolutely sure?",
+      "confirmText": "This will sign you out and delete all bookmarks and playback history stored on this device.",
+      "cancel": "Cancel",
+      "clearEverything": "Clear Everything"
+    }
+  },
+  "home": {
+    "welcome": "Welcome back",
+    "title": "For You",
+    "subtitle": "Recommended",
+    "continue": "Continue Listening",
+    "recentlyAdded": "Recently Added",
+    "noBooks": "No audiobooks found.",
+    "welcomeTo": "Welcome to Lesenacht",
+    "signInPromptPlex": "Please sign in with Plex",
+    "signInPromptSelection": "Please select a server and library",
+    "startListening": "to start listening."
+  },
+  "library": {
+    "title": "Library",
+    "searchBooks": "Search books...",
+    "searchAuthors": "Search authors...",
+    "books": "Books",
+    "authors": "Authors",
+    "booksCount": "{{count}} Books",
+    "authorsCount": "{{count}} Authors",
+    "setupRequired": "Library Setup Required",
+    "viewCollectionPrompt": "in the settings to view your collection.",
+    "authorDetails": "Author Details",
+    "biography": "Biography / Summary",
+    "audiobooks": "Audiobooks",
+    "tracks": "{{count}} Tracks",
+    "singleTrack": "Single Track",
+    "read": "Read",
+    "unread": "Unread",
+    "all": "All",
+    "az": "A-Z",
+    "recent": "Recent",
+    "nothingFound": "Nothing found matching your search.",
+    "sortBy": "Sort by",
+    "dateAdded": "Date Added",
+    "bookNotFound": "Book Not Found",
+    "retrieveDetailsError": "We couldn't retrieve the details for this audiobook.",
+    "goBack": "Go Back",
+    "goToAuthor": "Go to Author",
+    "downloadBook": "Download Book",
+    "progress": "Progress",
+    "continue": "Continue",
+    "listenNow": "Listen Now",
+    "markAsUnread": "Mark as Unread",
+    "markAsFinished": "Mark as Finished",
+    "reset": "Reset",
+    "finish": "Finish",
+    "summary": "Summary",
+    "bookmarks": "Bookmarks",
+    "trackList": "Track List",
+    "min": "min",
+    "chaptersCount": "{{count}} Chapters"
+  },
+  "player": {
+    "title": "Now Playing",
+    "currentlyListening": "Currently Listening",
+    "goToBook": "Go to Book",
+    "goToAuthor": "Go to Author",
+    "currentChapter": "Current Chapter",
+    "sleepTimer": "Sleep Timer",
+    "playbackSpeed": "Playback Speed",
+    "bookmarks": "Bookmarks",
+    "addBookmark": "Add Bookmark",
+    "mark": "Mark",
+    "saved": "Saved",
+    "list": "List",
+    "sleep": "Sleep",
+    "queue": "Queue",
+    "minutes": "{{count}}m",
+    "off": "Off",
+    "forward45": "Forward 45s",
+    "back15": "Back 15s",
+    "noBookmarks": "No bookmarks for this track.",
+    "chapters": "Chapters"
+  }
+}
