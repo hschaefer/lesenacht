@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { plexService } from '../services/plexService';
 import { useAuthStore } from '../store/useStore';
-import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info, Languages } from 'lucide-react';
+import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info, Languages, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
@@ -326,6 +326,41 @@ export function SettingsView({ onLogin, autoStartLogin }: { onLogin?: () => void
           </div>
           <div className="pt-2 border-t border-white/5 text-[10px] text-ink-muted text-center uppercase tracking-widest leading-relaxed">
             {t('settings.info.tagline')}
+          </div>
+        </div>
+      </section>
+
+      {/* Privacy Section */}
+      <section className="space-y-4 pt-6 border-t border-white/5">
+        <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+          <ShieldCheck size={16} /> {t('settings.privacy.title')}
+        </h2>
+        <div className="p-6 glass rounded-2xl space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold text-ink flex items-center gap-2">
+              <CheckCircle2 size={14} className="text-accent" /> {t('settings.privacy.dataTitle')}
+            </h3>
+            <p className="text-xs text-ink-dim leading-relaxed">
+              {t('settings.privacy.dataText')}
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            <h3 className="text-xs font-bold text-ink flex items-center gap-2">
+              <Server size={14} className="text-accent" /> {t('settings.privacy.hostingTitle')}
+            </h3>
+            <p className="text-xs text-ink-dim leading-relaxed">
+              {t('settings.privacy.hostingText')}
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-white/5">
+            <h3 className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">
+              {t('settings.privacy.gdprTitle')}
+            </h3>
+            <p className="text-[10px] text-ink-muted leading-tight">
+              {t('settings.privacy.gdprText')}
+            </p>
           </div>
         </div>
       </section>

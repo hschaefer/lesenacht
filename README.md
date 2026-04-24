@@ -30,13 +30,21 @@ To run Lesenacht on your local machine with full proxy support:
 
 ### Cloudflare Pages Deployment
 
-This app is optimized for deployment on [Cloudflare Pages](https://pages.cloudflare.com/):
+This app is optimized for deployment on [Cloudflare Pages](https://pages.cloudflare.com/).
 
-1.  **Framework Preset**: None (or select Vite)
-2.  **Build Command**: `npm run build`
-3.  **Build Output Directory**: `dist`
-4.  **Backend Logic**: The `/functions` directory contains the Plex proxy logic. Cloudflare Pages detects this automatically and deploys it as Cloudflare Workers.
-5
+**Deployment Steps:**
+1.  **Dashboard**: Go to Cloudflare Dashboard > **Workers & Pages** > **Create** > **Pages** > **Connect to Git**.
+2.  **Build Settings**:
+    - **Framework Preset**: `Vite`
+    - **Build Command**: `npm run build`
+    - **Build Output Directory**: `dist`
+3.  **Functions**: Cloudflare automatically detects the `/functions` directory and deploys it as **Pages Functions**.
+4.  **SPA Support**: We include a `public/_redirects` file in the repo to handle client-side routing.
+
+**Common Pitfalls:**
+*   **"Deploy Command" vs "Build Command"**: You only need a **Build Command** (`npm run build`). You should **not** need a "Deploy Command" like `npx wrangler versions upload`. If you see that, you might be in the **Workers** tab instead of the **Pages** tab.
+*   **Worker vs Page**: If Cloudflare asks you to upload a script directly, you are creating a Worker. If it asks you to connect to GitHub and select an output directory, you are creating a Page.
+*   **Environment Variables**: If your app uses environment variables (like `PLEX_SERVER_URL`), make sure to add them in the Pages dashboard under **Settings > Functions > Variables and Secrets**.
 ## Mobile App (Android)
 
 This project uses **Capacitor** to turn the web application into a native Android app.
@@ -59,6 +67,12 @@ This project uses **Capacitor** to turn the web application into a native Androi
   ```bash
   npm run cap:open
   ```
+
+
+### Data Privacy & GDPR
+*   **Local-First**: This app is "local-first". Your Plex authentication token and library metadata are stored in your browser's `localStorage`.
+*   **No Central Backend**: There is no central database or analytics server. All communication happens between your browser and the Plex API (optionally proxied through your own Cloudflare Worker functions).
+*   **Compliance**: Since you are hosting the app to access your own data, you are generally the "Data Controller" under GDPR. The app itself complies by not collecting, storing, or transmitting PII to any third party other than Plex.
 
 ---
 

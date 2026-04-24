@@ -43,6 +43,15 @@
       "confirmText": "This will sign you out and delete all bookmarks and playback history stored on this device.",
       "cancel": "Cancel",
       "clearEverything": "Clear Everything"
+    },
+    "privacy": {
+      "title": "Privacy & Transparency",
+      "dataTitle": "Your Data",
+      "dataText": "Lesenacht is a local-first application. Your Plex credentials and library data are sent only to Plex and your own server. No personal data is collected, stored, or shared by the application developers.",
+      "hostingTitle": "Hosting",
+      "hostingText": "This application instance is hosted on Cloudflare Pages. Cloudflare may collect basic diagnostic and traffic data required for security and delivery.",
+      "gdprTitle": "GDPR Statement",
+      "gdprText": "As this is a tool to access your own self-hosted media, you remain the data controller. The application does not store PII (Personally Identifiable Information) on external servers."
     }
   },
   "home": {
