@@ -7,6 +7,7 @@ import { plexService } from '../services/plexService';
 export function MiniPlayer({ onClick }: { onClick: () => void }) {
   const { currentBook, isPlaying, setPlaying, currentTime, duration } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
+  const effectiveToken = selectedServer?.accessToken || authToken;
 
   if (!currentBook || !selectedServer) return null;
 
@@ -15,7 +16,7 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
   
   if (!baseUrl) return null;
 
-  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, authToken!, 100, 100);
+  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken!, 100, 100);
   const progress = (currentTime / duration) * 100;
 
   return (

@@ -16,12 +16,13 @@ export function HomeView({
 }) {
   const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();
+  const effectiveToken = selectedServer?.accessToken || authToken;
   const { progressMap, lastTrackByBook } = usePlayerStore();
   const [allBooks, setAllBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (authToken && selectedServer && selectedLibrary) {
+    if (effectiveToken && selectedServer && selectedLibrary) {
       const connections = selectedServer?.connections || [];
       const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
       
@@ -32,7 +33,7 @@ export function HomeView({
 
       setLoading(true);
       
-      plexService.getLibraryItems(baseUrl, selectedLibrary.key, authToken)
+      plexService.getLibraryItems(baseUrl, selectedLibrary.key, effectiveToken)
         .then(items => {
           setAllBooks(items || []);
           setLoading(false);
@@ -42,7 +43,7 @@ export function HomeView({
           setLoading(false);
         });
     }
-  }, [authToken, selectedServer, selectedLibrary]);
+  }, [effectiveToken, selectedServer, selectedLibrary]);
 
   const continueListening = useMemo(() => {
     // Get books that have local progress
@@ -136,7 +137,7 @@ export function HomeView({
                     key={book.ratingKey} 
                     book={book} 
                     baseUrl={baseUrl || ''} 
-                    authToken={authToken} 
+                    authToken={effectiveToken!} 
                     onClick={() => onSelectBook(book.ratingKey)}
                     onSelectAuthor={onSelectAuthor}
                     large
@@ -154,7 +155,7 @@ export function HomeView({
                   key={book.ratingKey} 
                   book={book} 
                   baseUrl={baseUrl || ''} 
-                  authToken={authToken} 
+                  authToken={effectiveToken!} 
                   onClick={() => onSelectBook(book.ratingKey)}
                   onSelectAuthor={onSelectAuthor}
                 />

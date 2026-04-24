@@ -57,6 +57,7 @@ export function NowPlayingView({
     removeBookmark
   } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
+  const effectiveToken = selectedServer?.accessToken || authToken;
   const [isSpeedMenuOpen, setIsSpeedMenuOpen] = useState(false);
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState(false);
   const [activeMenuTab, setActiveMenuTab] = useState<'chapters' | 'bookmarks'>('chapters');
@@ -66,13 +67,13 @@ export function NowPlayingView({
   const [chapters, setChapters] = useState<any[]>([]);
 
   useEffect(() => {
-    if (currentTrack && authToken && selectedServer) {
+    if (currentTrack && effectiveToken && selectedServer) {
       const connections = selectedServer?.connections || [];
       const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
       
       if (!baseUrl) return;
 
-      plexService.getTrackMetadata(baseUrl, currentTrack.ratingKey, authToken)
+      plexService.getTrackMetadata(baseUrl, currentTrack.ratingKey, effectiveToken)
         .then(metadata => {
           if (metadata && metadata.Chapter) {
             setChapters(metadata.Chapter);
@@ -85,7 +86,7 @@ export function NowPlayingView({
           setChapters([]);
         });
     }
-  }, [currentTrack?.ratingKey, authToken, selectedServer]);
+  }, [currentTrack?.ratingKey, effectiveToken, selectedServer]);
 
   if (!currentBook || !currentTrack || !selectedServer) return null;
 
@@ -94,7 +95,7 @@ export function NowPlayingView({
   
   if (!baseUrl) return null;
 
-  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, authToken!, 800, 800);
+  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken!, 800, 800);
   
   const formatTime = (seconds: number) => {
     const s = Math.floor(seconds);

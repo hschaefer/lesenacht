@@ -19,6 +19,7 @@ export function AudioController() {
     setSleepTimer
   } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
+  const effectiveToken = selectedServer?.accessToken || authToken;
 
   // Handle Sleep Timer
   useEffect(() => {
@@ -124,7 +125,7 @@ export function AudioController() {
   
   if (!baseUrl || !partKey) return null;
 
-  const streamUrl = plexService.getMediaUrl(baseUrl, partKey, authToken);
+  const streamUrl = plexService.getMediaUrl(baseUrl, partKey, effectiveToken!);
 
   return (
     <audio

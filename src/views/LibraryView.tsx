@@ -20,6 +20,7 @@ export function LibraryView({
 }) {
   const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();
+  const effectiveToken = selectedServer?.accessToken || authToken;
   const [activeTab, setActiveTab] = useState<Tab>('books');
   const [books, setBooks] = useState<any[]>([]);
   const [authors, setAuthors] = useState<any[]>([]);
@@ -50,20 +51,20 @@ export function LibraryView({
   // If initialAuthorKey is provided but authors aren't loaded yet, 
   // fetch the specific author directly to avoid empty screen
   useEffect(() => {
-    if (initialAuthorKey && authToken && baseUrl && !selectedAuthor) {
-      plexService.getItemMetadata(baseUrl, initialAuthorKey, authToken)
+    if (initialAuthorKey && effectiveToken && baseUrl && !selectedAuthor) {
+      plexService.getItemMetadata(baseUrl, initialAuthorKey, effectiveToken)
         .then(meta => {
           if (meta) setSelectedAuthor(meta);
         })
         .catch(console.error);
     }
-  }, [initialAuthorKey, authToken, baseUrl, selectedAuthor]);
+  }, [initialAuthorKey, effectiveToken, baseUrl, selectedAuthor]);
 
   useEffect(() => {
-    if (authToken && baseUrl && selectedLibrary) {
+    if (effectiveToken && baseUrl && selectedLibrary) {
       setLoading(true);
       if (activeTab === 'books') {
-        plexService.getLibraryItems(baseUrl, selectedLibrary.key, authToken)
+        plexService.getLibraryItems(baseUrl, selectedLibrary.key, effectiveToken)
           .then(items => {
             setBooks(items);
             setLoading(false);
@@ -73,7 +74,7 @@ export function LibraryView({
             setLoading(false);
           });
       } else {
-        plexService.getLibraryArtists(baseUrl, selectedLibrary.key, authToken)
+        plexService.getLibraryArtists(baseUrl, selectedLibrary.key, effectiveToken)
           .then(items => {
             setAuthors(items);
             setLoading(false);
@@ -84,12 +85,12 @@ export function LibraryView({
           });
       }
     }
-  }, [authToken, baseUrl, selectedLibrary, activeTab]);
+  }, [effectiveToken, baseUrl, selectedLibrary, activeTab]);
 
   useEffect(() => {
-    if (selectedAuthor && authToken && baseUrl) {
+    if (selectedAuthor && effectiveToken && baseUrl) {
       setLoading(true);
-      plexService.getArtistAlbums(baseUrl, selectedAuthor.ratingKey, authToken)
+      plexService.getArtistAlbums(baseUrl, selectedAuthor.ratingKey, effectiveToken)
         .then(items => {
           setAuthorBooks(items);
           setLoading(false);
@@ -99,7 +100,7 @@ export function LibraryView({
           setLoading(false);
         });
     }
-  }, [selectedAuthor, authToken, baseUrl]);
+  }, [selectedAuthor, effectiveToken, baseUrl]);
 
   const processedBooks = books
     .filter(b => {
@@ -201,7 +202,7 @@ export function LibraryView({
                   key={book.ratingKey} 
                   book={book} 
                   baseUrl={baseUrl || ''} 
-                  authToken={authToken!} 
+                  authToken={effectiveToken!} 
                   onClick={() => onSelectBook(book.ratingKey)}
                 />
               ))}
@@ -322,7 +323,7 @@ export function LibraryView({
                     key={book.ratingKey} 
                     book={book} 
                     baseUrl={baseUrl || ''} 
-                    authToken={authToken!} 
+                    authToken={effectiveToken!} 
                     onClick={() => onSelectBook(book.ratingKey)}
                     onSelectAuthor={(key) => {
                       const author = authors.find(a => a.ratingKey === key);
@@ -330,7 +331,7 @@ export function LibraryView({
                       else {
                         // If not in authors list (maybe not fetched yet), 
                         // we can fetch it or just set a dummy with key
-                        plexService.getItemMetadata(baseUrl || '', key, authToken!)
+                        plexService.getItemMetadata(baseUrl || '', key, effectiveToken!)
                           .then(setSelectedAuthor);
                       }
                     }}
@@ -342,7 +343,7 @@ export function LibraryView({
                     key={author.ratingKey}
                     author={author}
                     baseUrl={baseUrl || ''}
-                    authToken={authToken!}
+                    authToken={effectiveToken!}
                     onClick={() => setSelectedAuthor(author)}
                   />
                 ))

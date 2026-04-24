@@ -27,8 +27,8 @@ export function SettingsView({ onLogin, autoStartLogin }: { onLogin?: () => void
   const [isAuthExpanded, setIsAuthExpanded] = useState(!authToken || !selectedServer || !selectedLibrary);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  const APP_VERSION = '1.3.0';
-  const LAST_UPDATED = '2026-04-23';
+  const APP_VERSION = '1.5.0';
+  const LAST_UPDATED = '2026-04-24';
 
   // Trigger login if autoStartLogin is true
   useEffect(() => {
@@ -86,7 +86,10 @@ export function SettingsView({ onLogin, autoStartLogin }: { onLogin?: () => void
 
   // Fetch libraries when server is selected
   useEffect(() => {
-    if (selectedServer && authToken) {
+    if (selectedServer) {
+      const effectiveToken = selectedServer.accessToken || authToken;
+      if (!effectiveToken) return;
+
       const connections = selectedServer?.connections || [];
       const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
       
@@ -95,7 +98,7 @@ export function SettingsView({ onLogin, autoStartLogin }: { onLogin?: () => void
         return;
       }
 
-      plexService.getLibrarySections(baseUrl, authToken)
+      plexService.getLibrarySections(baseUrl, effectiveToken)
         .then(sections => {
           // Plex Music libraries are often type 'artist' or 'music'
           const filtered = sections.filter((s: any) => 

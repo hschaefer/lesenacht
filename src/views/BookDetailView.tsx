@@ -30,6 +30,7 @@ export function BookDetailView({
 }) {
   const { t } = useTranslation();
   const { authToken, selectedServer } = useAuthStore();
+  const effectiveToken = selectedServer?.accessToken || authToken;
   const { 
     setCurrentBook, 
     setCurrentTrack, 
@@ -50,7 +51,7 @@ export function BookDetailView({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (authToken && selectedServer) {
+    if (effectiveToken && selectedServer) {
       const connections = selectedServer?.connections || [];
       const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
       
@@ -62,9 +63,9 @@ export function BookDetailView({
       setLoading(true);
       
       // Fetch tracks
-      const tracksPromise = plexService.getItemDetails(baseUrl, ratingKey, authToken);
+      const tracksPromise = plexService.getItemDetails(baseUrl, ratingKey, effectiveToken);
       // Fetch album/book metadata specifically for the summary
-      const metadataPromise = plexService.getItemMetadata(baseUrl, ratingKey, authToken);
+      const metadataPromise = plexService.getItemMetadata(baseUrl, ratingKey, effectiveToken);
       
       Promise.all([tracksPromise, metadataPromise])
         .then(([metadata, bookMeta]) => {
@@ -79,10 +80,10 @@ export function BookDetailView({
               thumb: bookMeta.thumb || '',
               summary: bookMeta.summary || ''
             });
-
+ 
             // If there's only one track, fetch its chapters immediately
             if (metadata.length === 1) {
-              plexService.getTrackMetadata(baseUrl, metadata[0].ratingKey, authToken)
+              plexService.getTrackMetadata(baseUrl, metadata[0].ratingKey, effectiveToken)
                 .then(trackMeta => {
                   if (trackMeta?.Chapter) {
                     setTrackChapters({ [metadata[0].ratingKey]: trackMeta.Chapter });
@@ -109,7 +110,7 @@ export function BookDetailView({
           setLoading(false);
         });
     }
-  }, [ratingKey, authToken, selectedServer]);
+  }, [ratingKey, effectiveToken, selectedServer]);
 
   const handlePlayTrack = (track: any, startTime = 0) => {
     setCurrentBook(book);
@@ -121,12 +122,12 @@ export function BookDetailView({
   };
 
   const handleDownload = () => {
-    if (!tracks || tracks.length === 0 || !baseUrl || !authToken) return;
+    if (!tracks || tracks.length === 0 || !baseUrl || !effectiveToken) return;
     
     tracks.forEach((track, index) => {
       const partKey = track.Media?.[0]?.Part?.[0]?.key;
       if (partKey) {
-        const downloadUrl = plexService.getDownloadUrl(baseUrl, partKey, authToken);
+        const downloadUrl = plexService.getDownloadUrl(baseUrl, partKey, effectiveToken);
         // Delay slightly between downloads to prevent browser from blocking multiple downloads
         setTimeout(() => {
           const link = document.createElement('a');
@@ -185,7 +186,7 @@ export function BookDetailView({
 
   const connections = selectedServer?.connections || [];
   const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
-  const thumbUrl = (baseUrl && book?.thumb) ? plexService.getThumbUrl(baseUrl, book.thumb, authToken!, 600, 600) : null;
+  const thumbUrl = (baseUrl && book?.thumb) ? plexService.getThumbUrl(baseUrl, book.thumb, effectiveToken!, 600, 600) : null;
 
   return (
     <div className="space-y-6 pb-20 overflow-x-hidden">

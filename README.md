@@ -38,15 +38,8 @@ This app is optimized for deployment on [Cloudflare Pages](https://pages.cloudfl
     - **Framework Preset**: `Vite`
     - **Build Command**: `npm run build`
     - **Build Output Directory**: `dist`
-3.  **Functions**: Cloudflare automatically detects the `/functions` directory and deploys it as **Pages Functions**.
-4.  **SPA Support**: We include a `public/_redirects` file in the repo to handle client-side routing.
 
-**Common Pitfalls:**
-*   **"Deploy Command" vs "Build Command"**: You only need a **Build Command** (`npm run build`). You should **not** need a "Deploy Command" like `npx wrangler versions upload`. If you see that, you might be in the **Workers** tab instead of the **Pages** tab.
-*   **Worker vs Page**: If Cloudflare asks you to upload a script directly, you are creating a Worker. If it asks you to connect to GitHub and select an output directory, you are creating a Page.
-*   **Environment Variables**: If your app uses environment variables (like `PLEX_SERVER_URL`), make sure to add them in the Pages dashboard under **Settings > Functions > Variables and Secrets**.
-## Mobile App (Android)
-
+## Android app
 This project uses **Capacitor** to turn the web application into a native Android app.
 
 ### Prerequisites for Android
