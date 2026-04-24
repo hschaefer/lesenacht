@@ -2,14 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   Home as HomeIcon, 
   Library as LibraryIcon, 
-  Settings as SettingsIcon,
-  Play,
-  Pause,
-  SkipBack,
-  SkipForward,
-  ChevronUp,
-  Search,
-  BookOpen
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuthStore, usePlayerStore } from './store/useStore';

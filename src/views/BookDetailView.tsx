@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { CoverImage } from '../components/CoverImage';
 
 export function BookDetailView({ 
   ratingKey, 
@@ -241,10 +242,11 @@ export function BookDetailView({
           animate={{ scale: 1, opacity: 1 }}
           className="w-56 h-56 md:w-64 md:h-64 rounded-[40px] overflow-hidden shadow-2xl book-card flex-shrink-0 mx-auto md:mx-0"
         >
-          <img 
-            src={thumbUrl || 'https://via.placeholder.com/600?text=No+Cover'} 
-            className="w-full h-full object-cover" 
+          <CoverImage 
+            src={thumbUrl} 
+            className="w-full h-full" 
             alt={book.title} 
+            size={64}
           />
         </motion.div>
         <div className="flex-1 space-y-4 text-center md:text-left">
@@ -265,7 +267,7 @@ export function BookDetailView({
                 <span className="text-ink-dim dark:text-ink-muted">{t('library.progress')}</span>
                 <span className="accent-text">{Math.floor(progressPercent)}%</span>
               </div>
-              <div className="h-1.5 w-full bg-slate-950 dark:bg-white/10 rounded-full overflow-hidden">
+              <div className="w-full progress-track">
                 <div 
                   className="h-full accent-bg shadow-[0_0_8px_rgba(234,88,12,0.4)] transition-all duration-700" 
                   style={{ width: `${Math.max(2, progressPercent)}%` }}

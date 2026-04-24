@@ -123,11 +123,7 @@ export function AudioController() {
   }, [isPlaying, currentTrack?.ratingKey]);
 
   const handleTimeUpdate = () => {
-    if (audioRef.current && Math.abs(audioRef.current.currentTime - currentTime) > 0.5) {
-      // Only sync if the difference is small (playback)
-      // Large differences (seeking) are handled by the effect below
-      setCurrentTime(audioRef.current.currentTime);
-    } else if (audioRef.current) {
+    if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
     }
   };

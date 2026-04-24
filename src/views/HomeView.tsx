@@ -4,6 +4,7 @@ import { plexService } from '../services/plexService';
 import { motion } from 'motion/react';
 import { BookOpen, Clock, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { CoverImage } from '../components/CoverImage';
 
 export function HomeView({ 
   onSelectBook,
@@ -182,7 +183,7 @@ function BookCard({
   onClick: () => void; 
   onSelectAuthor?: (key: string) => void;
   large?: boolean;
-  key?: string;
+  key?: any;
 }) {
   const { progressMap, lastTrackByBook } = usePlayerStore();
   const thumbUrl = plexService.getThumbUrl(baseUrl, book.thumb, authToken, large ? 400 : 300, large ? 400 : 300);
@@ -201,11 +202,11 @@ function BookCard({
       className={`${large ? 'w-64 flex-shrink-0' : 'w-full'} group cursor-pointer`}
     >
       <div className={`relative aspect-square rounded-2xl overflow-hidden shadow-2xl book-card transition-transform group-hover:scale-[1.02] ${large ? 'ring-offset-2 ring-offset-bg ring-accent/20' : ''}`}>
-        <img 
-          src={thumbUrl || 'https://via.placeholder.com/300?text=No+Cover'} 
+        <CoverImage 
+          src={thumbUrl} 
           alt={book.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
+          className="w-full h-full shadow-lg"
+          size={large ? 40 : 32}
         />
         
         {/* Progress bar overlay for in-progress books */}

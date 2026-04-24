@@ -11,8 +11,6 @@ import {
   MoreVertical,
   Volume2,
   VolumeX,
-  Repeat,
-  Shuffle,
   List,
   RotateCcw,
   RotateCw,
@@ -27,6 +25,7 @@ import {
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
 import { useTranslation } from 'react-i18next';
+import { CoverImage } from '../components/CoverImage';
 
 export function NowPlayingView({ 
   onClose,
@@ -105,7 +104,7 @@ export function NowPlayingView({
     return `${h > 0 ? `${h}:` : ''}${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const progress = (currentTime / duration) * 100;
+  const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
   const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2];
   const sleepOptions = [15, 30, 45, 60, null];
 
@@ -219,10 +218,11 @@ export function NowPlayingView({
           animate={{ scale: 1, opacity: 1 }}
           className="w-full aspect-square max-w-[280px] md:max-w-[400px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/50 book-card relative group flex-shrink-0"
         >
-          <img 
-            src={thumbUrl || 'https://via.placeholder.com/800?text=No+Cover'} 
-            className="w-full h-full object-cover" 
+          <CoverImage 
+            src={thumbUrl} 
+            className="w-full h-full" 
             alt={currentBook.title} 
+            size={80}
           />
           {currentChapter && (
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
@@ -247,7 +247,7 @@ export function NowPlayingView({
             {/* Progress Bar */}
             <div className="space-y-2">
               <div 
-                className="relative h-2 w-full bg-slate-950 dark:bg-white/10 rounded-full overflow-hidden group cursor-pointer"
+                className="progress-track w-full group cursor-pointer"
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
                   const x = e.clientX - rect.left;
@@ -359,12 +359,12 @@ export function NowPlayingView({
             </div>
 
             {/* Volume */}
-            <div className="flex items-center gap-4 text-ink-dim dark:text-ink-muted pb-2">
+            <div className="flex items-center gap-4 text-ink-dim dark:text-ink-muted">
               <VolumeX size={16} />
               <input 
                 type="range" min="0" max="1" step="0.01" 
                 value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="flex-1 accent-accent h-1 bg-slate-950 dark:bg-white/10 rounded-full appearance-none outline-none"
+                className="flex-1"
               />
               <Volume2 size={16} />
             </div>

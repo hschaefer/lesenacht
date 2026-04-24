@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
-import { Search, Filter, BookOpen, Clock, ListFilter, Users, ChevronLeft, Info, Library as LibraryIcon } from 'lucide-react';
+import { Search, BookOpen, Clock, Users, ChevronLeft, Info, Library as LibraryIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
+import { CoverImage } from '../components/CoverImage';
 
 type Tab = 'books' | 'authors';
 type SortOption = 'title' | 'added';
@@ -167,10 +168,12 @@ export function LibraryView({
 
         <div className="flex flex-col md:flex-row gap-6">
           <div className="w-40 h-40 rounded-3xl overflow-hidden bg-slate-800 flex-shrink-0 shadow-xl overflow-hidden relative">
-             <img 
-              src={plexService.getThumbUrl(baseUrl || '', selectedAuthor.thumb, authToken!, 300, 300) || 'https://via.placeholder.com/300?text=Author'} 
-              className="w-full h-full object-cover"
+             <CoverImage 
+              src={plexService.getThumbUrl(baseUrl || '', selectedAuthor.thumb, authToken!, 300, 300)} 
+              className="w-full h-full"
               alt={selectedAuthor.title}
+              type="author"
+              size={48}
             />
           </div>
           <div className="flex-1 space-y-4">
@@ -373,7 +376,7 @@ function AuthorItem({
   baseUrl: string; 
   authToken: string; 
   onClick: () => void;
-  key?: string;
+  key?: any;
 }) {
   const { t } = useTranslation();
   const thumbUrl = plexService.getThumbUrl(baseUrl, author.thumb, authToken, 120, 120);
@@ -385,10 +388,12 @@ function AuthorItem({
       className="flex items-center gap-4 p-2 glass hover:bg-white/5 rounded-2xl transition-all cursor-pointer group"
     >
       <div className="w-16 h-16 rounded-full overflow-hidden bg-slate-800 flex-shrink-0 group-hover:scale-105 transition-transform border-2 border-white/5">
-        <img 
-          src={thumbUrl || 'https://via.placeholder.com/120?text=Author'} 
-          className="w-full h-full object-cover"
+        <CoverImage 
+          src={thumbUrl} 
+          className="w-full h-full"
           alt={author.title}
+          type="author"
+          size={24}
         />
       </div>
       <div className="flex-1 min-w-0 pr-4">
@@ -413,7 +418,7 @@ function LibraryItem({
   authToken: string; 
   onClick: () => void;
   onSelectAuthor?: (key: string) => void;
-  key?: string;
+  key?: any;
 }) {
   const { t } = useTranslation();
   const thumbUrl = plexService.getThumbUrl(baseUrl, book.thumb, authToken, 120, 120);
@@ -430,10 +435,12 @@ function LibraryItem({
       className="flex items-center gap-4 p-2 glass hover:bg-white/5 rounded-2xl transition-all cursor-pointer group"
     >
       <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-800 flex-shrink-0 group-hover:scale-105 transition-transform">
-        <img 
-          src={thumbUrl || 'https://via.placeholder.com/120?text=N/A'} 
-          className="w-full h-full object-cover"
+        <CoverImage 
+          src={thumbUrl} 
+          className="w-full h-full"
           alt={book.title}
+          type="book"
+          size={24}
         />
       </div>
       <div className="flex-1 min-w-0 pr-4">

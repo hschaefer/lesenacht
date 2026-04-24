@@ -4,6 +4,8 @@ import { Play, Pause, ChevronUp } from 'lucide-react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
 
+import { CoverImage } from './CoverImage';
+
 export function MiniPlayer({ onClick }: { onClick: () => void }) {
   const { currentBook, isPlaying, setPlaying, currentTime, duration } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
@@ -17,7 +19,7 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
   if (!baseUrl) return null;
 
   const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken!, 100, 100);
-  const progress = (currentTime / duration) * 100;
+  const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
   return (
     <motion.div 
@@ -28,9 +30,9 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
       onClick={onClick}
     >
       <div className="flex items-center p-3 gap-3">
-        <img 
-          src={thumbUrl || 'https://via.placeholder.com/100'} 
-          className="w-12 h-12 rounded-lg object-cover shadow-lg"
+        <CoverImage 
+          src={thumbUrl} 
+          className="w-12 h-12 rounded-lg shadow-lg"
           alt={currentBook.title}
         />
         <div className="flex-1 min-w-0">
@@ -49,7 +51,7 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
           </button>
         </div>
       </div>
-      <div className="w-full h-1 bg-slate-950 dark:bg-white/10">
+      <div className="w-full progress-track">
         <motion.div 
           className="h-full accent-bg shadow-[0_0_8px_rgba(249,115,22,0.5)]" 
           initial={{ width: 0 }}
