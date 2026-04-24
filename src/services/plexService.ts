@@ -204,5 +204,28 @@ export const plexService = {
     if (!thumb) return null;
     // Use Plex's built-in image transcoder
     return `${baseUrl}/photo/:/transcode?url=${encodeURIComponent(thumb)}&width=${width}&height=${height}&X-Plex-Token=${token}`;
+  },
+
+  async reportPlayback(baseUrl: string, token: string, params: {
+    ratingKey: string;
+    state: 'playing' | 'paused' | 'stopped';
+    time: number; // ms
+    duration: number; // ms
+  }) {
+    try {
+      const url = new URL(`${baseUrl}/:/timeline`);
+      url.searchParams.append('ratingKey', params.ratingKey);
+      url.searchParams.append('key', `/library/metadata/${params.ratingKey}`);
+      url.searchParams.append('state', params.state);
+      url.searchParams.append('time', Math.round(params.time).toString());
+      url.searchParams.append('duration', Math.round(params.duration).toString());
+      url.searchParams.append('context', 'music'); // Audiobooks are usually in music libraries
+      
+      // The fetch method in this service handles headers and proxying
+      return await this.fetch(url.toString(), token);
+    } catch (error) {
+      console.error('Failed to report playback to Plex:', error);
+      return null;
+    }
   }
 };

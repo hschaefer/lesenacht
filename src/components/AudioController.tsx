@@ -20,6 +20,56 @@ export function AudioController() {
   } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
+  const lastReportRef = useRef<number>(0);
+  const lastStateRef = useRef<'playing' | 'paused' | 'stopped' | null>(null);
+
+  // Handle Plex Playback Reporting
+  useEffect(() => {
+    if (!currentTrack || !selectedServer || !effectiveToken) return;
+
+    const connections = selectedServer?.connections || [];
+    const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
+    if (!serverBaseUrl) return;
+
+    const currentState = isPlaying ? 'playing' : 'paused';
+    const now = Date.now();
+    const shouldReport = 
+      currentState !== lastStateRef.current || 
+      (isPlaying && now - lastReportRef.current >= 10000);
+
+    if (shouldReport) {
+      plexService.reportPlayback(serverBaseUrl, effectiveToken, {
+        ratingKey: currentTrack.ratingKey,
+        state: currentState,
+        time: currentTime * 1000,
+        duration: duration * 1000
+      });
+      lastReportRef.current = now;
+      lastStateRef.current = currentState;
+    }
+  }, [isPlaying, currentTime, currentTrack, duration, selectedServer, effectiveToken]);
+
+  // Report 'stopped' when track changes or unmounts
+  useEffect(() => {
+    const track = currentTrack;
+    const server = selectedServer;
+    const token = effectiveToken;
+
+    return () => {
+      if (track && server && token && lastStateRef.current !== 'stopped') {
+        const connections = server?.connections || [];
+        const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
+        if (serverBaseUrl) {
+          plexService.reportPlayback(serverBaseUrl, token, {
+            ratingKey: track.ratingKey,
+            state: 'stopped',
+            time: usePlayerStore.getState().currentTime * 1000,
+            duration: usePlayerStore.getState().duration * 1000
+          });
+        }
+      }
+    };
+  }, [currentTrack?.ratingKey]); // Track key change triggers cleanup of old track report
 
   // Handle Sleep Timer
   useEffect(() => {
