@@ -17,28 +17,22 @@ This application is completely **vibe coded ✨ **. If thats not for you, please
 ### Prerequisites
 
 - A running Plex server with your audiobooks.
-- Node.js (v20 or higher recommended).
-- npm (usually installed with Node.js).
+- Node.js 
+- npm 
 
-### Installation
+## Deployment
 
-1. Clone this repository:
-   ```bash
-   git clone <repository-url>
-   cd lesenacht
-   ```
+### Local Deployment
+To run Lesenacht on your local machine with full proxy support:
+1. **Install**: `npm install`
+2. **Start**: `npm run dev`
+3. **Access**: Open `http://localhost:3000`
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Run the application:
-   ```bash
-   npm run dev
-   ```
-
-This will start the development server. Access the app at `http://localhost:3000`.
+### Cloudflare Pages Deployment
+This app is optimized for Cloudflare Pages:
+1. **Build Command**: `npm run build`
+2. **Output Directory**: `dist`
+3. **Backend Logic**: The `/functions` directory contains the Plex proxy logic. Cloudflare Pages detects this automatically and deploys it as a serverless function.
 
 ## Mobile App (Android)
 
@@ -62,20 +56,6 @@ This project uses **Capacitor** to turn the web application into a native Androi
   ```bash
   npm run cap:open
   ```
-
-### Native vs Web
-On Android, the app communicates directly with the Plex API, bypassing the CORS proxy used in the web version for better performance and reliability.
-
-## Self-Hosting / Deployment
-
-To build the application for production:
-
-1. Build the static assets:
-   ```bash
-   npm run build
-   ```
-
-2. The production files will be generated in the `dist/` directory. You can serve these files using any static file server (like Nginx, Apache, or `serve`).
 
 ---
 
