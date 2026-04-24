@@ -13,6 +13,13 @@ export async function onRequest(context) {
   const plexHeaders = new Headers();
   plexHeaders.set('Accept', 'application/json');
   
+  // Forward client IP if available (useful for Tautulli/Dash reporting)
+  const clientIP = request.headers.get('CF-Connecting-IP') || request.headers.get('X-Forwarded-For');
+  if (clientIP) {
+    plexHeaders.set('X-Forwarded-For', clientIP);
+    plexHeaders.set('X-Real-IP', clientIP);
+  }
+  
   // Forward all X-Plex headers
   for (const [key, value] of request.headers.entries()) {
     if (key.toLowerCase().startsWith('x-plex-')) {

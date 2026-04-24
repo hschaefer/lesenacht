@@ -122,7 +122,7 @@ export default function App() {
   return (
     <div className="fixed inset-0 flex flex-col bg-bg text-ink font-sans selection:bg-accent/30 overflow-hidden">
       <main className="flex-1 overflow-y-auto pt-safe px-4 pb-32">
-        <div className="max-w-lg mx-auto overflow-x-hidden">
+        <div className="max-w-lg md:max-w-none mx-auto overflow-x-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={selectedBookKey || selectedAuthorKey || activeTab}
@@ -139,7 +139,7 @@ export default function App() {
 
       {/* Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 glass border-t border-white/5 pb-[env(safe-area-inset-bottom)] z-40">
-        <div className="max-w-lg mx-auto grid grid-cols-3 h-16">
+        <div className="max-w-lg md:max-w-none mx-auto grid grid-cols-3 h-16">
           <NavButton 
             active={activeTab === 'home' && !selectedBookKey && !selectedAuthorKey} 
             onClick={() => { setActiveTab('home'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
@@ -165,7 +165,7 @@ export default function App() {
       <AnimatePresence>
         {currentBook && (
           <div className="fixed bottom-16 left-0 right-0 z-30">
-            <div className="max-w-lg mx-auto">
+            <div className="max-w-lg md:max-w-none mx-auto">
               <MiniPlayer onClick={() => setIsNowPlayingOpen(true)} />
             </div>
           </div>

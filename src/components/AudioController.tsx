@@ -169,7 +169,10 @@ export function AudioController() {
   if (!currentTrack || !selectedServer || !authToken) return null;
 
   const connections = selectedServer?.connections || [];
-  const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
+  // Prefer remote connections that are not relayed, then internal ones
+  const baseUrl = connections.find((c: any) => !c.local && !c.relay)?.uri 
+    || connections.find((c: any) => c.local)?.uri 
+    || connections[0]?.uri;
   
   const partKey = currentTrack?.Media?.[0]?.Part?.[0]?.key;
   

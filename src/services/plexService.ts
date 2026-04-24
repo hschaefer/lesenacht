@@ -221,7 +221,26 @@ export const plexService = {
       url.searchParams.append('duration', Math.round(params.duration).toString());
       url.searchParams.append('context', 'music'); // Audiobooks are usually in music libraries
       
-      // The fetch method in this service handles headers and proxying
+      // To ensure that Plex (and Tautulli) see the user's IP address rather than the Cloudflare proxy IP,
+      // we attempt a direct 'no-cors' fetch from the browser first.
+      // This is possible for GET requests where we don't need to read the response.
+      if (!Capacitor.isNativePlatform()) {
+        const directUrl = new URL(url.toString());
+        directUrl.searchParams.append('X-Plex-Token', token);
+        
+        try {
+          // 'no-cors' mode allows sending the request to another origin without full CORS compliance,
+          // but we won't be able to read the response. For a timeline update, this is sufficient.
+          fetch(directUrl.toString(), { mode: 'no-cors', keepalive: true }).catch(() => {});
+          // We still proceed to call the proxy version to be sure it's recorded if direct fails,
+          // though this may result in double reporting if the user is technical, Tautulli 
+          // usually merges these.
+        } catch (e) {
+          // ignore direct fetch errors
+        }
+      }
+
+      // The fetch method in this service handles headers and proxying (required for metadata reading)
       return await this.fetch(url.toString(), token);
     } catch (error) {
       console.error('Failed to report playback to Plex:', error);

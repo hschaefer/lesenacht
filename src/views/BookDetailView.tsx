@@ -235,11 +235,11 @@ export function BookDetailView({
         </div>
       </header>
 
-      <div className="flex flex-col items-center text-center space-y-4 px-4" onClick={() => setIsMenuOpen(false)}>
+      <div className="flex flex-col md:flex-row md:items-start md:text-left gap-8 px-4" onClick={() => setIsMenuOpen(false)}>
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-56 h-56 rounded-[40px] overflow-hidden shadow-2xl book-card"
+          className="w-56 h-56 md:w-64 md:h-64 rounded-[40px] overflow-hidden shadow-2xl book-card flex-shrink-0 mx-auto md:mx-0"
         >
           <img 
             src={thumbUrl || 'https://via.placeholder.com/600?text=No+Cover'} 
@@ -247,202 +247,208 @@ export function BookDetailView({
             alt={book.title} 
           />
         </motion.div>
-        <div>
-          <h1 className="text-2xl font-bold text-ink">{book.title}</h1>
-          <button 
-            onClick={() => book?.parentRatingKey && onSelectAuthor?.(book.parentRatingKey)}
-            className="accent-text font-bold uppercase tracking-widest text-xs mt-1 hover:brightness-125 transition-all"
-          >
-            {book.parentTitle}
-          </button>
-        </div>
-
-        {/* Progress Display */}
-        {hasProgress && (
-          <div className="w-full max-w-xs space-y-2">
-            <div className="flex justify-between items-end text-[10px] font-bold uppercase tracking-widest">
-              <span className="text-ink-muted">{t('library.progress')}</span>
-              <span className="accent-text">{Math.floor(progressPercent)}%</span>
-            </div>
-            <div className="h-1.5 w-full glass rounded-full overflow-hidden">
-              <div 
-                className="h-full accent-bg shadow-[0_0_8px_rgba(234,88,12,0.4)] transition-all duration-700" 
-                style={{ width: `${Math.max(2, progressPercent)}%` }}
-              />
-            </div>
-            <div className="text-[10px] font-mono text-ink-dim flex justify-between">
-              <span>{formatTime(progressData?.time || 0)}</span>
-              <span>{formatTime(progressData?.duration || 0)}</span>
-            </div>
-          </div>
-        )}
-
-        <div className="flex items-center gap-4 flex-wrap justify-center">
-          <button 
-            onClick={() => handlePlayTrack(tracks[0])}
-            className="px-8 py-3 accent-bg rounded-full font-bold text-white shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
-          >
-            <Play size={18} fill="currentColor" /> {hasProgress ? t('library.continue') : t('library.listenNow')}
-          </button>
-          
-          {(hasProgress || isFinished) && (
+        <div className="flex-1 space-y-4 text-center md:text-left">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-ink">{book.title}</h1>
             <button 
-              onClick={handleToggleComplete}
-              className={`p-3 rounded-full font-bold transition-all flex items-center gap-2 border ${
-                isFinished 
-                ? 'bg-white/5 border-white/10 text-ink-muted hover:text-ink' 
-                : 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20'
-              }`}
-              title={isFinished ? t('library.markAsUnread') : t('library.markAsFinished')}
+              onClick={() => book?.parentRatingKey && onSelectAuthor?.(book.parentRatingKey)}
+              className="accent-text font-bold uppercase tracking-widest text-xs mt-1 hover:brightness-125 transition-all"
             >
-              {isFinished ? <RotateCcw size={20} /> : <CheckCircle2 size={20} />}
-              <span className="text-xs uppercase tracking-widest">{isFinished ? t('library.reset') : t('library.finish')}</span>
+              {book.parentTitle}
             </button>
+          </div>
+
+          {/* Progress Display */}
+          {hasProgress && (
+            <div className="w-full max-w-xs mx-auto md:mx-0 space-y-2">
+              <div className="flex justify-between items-end text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-ink-dim dark:text-ink-muted">{t('library.progress')}</span>
+                <span className="accent-text">{Math.floor(progressPercent)}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-slate-950 dark:bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className="h-full accent-bg shadow-[0_0_8px_rgba(234,88,12,0.4)] transition-all duration-700" 
+                  style={{ width: `${Math.max(2, progressPercent)}%` }}
+                />
+              </div>
+              <div className="text-[10px] font-mono text-ink-dim dark:text-ink-muted flex justify-between">
+                <span>{formatTime(progressData?.time || 0)}</span>
+                <span>{formatTime(progressData?.duration || 0)}</span>
+              </div>
+            </div>
           )}
+
+          <div className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
+            <button 
+              onClick={() => handlePlayTrack(tracks[0])}
+              className="px-8 py-3 accent-bg rounded-full font-bold text-white shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+            >
+              <Play size={18} fill="currentColor" /> {hasProgress ? t('library.continue') : t('library.listenNow')}
+            </button>
+            
+            {(hasProgress || isFinished) && (
+              <button 
+                onClick={handleToggleComplete}
+                className={`p-3 rounded-full font-bold transition-all flex items-center gap-2 border ${
+                  isFinished 
+                  ? 'bg-white/5 border-white/10 text-ink-muted hover:text-ink' 
+                  : 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20'
+                }`}
+                title={isFinished ? t('library.markAsUnread') : t('library.markAsFinished')}
+              >
+                {isFinished ? <RotateCcw size={20} /> : <CheckCircle2 size={20} />}
+                <span className="text-xs uppercase tracking-widest">{isFinished ? t('library.reset') : t('library.finish')}</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Description / Summary Section */}
-      {book.summary && (
-        <section className="glass rounded-3xl p-6 space-y-3">
-          <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
-            <span className="flex items-center gap-2"><Info size={16} /> {t('library.summary')}</span>
-          </h3>
-          <p className="text-sm text-ink-dim leading-relaxed text-justify">
-            {book.summary}
-          </p>
-        </section>
-      )}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          {/* Description / Summary Section */}
+          {book.summary && (
+            <section className="glass rounded-3xl p-6 space-y-3">
+              <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+                <span className="flex items-center gap-2"><Info size={16} /> {t('library.summary')}</span>
+              </h3>
+              <p className="text-sm text-ink-dim leading-relaxed text-left">
+                {book.summary}
+              </p>
+            </section>
+          )}
 
-      {/* Bookmarks Section */}
-      {bookmarks.some(b => tracks.some(t => t.ratingKey === b.trackKey)) && (
-        <section className="glass rounded-3xl p-6">
-          <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-4 flex items-center gap-2">
-            <Bookmark size={16} /> {t('library.bookmarks')}
-          </h3>
-          <div className="space-y-2">
-            {bookmarks
-              .filter(b => tracks.some(t => t.ratingKey === b.trackKey))
-              .sort((a, b) => b.date - a.date)
-              .map((bookmark) => {
-                const track = tracks.find(t => t.ratingKey === bookmark.trackKey);
-                return (
-                  <div 
-                    key={`${bookmark.trackKey}-${bookmark.date}`}
-                    className="flex items-center justify-between p-3 rounded-xl glass group border border-white/5 hover:border-accent/20 transition-all"
-                  >
-                    <button 
-                      onClick={() => handlePlayTrack(track, bookmark.time)}
-                      className="flex-1 text-left min-w-0"
-                    >
-                      <p className="text-sm font-medium text-ink-dim group-hover:text-ink transition-colors">
-                        {bookmark.label || `${t('player.bookmarks')} at ${formatTime(bookmark.time)}`}
-                      </p>
-                      <p className="text-[10px] text-ink-muted font-mono mt-1 flex items-center gap-2">
-                        {track?.title} • {formatTime(bookmark.time)}
-                      </p>
-                    </button>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeBookmark(bookmark.trackKey, bookmark.date);
-                      }}
-                      className="p-2 text-ink-muted hover:text-red-400 opacity-40 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                );
-              })}
-          </div>
-        </section>
-      )}
-
-      <section className="glass rounded-3xl p-6">
-        <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-3 flex items-center gap-2">
-          <ListMusic size={16} /> {t('library.trackList')}
-        </h3>
-        <div className="space-y-1">
-          {tracks.map((track, i) => {
-            const isActive = currentTrack?.ratingKey === track.ratingKey;
-            const trackProgress = progressMap[track.ratingKey];
-            const trackPercent = trackProgress && trackProgress.duration > 0 
-              ? (trackProgress.time / trackProgress.duration) * 100 
-              : 0;
-            const chapters = trackChapters[track.ratingKey] || [];
-
-            return (
-              <div key={track.ratingKey} className="space-y-1">
-                <button
-                  onClick={() => handlePlayTrack(track)}
-                  className={`w-full flex items-center gap-4 p-3 rounded-xl transition-colors text-left group ${isActive ? 'bg-accent/10' : 'hover:bg-ink/5'}`}
-                >
-                  <div className="relative">
-                    <span className={`text-xs font-mono w-6 text-right block ${isActive ? 'accent-text' : 'text-ink-muted'}`}>
-                      {(i + 1).toString().padStart(2, '0')}
-                    </span>
-                    {trackPercent >= 95 && (
-                      <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-bg shadow-sm" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className={`text-sm font-medium truncate ${isActive ? 'accent-text' : 'text-ink group-hover:text-ink shadow-sm shadow-transparent'}`}>
-                      {track.title}
-                    </h4>
-                    <p className="text-[10px] text-ink-muted uppercase font-bold tracking-widest flex items-center gap-1">
-                      <Clock size={10} /> {Math.floor(track.duration / 60000)} {t('library.min')}
-                      {trackPercent > 0 && trackPercent < 95 && (
-                        <span className="ml-2 accent-text font-mono truncate">{Math.floor(trackPercent)}%</span>
-                      )}
-                      {chapters.length > 0 && (
-                        <span className="ml-2 text-ink-muted truncate">• {t('library.chaptersCount', { count: chapters.length })}</span>
-                      )}
-                    </p>
-                  </div>
-                  {isActive && isPlaying && (
-                    <div className="flex gap-0.5 h-3 items-end">
-                      {[1,2,3].map(bar => (
-                        <motion.div 
-                          key={bar}
-                          animate={{ height: ['20%', '100%', '20%'] }}
-                          transition={{ repeat: Infinity, duration: 0.5 + bar*0.1 }}
-                          className="w-1 accent-bg rounded-full"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </button>
-
-                {/* Internal Chapters if visible */}
-                {chapters.length > 0 && (
-                  <div className="pl-12 pr-4 py-2 space-y-1 border-l border-white/5 ml-3">
-                    {chapters.map((chapter, idx) => {
-                      const startTime = (chapter.startTimeOffset || chapter.start || 0) / 1000;
-                      return (
-                        <button
-                          key={`${track.ratingKey}-ch-${idx}`}
+          {/* Bookmarks Section */}
+          {bookmarks.some(b => tracks.some(t => t.ratingKey === b.trackKey)) && (
+            <section className="glass rounded-3xl p-6">
+              <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-4 flex items-center gap-2">
+                <Bookmark size={16} /> {t('library.bookmarks')}
+              </h3>
+              <div className="space-y-2">
+                {bookmarks
+                  .filter(b => tracks.some(t => t.ratingKey === b.trackKey))
+                  .sort((a, b) => b.date - a.date)
+                  .map((bookmark) => {
+                    const track = tracks.find(t => t.ratingKey === bookmark.trackKey);
+                    return (
+                      <div 
+                        key={`${bookmark.trackKey}-${bookmark.date}`}
+                        className="flex items-center justify-between p-3 rounded-xl glass group border border-white/5 hover:border-accent/20 transition-all"
+                      >
+                        <button 
+                          onClick={() => handlePlayTrack(track, bookmark.time)}
+                          className="flex-1 text-left min-w-0"
+                        >
+                          <p className="text-sm font-medium text-ink-dim group-hover:text-ink transition-colors">
+                            {bookmark.label || `${t('player.bookmarks')} at ${formatTime(bookmark.time)}`}
+                          </p>
+                          <p className="text-[10px] text-ink-muted font-mono mt-1 flex items-center gap-2">
+                            {track?.title} • {formatTime(bookmark.time)}
+                          </p>
+                        </button>
+                        <button 
                           onClick={(e) => {
                             e.stopPropagation();
-                            handlePlayTrack(track, startTime);
+                            removeBookmark(bookmark.trackKey, bookmark.date);
                           }}
-                          className="w-full flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-ink/5 transition-colors text-left group/ch"
+                          className="p-2 text-ink-muted hover:text-red-400 opacity-40 group-hover:opacity-100 transition-opacity"
                         >
-                          <span className="text-[10px] text-ink-muted font-mono truncate mr-2 group-hover/ch:text-ink-dim transition-colors">
-                            {chapter.tag || chapter.title}
-                          </span>
-                          <span className="text-[9px] font-mono text-ink-muted tabular-nums">
-                            {formatTime(startTime)}
-                          </span>
+                          <Trash2 size={16} />
                         </button>
-                      );
-                    })}
-                  </div>
-                )}
+                      </div>
+                    );
+                  })}
               </div>
-            );
-          })}
+            </section>
+          )}
         </div>
-      </section>
+
+        <section className="glass rounded-3xl p-6 h-fit">
+          <h3 className="text-[10px] uppercase tracking-widest font-bold text-ink-muted mb-3 flex items-center gap-2">
+            <ListMusic size={16} /> {t('library.trackList')}
+          </h3>
+          <div className="space-y-1">
+            {tracks.map((track, i) => {
+              const isActive = currentTrack?.ratingKey === track.ratingKey;
+              const trackProgress = progressMap[track.ratingKey];
+              const trackPercent = trackProgress && trackProgress.duration > 0 
+                ? (trackProgress.time / trackProgress.duration) * 100 
+                : 0;
+              const chapters = trackChapters[track.ratingKey] || [];
+
+              return (
+                <div key={track.ratingKey} className="space-y-1">
+                  <button
+                    onClick={() => handlePlayTrack(track)}
+                    className={`w-full flex items-center gap-4 p-3 rounded-xl transition-colors text-left group ${isActive ? 'bg-accent/10' : 'hover:bg-ink/5'}`}
+                  >
+                    <div className="relative">
+                      <span className={`text-xs font-mono w-6 text-right block ${isActive ? 'accent-text' : 'text-ink-muted'}`}>
+                        {(i + 1).toString().padStart(2, '0')}
+                      </span>
+                      {trackPercent >= 95 && (
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full border border-bg shadow-sm" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className={`text-sm font-medium truncate ${isActive ? 'accent-text' : 'text-ink group-hover:text-ink shadow-sm shadow-transparent'}`}>
+                        {track.title}
+                      </h4>
+                      <p className="text-[10px] text-ink-muted uppercase font-bold tracking-widest flex items-center gap-1">
+                        <Clock size={10} /> {Math.floor(track.duration / 60000)} {t('library.min')}
+                        {trackPercent > 0 && trackPercent < 95 && (
+                          <span className="ml-2 accent-text font-mono truncate">{Math.floor(trackPercent)}%</span>
+                        )}
+                        {chapters.length > 0 && (
+                          <span className="ml-2 text-ink-muted truncate">• {t('library.chaptersCount', { count: chapters.length })}</span>
+                        )}
+                      </p>
+                    </div>
+                    {isActive && isPlaying && (
+                      <div className="flex gap-0.5 h-3 items-end">
+                        {[1,2,3].map(bar => (
+                          <motion.div 
+                            key={bar}
+                            animate={{ height: ['20%', '100%', '20%'] }}
+                            transition={{ repeat: Infinity, duration: 0.5 + bar*0.1 }}
+                            className="w-1 accent-bg rounded-full"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </button>
+
+                  {/* Internal Chapters if visible */}
+                  {chapters.length > 0 && (
+                    <div className="pl-12 pr-4 py-2 space-y-1 border-l border-white/5 ml-3">
+                      {chapters.map((chapter, idx) => {
+                        const startTime = (chapter.startTimeOffset || chapter.start || 0) / 1000;
+                        return (
+                          <button
+                            key={`${track.ratingKey}-ch-${idx}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handlePlayTrack(track, startTime);
+                            }}
+                            className="w-full flex items-center justify-between py-1.5 px-3 rounded-lg hover:bg-ink/5 transition-colors text-left group/ch"
+                          >
+                            <span className="text-[10px] text-ink-muted font-mono truncate mr-2 group-hover/ch:text-ink-dim transition-colors">
+                              {chapter.tag || chapter.title}
+                            </span>
+                            <span className="text-[9px] font-mono text-ink-muted tabular-nums">
+                              {formatTime(startTime)}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

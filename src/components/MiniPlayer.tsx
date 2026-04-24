@@ -49,7 +49,7 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
           </button>
         </div>
       </div>
-      <div className="w-full h-1 bg-slate-200 dark:bg-white/10">
+      <div className="w-full h-1 bg-slate-950 dark:bg-white/10">
         <motion.div 
           className="h-full accent-bg shadow-[0_0_8px_rgba(249,115,22,0.5)]" 
           initial={{ width: 0 }}

@@ -61,7 +61,15 @@
 }
 
 input[type="range"] {
-  @apply cursor-pointer;
+  @apply cursor-pointer appearance-none bg-transparent;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  @apply bg-slate-950 dark:bg-white/10 rounded-full h-1;
+}
+
+input[type="range"]::-moz-range-track {
+  @apply bg-slate-950 dark:bg-white/10 rounded-full h-1;
 }
 
 .pb-safe {
