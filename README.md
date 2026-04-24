@@ -2,9 +2,9 @@
 
 Lesenacht is a progressive web app designed for streaming and listening to audiobooks, utilizing your self-hosted Plex server as the backend.
 
-##  Vibe Coded
+##  AI statement
 
-This application is completely **vibe coded ✨ **. If thats not for you, please move on.
+This application is completely **vibe coded**. If thats not for you, please move on.
 
 ## Features
 
@@ -29,11 +29,14 @@ To run Lesenacht on your local machine with full proxy support:
 3. **Access**: Open `http://localhost:3000`
 
 ### Cloudflare Pages Deployment
-This app is optimized for Cloudflare Pages:
-1. **Build Command**: `npm run build`
-2. **Output Directory**: `dist`
-3. **Backend Logic**: The `/functions` directory contains the Plex proxy logic. Cloudflare Pages detects this automatically and deploys it as a serverless function.
 
+This app is optimized for deployment on [Cloudflare Pages](https://pages.cloudflare.com/):
+
+1.  **Framework Preset**: None (or select Vite)
+2.  **Build Command**: `npm run build`
+3.  **Build Output Directory**: `dist`
+4.  **Backend Logic**: The `/functions` directory contains the Plex proxy logic. Cloudflare Pages detects this automatically and deploys it as Cloudflare Workers.
+5
 ## Mobile App (Android)
 
 This project uses **Capacitor** to turn the web application into a native Android app.
