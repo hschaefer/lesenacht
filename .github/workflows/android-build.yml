@@ -41,6 +41,7 @@ jobs:
 
       - name: Build Android APK
         run: |
+          npm run cap:assets
           npx cap sync
           cd android
           # Regenerate wrapper if it's corrupt
