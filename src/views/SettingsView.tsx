@@ -27,8 +27,8 @@ export function SettingsView({ onLogin, autoStartLogin }: { onLogin?: () => void
   const [isAuthExpanded, setIsAuthExpanded] = useState(!authToken || !selectedServer || !selectedLibrary);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  const APP_VERSION = '1.5.0';
-  const LAST_UPDATED = '2026-04-24';
+  const APP_VERSION = '1.0';
+  const LAST_UPDATED = '2026-04-28';
 
   // Trigger login if autoStartLogin is true
   useEffect(() => {
