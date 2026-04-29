@@ -4,6 +4,7 @@ import { useAuthStore, usePlayerStore } from '../store/useStore';
 import { 
   ChevronLeft, 
   Play, 
+    Pause,
   Clock, 
   Share2, 
   MoreVertical, 
@@ -36,6 +37,7 @@ export function BookDetailView({
     setCurrentBook, 
     setCurrentTrack, 
     setPlaying, 
+    currentBook,
     currentTrack, 
     isPlaying, 
     progressMap, 
@@ -176,13 +178,35 @@ export function BookDetailView({
     ? (progressData.time / progressData.duration) * 100 
     : 0;
   const isFinished = progressPercent >= 95;
-  const hasProgress = progressPercent > 0;
+  const hasProgress = !!progressData && progressData.time > 0;
+
+  const isThisBookLoaded = !!currentBook && currentBook.ratingKey === book.ratingKey;
+  const isThisBookPlaying = isThisBookLoaded && isPlaying;
 
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = Math.floor(seconds % 60);
     return `${h > 0 ? `${h}:` : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handlePrimaryAction = () => {
+    if (!tracks || tracks.length === 0) return;
+
+    // If this book is already loaded, toggle play/pause without changing track.
+    if (isThisBookLoaded) {
+      setPlaying(!isPlaying);
+      return;
+    }
+
+    const lastTrackKeyForBook = lastTrackByBook[book.ratingKey];
+    const trackToPlay =
+      hasProgress && lastTrackKeyForBook
+        ? tracks.find((t: any) => t.ratingKey === lastTrackKeyForBook) || tracks[0]
+        : tracks[0];
+
+    // setCurrentTrack() already restores saved time for the chosen track.
+    handlePlayTrack(trackToPlay);
   };
 
   const connections = selectedServer?.connections || [];
@@ -282,10 +306,17 @@ export function BookDetailView({
 
           <div className="flex items-center gap-4 flex-wrap justify-center md:justify-start">
             <button 
-              onClick={() => handlePlayTrack(tracks[0])}
+              onClick={handlePrimaryAction}
               className="px-8 py-3 accent-bg rounded-full font-bold text-white shadow-lg shadow-accent/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
             >
-              <Play size={18} fill="currentColor" /> {hasProgress ? t('library.continue') : t('library.listenNow')}
+              {isThisBookPlaying ? (
+                <Pause size={18} fill="currentColor" />
+              ) : (
+                <Play size={18} fill="currentColor" />
+              )}
+              {isThisBookPlaying
+                ? t('library.pause')
+                : (hasProgress ? t('library.continue') : t('library.listenNow'))}
             </button>
             
             {(hasProgress || isFinished) && (
