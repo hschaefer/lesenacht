@@ -14,6 +14,7 @@ import { NowPlayingView } from './views/NowPlayingView';
 import { MiniPlayer } from './components/MiniPlayer';
 import { AudioController } from './components/AudioController';
 import { useTranslation } from 'react-i18next';
+import { plexService } from './services/plexService';
 
 export default function App() {
   const { t } = useTranslation();
@@ -22,10 +23,25 @@ export default function App() {
   const [selectedAuthorKey, setSelectedAuthorKey] = useState<string | null>(null);
   const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
   const [loginInitiatedFromHome, setLoginInitiatedFromHome] = useState(false);
-  
-  const { authToken, selectedLibrary, theme, language } = useAuthStore();
+
+  const { authToken, selectedServer, setSelectedServer, selectedLibrary, theme, language } = useAuthStore();
   const { currentBook } = usePlayerStore();
   const { i18n } = useTranslation();
+
+  // Refresh server connection info on mount to get fresh URLs and access tokens.
+  // Stored server data can become stale (Plex direct URLs / managed tokens rotate),
+  // causing 500 errors until the user manually re-authenticates.
+  useEffect(() => {
+    if (!authToken || !selectedServer) return;
+    plexService.getResources(authToken)
+      .then((resources: any[]) => {
+        const fresh = resources.find((s: any) =>
+          s.clientIdentifier === selectedServer.clientIdentifier && s.provides === 'server'
+        );
+        if (fresh) setSelectedServer(fresh);
+      })
+      .catch(() => {});
+  }, []);
 
   // Sync i18n with stored language
   useEffect(() => {
