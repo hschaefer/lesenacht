@@ -31,6 +31,8 @@ export function LibraryView({
   const [loading, setLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortOption>('title');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
+  const [bookDurations, setBookDurations] = useState<Record<string, number>>({});
+  const [authorBookCounts, setAuthorBookCounts] = useState<Record<string, number>>({});
 
   const { progressMap } = usePlayerStore();
 
@@ -65,9 +67,18 @@ export function LibraryView({
     if (effectiveToken && baseUrl && selectedLibrary) {
       setLoading(true);
       if (activeTab === 'books') {
-        plexService.getLibraryItems(baseUrl, selectedLibrary.key, effectiveToken)
-          .then(items => {
+        Promise.all([
+          plexService.getLibraryItems(baseUrl, selectedLibrary.key, effectiveToken),
+          plexService.getLibraryTracks(baseUrl, selectedLibrary.key, effectiveToken),
+        ]).then(([items, tracks]) => {
             setBooks(items);
+            const durations: Record<string, number> = {};
+            for (const track of tracks) {
+              if (track.parentRatingKey && track.duration) {
+                durations[track.parentRatingKey] = (durations[track.parentRatingKey] || 0) + track.duration;
+              }
+            }
+            setBookDurations(durations);
             setLoading(false);
           })
           .catch(err => {
@@ -75,9 +86,18 @@ export function LibraryView({
             setLoading(false);
           });
       } else {
-        plexService.getLibraryArtists(baseUrl, selectedLibrary.key, effectiveToken)
-          .then(items => {
+        Promise.all([
+          plexService.getLibraryArtists(baseUrl, selectedLibrary.key, effectiveToken),
+          plexService.getLibraryItems(baseUrl, selectedLibrary.key, effectiveToken),
+        ]).then(([items, albums]) => {
             setAuthors(items);
+            const counts: Record<string, number> = {};
+            for (const album of albums) {
+              if (album.parentRatingKey) {
+                counts[album.parentRatingKey] = (counts[album.parentRatingKey] || 0) + 1;
+              }
+            }
+            setAuthorBookCounts(counts);
             setLoading(false);
           })
           .catch(err => {
@@ -201,11 +221,12 @@ export function LibraryView({
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {authorBooks.map(book => (
-                <LibraryItem 
-                  key={book.ratingKey} 
-                  book={book} 
-                  baseUrl={baseUrl || ''} 
-                  authToken={effectiveToken!} 
+                <LibraryItem
+                  key={book.ratingKey}
+                  book={book}
+                  baseUrl={baseUrl || ''}
+                  authToken={effectiveToken!}
+                  totalDuration={bookDurations[book.ratingKey]}
                   onClick={() => onSelectBook(book.ratingKey)}
                 />
               ))}
@@ -322,11 +343,12 @@ export function LibraryView({
             >
               {activeTab === 'books' ? (
                 processedBooks.map(book => (
-                  <LibraryItem 
-                    key={book.ratingKey} 
-                    book={book} 
-                    baseUrl={baseUrl || ''} 
-                    authToken={effectiveToken!} 
+                  <LibraryItem
+                    key={book.ratingKey}
+                    book={book}
+                    baseUrl={baseUrl || ''}
+                    authToken={effectiveToken!}
+                    totalDuration={bookDurations[book.ratingKey]}
                     onClick={() => onSelectBook(book.ratingKey)}
                     onSelectAuthor={(key) => {
                       const author = authors.find(a => a.ratingKey === key);
@@ -342,11 +364,12 @@ export function LibraryView({
                 ))
               ) : (
                 filteredAuthors.map(author => (
-                  <AuthorItem 
+                  <AuthorItem
                     key={author.ratingKey}
                     author={author}
                     baseUrl={baseUrl || ''}
                     authToken={effectiveToken!}
+                    bookCount={authorBookCounts[author.ratingKey]}
                     onClick={() => setSelectedAuthor(author)}
                   />
                 ))
@@ -366,15 +389,17 @@ export function LibraryView({
   );
 }
 
-function AuthorItem({ 
-  author, 
-  baseUrl, 
-  authToken, 
-  onClick 
-}: { 
-  author: any; 
-  baseUrl: string; 
-  authToken: string; 
+function AuthorItem({
+  author,
+  baseUrl,
+  authToken,
+  bookCount,
+  onClick
+}: {
+  author: any;
+  baseUrl: string;
+  authToken: string;
+  bookCount?: number;
   onClick: () => void;
   key?: any;
 }) {
@@ -399,23 +424,34 @@ function AuthorItem({
       <div className="flex-1 min-w-0 pr-4">
         <h3 className="text-sm font-bold text-ink line-clamp-1 break-all">{author.title}</h3>
         <p className="text-[10px] text-ink-muted uppercase font-bold tracking-widest mt-0.5">
-          {t('library.author')}
+          {bookCount ? t('library.booksCount', { count: bookCount }) : t('library.author')}
         </p>
       </div>
     </motion.div>
   );
 }
 
-function LibraryItem({ 
-  book, 
-  baseUrl, 
-  authToken, 
+function formatDuration(ms: number): string {
+  const totalMinutes = Math.round(ms / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${minutes}m`;
+  if (minutes === 0) return `${hours}h`;
+  return `${hours}h ${minutes}m`;
+}
+
+function LibraryItem({
+  book,
+  baseUrl,
+  authToken,
+  totalDuration,
   onClick,
   onSelectAuthor
-}: { 
-  book: any; 
-  baseUrl: string; 
-  authToken: string; 
+}: {
+  book: any;
+  baseUrl: string;
+  authToken: string;
+  totalDuration?: number;
   onClick: () => void;
   onSelectAuthor?: (key: string) => void;
   key?: any;
@@ -429,14 +465,14 @@ function LibraryItem({
   const isRead = progress && progress.time >= progress.duration * 0.95;
 
   return (
-    <motion.div 
+    <motion.div
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className="flex items-center gap-4 p-2 glass hover:bg-white/5 rounded-2xl transition-all cursor-pointer group"
     >
       <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-800 flex-shrink-0 group-hover:scale-105 transition-transform">
-        <CoverImage 
-          src={thumbUrl} 
+        <CoverImage
+          src={thumbUrl}
           className="w-full h-full"
           alt={book.title}
           type="book"
@@ -445,7 +481,7 @@ function LibraryItem({
       </div>
       <div className="flex-1 min-w-0 pr-4">
         <h3 className="text-sm font-bold text-ink line-clamp-1 break-all">{book.title}</h3>
-        <button 
+        <button
           onClick={(e) => {
             e.stopPropagation();
             if (book.parentRatingKey) onSelectAuthor?.(book.parentRatingKey);
@@ -454,10 +490,16 @@ function LibraryItem({
         >
           {book.parentTitle || t('library.author')}
         </button>
-        <div className="flex items-center gap-4 mt-1">
+        <div className="flex items-center gap-3 mt-1">
           <span className="text-[10px] text-ink-muted uppercase font-bold tracking-tighter">
             {book.leafCount ? t('library.tracks', { count: book.leafCount }) : t('library.singleTrack')}
           </span>
+          {totalDuration && totalDuration > 0 && (
+            <span className="text-[10px] text-ink-muted uppercase font-bold tracking-tighter flex items-center gap-1">
+              <Clock size={9} />
+              {formatDuration(totalDuration)}
+            </span>
+          )}
           {(isRead || (book.viewCount && book.viewCount > 0)) && (
             <span className="text-[10px] accent-text uppercase font-bold tracking-tighter">{t('library.read')}</span>
           )}

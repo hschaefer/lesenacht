@@ -147,6 +147,17 @@ export const plexService = {
     }
   },
 
+  async getLibraryTracks(baseUrl: string, sectionId: string, token: string) {
+    try {
+      const url = `${baseUrl}/library/sections/${sectionId}/all?type=10`; // type 10 = track
+      const data = await this.fetch(url, token);
+      return data?.MediaContainer?.Metadata || [];
+    } catch (error) {
+      console.error('Failed to get library tracks:', error);
+      return [];
+    }
+  },
+
   async getArtistAlbums(baseUrl: string, ratingKey: string, token: string) {
     try {
       const url = `${baseUrl}/library/metadata/${ratingKey}/children`;
