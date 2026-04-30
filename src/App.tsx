@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Home as HomeIcon, 
-  Library as LibraryIcon, 
+import {
+  Home as HomeIcon,
+  Library as LibraryIcon,
   Settings as SettingsIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -15,6 +15,7 @@ import { MiniPlayer } from './components/MiniPlayer';
 import { AudioController } from './components/AudioController';
 import { useTranslation } from 'react-i18next';
 import { plexService } from './services/plexService';
+import { App as CapApp } from '@capacitor/app';
 
 export default function App() {
   const { t } = useTranslation();
@@ -28,6 +29,9 @@ export default function App() {
   const { currentBook } = usePlayerStore();
   const { i18n } = useTranslation();
 
+  // False only when we have a stored server that needs a refresh before children fetch.
+  const [serverReady, setServerReady] = useState(!authToken || !selectedServer);
+
   // Refresh server connection info on mount to get fresh URLs and access tokens.
   // Stored server data can become stale (Plex direct URLs / managed tokens rotate),
   // causing 500 errors until the user manually re-authenticates.
@@ -40,7 +44,8 @@ export default function App() {
         );
         if (fresh) setSelectedServer(fresh);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setServerReady(true));
   }, []);
 
   // Sync i18n with stored language
@@ -128,6 +133,22 @@ export default function App() {
     }
   }, [activeTab, loginInitiatedFromHome]);
 
+  // Android back gesture/button: navigate back instead of closing app
+  useEffect(() => {
+    const listener = CapApp.addListener('backButton', () => {
+      if (isNowPlayingOpen) {
+        setIsNowPlayingOpen(false);
+      } else if (selectedBookKey) {
+        setSelectedBookKey(null);
+      } else if (selectedAuthorKey) {
+        setSelectedAuthorKey(null);
+      } else {
+        CapApp.exitApp();
+      }
+    });
+    return () => { listener.then(h => h.remove()); };
+  }, [isNowPlayingOpen, selectedBookKey, selectedAuthorKey]);
+
   return (
     <div className="fixed inset-0 flex flex-col bg-bg text-ink font-sans selection:bg-accent/30 overflow-hidden">
       <main className="flex-1 overflow-y-auto pt-safe px-4 pb-32">
@@ -140,7 +161,7 @@ export default function App() {
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
             >
-              {renderContent()}
+              {serverReady ? renderContent() : null}
             </motion.div>
           </AnimatePresence>
         </div>

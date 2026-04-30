@@ -22,10 +22,23 @@ export function AudioController() {
   const effectiveToken = selectedServer?.accessToken || authToken;
   const lastReportRef = useRef<number>(0);
   const lastStateRef = useRef<'playing' | 'paused' | 'stopped' | null>(null);
+  const isMountRef = useRef(true);
+  const hasReportedRef = useRef(false);
 
   // Handle Plex Playback Reporting
   useEffect(() => {
     if (!currentTrack || !selectedServer || !effectiveToken) return;
+
+    // On initial mount, initialize state without reporting — avoids spurious paused/stopped
+    // reports with duration=0 before audio metadata loads or server token refreshes.
+    if (isMountRef.current) {
+      isMountRef.current = false;
+      lastStateRef.current = isPlaying ? 'playing' : 'paused';
+      return;
+    }
+
+    // Skip until audio metadata is loaded (duration=0 causes 400 from Plex)
+    if (duration === 0) return;
 
     const connections = selectedServer?.connections || [];
     const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
@@ -33,8 +46,8 @@ export function AudioController() {
 
     const currentState = isPlaying ? 'playing' : 'paused';
     const now = Date.now();
-    const shouldReport = 
-      currentState !== lastStateRef.current || 
+    const shouldReport =
+      currentState !== lastStateRef.current ||
       (isPlaying && now - lastReportRef.current >= 10000);
 
     if (shouldReport) {
@@ -46,6 +59,7 @@ export function AudioController() {
       });
       lastReportRef.current = now;
       lastStateRef.current = currentState;
+      hasReportedRef.current = true;
     }
   }, [isPlaying, currentTime, currentTrack, duration, selectedServer, effectiveToken]);
 
@@ -56,7 +70,7 @@ export function AudioController() {
     const token = effectiveToken;
 
     return () => {
-      if (track && server && token && lastStateRef.current !== 'stopped') {
+      if (track && server && token && hasReportedRef.current && lastStateRef.current !== 'stopped') {
         const connections = server?.connections || [];
         const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
         if (serverBaseUrl) {
