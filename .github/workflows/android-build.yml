@@ -72,14 +72,14 @@ jobs:
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: lesenacht-debug-apk
+          name: lesenacht-debug.apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload Release APK
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v4
         with:
-          name: lesenacht-release-apk
+          name: lesenacht-release.apk
           path: android/app/build/outputs/apk/release/app-release.apk
 
       - name: Create Release
