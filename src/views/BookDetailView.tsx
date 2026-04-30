@@ -6,7 +6,6 @@ import {
   Play, 
     Pause,
   Clock, 
-  Share2, 
   MoreVertical, 
   BookOpen, 
   ListMusic,
@@ -220,9 +219,6 @@ export function BookDetailView({
           <ChevronLeft size={24} />
         </button>
         <div className="flex gap-2">
-          <button className="w-10 h-10 glass rounded-full flex items-center justify-center text-ink-dim hover:text-ink transition-colors">
-            <Share2 size={20} />
-          </button>
           <div className="relative">
             <button 
               onClick={() => setIsMenuOpen(!isMenuOpen)}
