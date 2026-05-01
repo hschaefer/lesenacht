@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
+import { downloadService, type DownloadedBook } from '../services/downloadService';
 import { motion } from 'motion/react';
-import { BookOpen, Clock, LogIn } from 'lucide-react';
+import { BookOpen, Clock, LogIn, WifiOff } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CoverImage } from '../components/CoverImage';
 
@@ -20,9 +21,18 @@ export function HomeView({
   const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
-  const { progressMap, lastTrackByBook } = usePlayerStore();
+  const { progressMap, lastTrackByBook, isNetworkConnected } = usePlayerStore();
   const [allBooks, setAllBooks] = useState<any[]>([]);
+  const [downloadedBooks, setDownloadedBooks] = useState<DownloadedBook[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    downloadService.isNative().then(native => {
+      if (native) {
+        downloadService.getDownloadedBooks().then(setDownloadedBooks).catch(() => {});
+      }
+    });
+  }, []);
 
   useEffect(() => {
     if (effectiveToken && selectedServer && selectedLibrary) {
@@ -41,16 +51,34 @@ export function HomeView({
           setAllBooks(items || []);
           setLoading(false);
         })
-        .catch(err => {
+        .catch(async (err) => {
           console.error(err);
+          try {
+            const offline = await downloadService.getDownloadedBooks();
+            setDownloadedBooks(offline);
+          } catch {}
           setLoading(false);
         });
+    } else if (!effectiveToken || !selectedLibrary) {
+      setLoading(false);
     }
   }, [effectiveToken, selectedServer, selectedLibrary]);
 
+  const effectiveBooks = useMemo(() => {
+    if (allBooks.length > 0) return allBooks;
+    return downloadedBooks.map(b => ({
+      ratingKey: b.ratingKey,
+      title: b.title,
+      parentTitle: b.parentTitle,
+      thumb: b.thumb,
+      addedAt: b.downloadedAt,
+      parentRatingKey: undefined as string | undefined,
+    }));
+  }, [allBooks, downloadedBooks]);
+
   const continueListening = useMemo(() => {
     // Get books that have local progress
-    return allBooks
+    return effectiveBooks
       .filter(book => {
         const lastTrackKey = lastTrackByBook[book.ratingKey];
         if (!lastTrackKey) return false;
@@ -69,14 +97,14 @@ export function HomeView({
         return timeB - timeA;
       })
       .slice(0, 5);
-  }, [allBooks, progressMap, lastTrackByBook]);
+  }, [effectiveBooks, progressMap, lastTrackByBook]);
 
   const recentlyAdded = useMemo(() => {
-    return [...allBooks]
+    return [...effectiveBooks]
       .sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0))
       .filter(b => !continueListening.find(cb => cb.ratingKey === b.ratingKey))
       .slice(0, 10);
-  }, [allBooks, continueListening]);
+  }, [effectiveBooks, continueListening]);
 
   if (!authToken || !selectedLibrary) {
     return (
@@ -113,6 +141,8 @@ export function HomeView({
 
   const baseUrl = selectedServer?.connections?.find((c: any) => !c.local)?.uri || selectedServer?.connections?.[0]?.uri;
 
+  const isOffline = !isNetworkConnected && downloadedBooks.length > 0;
+
   return (
     <div className="space-y-8 pb-10">
       <header className="flex items-center justify-between">
@@ -120,6 +150,12 @@ export function HomeView({
           <h1 className="text-3xl font-light tracking-tight text-ink">{t('home.title')}</h1>
           <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">{t('home.subtitle')}</p>
         </div>
+        {isOffline && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-xs font-bold">
+            <WifiOff size={13} />
+            <span>Offline</span>
+          </div>
+        )}
       </header>
 
       {loading ? (

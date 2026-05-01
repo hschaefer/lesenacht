@@ -41,7 +41,7 @@ export function LibraryView({
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [isNative, setIsNative] = useState(false);
 
-  const { progressMap, activeDownloads, downloadedTracks, removeDownloadedBook } = usePlayerStore();
+  const { progressMap, activeDownloads, downloadedTracks, removeDownloadedBook, isNetworkConnected } = usePlayerStore();
 
   const connections = selectedServer?.connections || [];
   const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
@@ -133,6 +133,12 @@ export function LibraryView({
   useEffect(() => {
     downloadService.isNative().then(setIsNative);
   }, []);
+
+  useEffect(() => {
+    if (!isNetworkConnected) {
+      setActiveTab('offline');
+    }
+  }, [isNetworkConnected]);
 
   const loadDownloads = useCallback(async () => {
     if (activeTab !== 'offline') return;

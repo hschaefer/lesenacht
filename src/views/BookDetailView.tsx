@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { CoverImage } from '../components/CoverImage';
 import { DownloadButton } from '../components/DownloadButton';
+import { downloadService } from '../services/downloadService';
 
 export function BookDetailView({ 
   ratingKey, 
@@ -108,8 +109,33 @@ export function BookDetailView({
           }
           setLoading(false);
         })
-        .catch(err => {
+        .catch(async (err) => {
           console.error(err);
+          try {
+            const offlineBooks = await downloadService.getDownloadedBooks();
+            const offlineBook = offlineBooks.find(b => b.ratingKey === ratingKey);
+            if (offlineBook) {
+              setBook({
+                ratingKey: offlineBook.ratingKey,
+                title: offlineBook.title,
+                parentTitle: offlineBook.parentTitle,
+                parentRatingKey: '',
+                thumb: offlineBook.thumb || '',
+                summary: offlineBook.summary || '',
+              });
+              setTracks(offlineBook.tracks.map(t => ({
+                ratingKey: t.ratingKey,
+                title: t.title,
+                duration: t.duration,
+                index: t.index,
+                parentTitle: offlineBook.title,
+                grandparentTitle: offlineBook.parentTitle,
+                Media: [],
+              })));
+            }
+          } catch (offlineErr) {
+            console.error('Offline fallback failed:', offlineErr);
+          }
           setLoading(false);
         });
     }

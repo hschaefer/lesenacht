@@ -16,6 +16,7 @@ import { MiniPlayer } from './components/MiniPlayer';
 import { AudioController } from './components/AudioController';
 import { useTranslation } from 'react-i18next';
 import { plexService } from './services/plexService';
+import { downloadService } from './services/downloadService';
 import { App as CapApp } from '@capacitor/app';
 
 export default function App() {
@@ -39,15 +40,21 @@ export default function App() {
   // causing 500 errors until the user manually re-authenticates.
   useEffect(() => {
     if (!authToken || !selectedServer) return;
-    plexService.getResources(authToken)
-      .then((resources: any[]) => {
+    (async () => {
+      try {
+        const networkStatus = await downloadService.getNetworkStatus();
+        if (!networkStatus.connected) {
+          setServerReady(true);
+          return;
+        }
+        const resources: any[] = await plexService.getResources(authToken);
         const fresh = resources.find((s: any) =>
           s.clientIdentifier === selectedServer.clientIdentifier && s.provides === 'server'
         );
         if (fresh) setSelectedServer(fresh);
-      })
-      .catch(() => {})
-      .finally(() => setServerReady(true));
+      } catch {}
+      setServerReady(true);
+    })();
   }, []);
 
   // Sync i18n with stored language
