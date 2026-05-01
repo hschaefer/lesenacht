@@ -194,7 +194,7 @@ export default function App() {
       {/* Mini Player */}
       <AnimatePresence>
         {currentBook && (
-          <div className="fixed bottom-16 left-0 right-0 z-30">
+          <div className="fixed left-0 right-0 z-30" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
             <div className="max-w-lg md:max-w-none mx-auto">
               <MiniPlayer onClick={() => setIsNowPlayingOpen(true)} />
             </div>
