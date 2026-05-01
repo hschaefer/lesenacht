@@ -163,6 +163,7 @@ export const usePlayerStore = create<PlayerState>()(
         bookmarks: state.bookmarks,
         progressMap: state.progressMap,
         lastTrackByBook: state.lastTrackByBook,
+        downloadedTracks: state.downloadedTracks,
       }),
     }
   )

@@ -1,6 +1,7 @@
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 import { Network } from '@capacitor/network';
+import { Capacitor } from '@capacitor/core';
 import { plexService } from './plexService';
 
 export interface DownloadedTrack {
@@ -257,7 +258,7 @@ export const downloadService = {
       path: filePath,
       directory: Directory.Data,
     });
-    return result.uri;
+    return Capacitor.convertFileSrc(result.uri);
   },
 
   async getAvailableSpace(): Promise<number> {
