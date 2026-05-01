@@ -1,6 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+interface DownloadProgress {
+  bookKey: string;
+  trackIndex: number;
+  totalTracks: number;
+  progress: number;
+  status: 'downloading' | 'completed' | 'error';
+}
+
+interface DownloadedTrackInfo {
+  ratingKey: string;
+  localPath: string;
+  downloadedAt: number;
+}
+
 interface PlayerState {
   isPlaying: boolean;
   currentBook: any | null;
@@ -14,7 +28,11 @@ interface PlayerState {
   progressMap: Record<string, { time: number; duration: number }>; // Map track ratingKey to its last position and total duration
   lastTrackByBook: Record<string, string>; // Map book ratingKey to last played track ratingKey
   sleepTimerEnd: number | null; // Timestamp when player should stop
-  
+  isNetworkConnected: boolean;
+  activeDownloads: Record<string, DownloadProgress>; // Map bookKey to download progress
+  downloadedTracks: Record<string, DownloadedTrackInfo>; // Map track ratingKey to download info
+  isOfflineMode: boolean;
+
   setPlaying: (playing: boolean) => void;
   setCurrentBook: (book: any) => void;
   setCurrentTrack: (track: any) => void;
@@ -29,6 +47,12 @@ interface PlayerState {
   resetProgress: (bookKey: string) => void;
   markAsFinished: (bookKey: string, trackKey: string, duration: number) => void;
   setSleepTimer: (minutes: number | null) => void;
+  setNetworkConnected: (connected: boolean) => void;
+  setDownloadProgress: (bookKey: string, progress: DownloadProgress) => void;
+  clearDownloadProgress: (bookKey: string) => void;
+  addDownloadedTrack: (trackKey: string, info: DownloadedTrackInfo) => void;
+  removeDownloadedBook: (bookKey: string, trackKeys: string[]) => void;
+  setOfflineMode: (offline: boolean) => void;
 }
 
 export const usePlayerStore = create<PlayerState>()(
@@ -46,7 +70,11 @@ export const usePlayerStore = create<PlayerState>()(
       progressMap: {},
       lastTrackByBook: {},
       sleepTimerEnd: null,
-      
+      isNetworkConnected: true,
+      activeDownloads: {},
+      downloadedTracks: {},
+      isOfflineMode: false,
+
       setPlaying: (playing) => set({ isPlaying: playing }),
       setCurrentBook: (book) => set({ currentBook: book }),
       setCurrentTrack: (track) => {
@@ -55,8 +83,8 @@ export const usePlayerStore = create<PlayerState>()(
           if (track && state.currentBook) {
             newLastTracks[state.currentBook.ratingKey] = track.ratingKey;
           }
-          
-          return { 
+
+          return {
             currentTrack: track,
             lastTrackByBook: newLastTracks,
             // When track changes, load stored time for this track or default to 0
@@ -82,27 +110,47 @@ export const usePlayerStore = create<PlayerState>()(
       resetProgress: (bookKey) => set((state) => {
         const lastTrackKey = state.lastTrackByBook[bookKey];
         if (!lastTrackKey) return state;
-        
+
         const newProgressMap = { ...state.progressMap };
         delete newProgressMap[lastTrackKey];
-        
+
         return { progressMap: newProgressMap };
       }),
       markAsFinished: (bookKey, trackKey, duration) => set((state) => {
         const newLastTracks = { ...state.lastTrackByBook };
         newLastTracks[bookKey] = trackKey;
-        
+
         const newProgressMap = { ...state.progressMap };
         newProgressMap[trackKey] = { time: duration, duration };
-        
-        return { 
+
+        return {
           lastTrackByBook: newLastTracks,
           progressMap: newProgressMap
         };
       }),
-      setSleepTimer: (minutes) => set({ 
-        sleepTimerEnd: minutes ? Date.now() + (minutes * 60 * 1000) : null 
+      setSleepTimer: (minutes) => set({
+        sleepTimerEnd: minutes ? Date.now() + (minutes * 60 * 1000) : null
       }),
+      setNetworkConnected: (connected) => set({ isNetworkConnected: connected }),
+      setDownloadProgress: (bookKey, progress) => set((state) => ({
+        activeDownloads: { ...state.activeDownloads, [bookKey]: progress }
+      })),
+      clearDownloadProgress: (bookKey) => set((state) => {
+        const newDownloads = { ...state.activeDownloads };
+        delete newDownloads[bookKey];
+        return { activeDownloads: newDownloads };
+      }),
+      addDownloadedTrack: (trackKey, info) => set((state) => ({
+        downloadedTracks: { ...state.downloadedTracks, [trackKey]: info }
+      })),
+      removeDownloadedBook: (bookKey, trackKeys) => set((state) => {
+        const newDownloadedTracks = { ...state.downloadedTracks };
+        for (const key of trackKeys) {
+          delete newDownloadedTracks[key];
+        }
+        return { downloadedTracks: newDownloadedTracks };
+      }),
+      setOfflineMode: (offline) => set({ isOfflineMode: offline }),
     }),
     {
       name: 'plex-audio-player-storage',

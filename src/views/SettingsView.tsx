@@ -5,7 +5,7 @@ import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
-export function SettingsView({ onLogin, autoStartLogin }: { onLogin?: () => void, autoStartLogin?: boolean }) {
+export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onLogin?: () => void, autoStartLogin?: boolean, onShowDownloads?: () => void }) {
   const { t, i18n } = useTranslation();
   const { 
     authToken, 

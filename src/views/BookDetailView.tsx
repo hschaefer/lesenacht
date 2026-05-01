@@ -19,6 +19,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { CoverImage } from '../components/CoverImage';
+import { DownloadButton } from '../components/DownloadButton';
 
 export function BookDetailView({ 
   ratingKey, 
@@ -316,11 +317,11 @@ export function BookDetailView({
             </button>
             
             {(hasProgress || isFinished) && (
-              <button 
+              <button
                 onClick={handleToggleComplete}
                 className={`p-3 rounded-full font-bold transition-all flex items-center gap-2 border ${
-                  isFinished 
-                  ? 'bg-white/5 border-white/10 text-ink-muted hover:text-ink' 
+                  isFinished
+                  ? 'bg-white/5 border-white/10 text-ink-muted hover:text-ink'
                   : 'bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20'
                 }`}
                 title={isFinished ? t('library.markAsUnread') : t('library.markAsFinished')}
@@ -328,6 +329,10 @@ export function BookDetailView({
                 {isFinished ? <RotateCcw size={20} /> : <CheckCircle2 size={20} />}
                 <span className="text-xs uppercase tracking-widest">{isFinished ? t('library.reset') : t('library.finish')}</span>
               </button>
+            )}
+
+            {book && tracks.length > 0 && (
+              <DownloadButton book={book} tracks={tracks} className="mt-2 md:mt-0" />
             )}
           </div>
         </div>

@@ -1,6 +1,8 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
+import { downloadService } from '../services/downloadService';
+import { Network } from '@capacitor/network';
 
 export function AudioController() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -16,7 +18,11 @@ export function AudioController() {
     setPlaying,
     saveProgress,
     sleepTimerEnd,
-    setSleepTimer
+    setSleepTimer,
+    downloadedTracks,
+    isNetworkConnected,
+    setNetworkConnected,
+    isOfflineMode,
   } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
@@ -24,6 +30,76 @@ export function AudioController() {
   const lastStateRef = useRef<'playing' | 'paused' | 'stopped' | null>(null);
   const isMountRef = useRef(true);
   const hasReportedRef = useRef(false);
+  const [audioSrc, setAudioSrc] = useState<string>('');
+  const [isNative, setIsNative] = useState(false);
+
+  // Network status monitoring
+  useEffect(() => {
+    const checkNetwork = async () => {
+      const status = await downloadService.getNetworkStatus();
+      setNetworkConnected(status.connected);
+    };
+    
+    checkNetwork();
+    
+    const listener = Network.addListener('networkStatusChange', (status) => {
+      setNetworkConnected(status.connected);
+    });
+    
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [setNetworkConnected]);
+
+  // Check if native platform
+  useEffect(() => {
+    downloadService.isNative().then(setIsNative);
+  }, []);
+
+  // Determine audio source - prefer local file when offline or when downloaded
+  useEffect(() => {
+    if (!currentTrack) {
+      setAudioSrc('');
+      return;
+    }
+
+    const determineSource = async () => {
+      // Check if we have a downloaded version of this track
+      const downloadedInfo = downloadedTracks[currentTrack.ratingKey];
+      
+      if (downloadedInfo && isNative) {
+        try {
+          const localUri = await downloadService.getLocalFileUrl(downloadedInfo.localPath);
+          setAudioSrc(localUri);
+          return;
+        } catch (e) {
+          console.warn('Failed to get local file URI, falling back to streaming:', e);
+        }
+      }
+
+      // Fall back to streaming if network is available
+      if ((!isOfflineMode && isNetworkConnected) || !downloadedInfo) {
+        if (selectedServer && effectiveToken) {
+          const connections = selectedServer?.connections || [];
+          const baseUrl = connections.find((c: any) => !c.local && !c.relay)?.uri 
+            || connections.find((c: any) => c.local)?.uri 
+            || connections[0]?.uri;
+          const partKey = currentTrack?.Media?.[0]?.Part?.[0]?.key;
+          
+          if (baseUrl && partKey) {
+            const streamUrl = plexService.getMediaUrl(baseUrl, partKey, effectiveToken);
+            setAudioSrc(streamUrl);
+            return;
+          }
+        }
+      }
+
+      // No source available
+      setAudioSrc('');
+    };
+
+    determineSource();
+  }, [currentTrack?.ratingKey, downloadedTracks, isNetworkConnected, isOfflineMode, selectedServer, effectiveToken, isNative]);
 
   // Handle Plex Playback Reporting
   useEffect(() => {
@@ -176,24 +252,21 @@ export function AudioController() {
     }
   };
 
-  if (!currentTrack || !selectedServer || !authToken) return null;
+  if (!currentTrack) return null;
 
-  const connections = selectedServer?.connections || [];
-  // Prefer remote connections that are not relayed, then internal ones
-  const baseUrl = connections.find((c: any) => !c.local && !c.relay)?.uri 
-    || connections.find((c: any) => c.local)?.uri 
-    || connections[0]?.uri;
-  
-  const partKey = currentTrack?.Media?.[0]?.Part?.[0]?.key;
-  
-  if (!baseUrl || !partKey) return null;
-
-  const streamUrl = plexService.getMediaUrl(baseUrl, partKey, effectiveToken!);
+  // If no audio source and we need network, show warning
+  if (!audioSrc && !isNetworkConnected && !downloadedTracks[currentTrack.ratingKey]) {
+    return (
+      <div className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-4 py-2 rounded-lg shadow-lg z-50">
+        <p className="text-sm font-medium">Offline - This track is not downloaded</p>
+      </div>
+    );
+  }
 
   return (
     <audio
       ref={audioRef}
-      src={streamUrl}
+      src={audioSrc}
       onTimeUpdate={handleTimeUpdate}
       onLoadedMetadata={handleLoadedMetadata}
       onCanPlay={handleCanPlay}

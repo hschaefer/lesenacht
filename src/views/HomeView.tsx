@@ -6,14 +6,16 @@ import { BookOpen, Clock, LogIn } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CoverImage } from '../components/CoverImage';
 
-export function HomeView({ 
+export function HomeView({
   onSelectBook,
   onSelectAuthor,
-  onLogin
-}: { 
+  onLogin,
+  onShowDownloads
+}: {
   onSelectBook: (key: string) => void;
   onSelectAuthor?: (key: string) => void;
   onLogin?: () => void;
+  onShowDownloads?: () => void;
 }) {
   const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();

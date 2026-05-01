@@ -10,14 +10,16 @@ type Tab = 'books' | 'authors';
 type SortOption = 'title' | 'added';
 type FilterOption = 'all' | 'read' | 'unread';
 
-export function LibraryView({ 
-  onSelectBook, 
-  initialAuthorKey, 
-  onAuthorBack 
-}: { 
-  onSelectBook: (key: string) => void; 
+export function LibraryView({
+  onSelectBook,
+  initialAuthorKey,
+  onAuthorBack,
+  onShowDownloads
+}: {
+  onSelectBook: (key: string) => void;
   initialAuthorKey?: string | null;
   onAuthorBack?: () => void;
+  onShowDownloads?: () => void;
 }) {
   const { t } = useTranslation();
   const { authToken, selectedServer, selectedLibrary } = useAuthStore();
