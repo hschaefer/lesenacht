@@ -145,49 +145,34 @@ export function DownloadButton({ book, tracks, className }: DownloadButtonProps)
 
   if (isDownloaded) {
     return (
-      <div className={cn("flex items-center gap-2", className)}>
-        <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm">
-          <Check className="w-4 h-4" />
-          <span>Downloaded</span>
-        </div>
-        <button
-          onClick={handleDelete}
-          className={cn(
-            "p-2 rounded-lg transition-colors",
-            showConfirmDelete
-              ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-              : "hover:bg-zinc-100 text-zinc-500 dark:hover:bg-zinc-800 dark:text-zinc-400"
-          )}
-          title={showConfirmDelete ? "Confirm delete" : "Delete download"}
-        >
-          {showConfirmDelete ? (
-            <X className="w-4 h-4" />
-          ) : (
-            <Trash2 className="w-4 h-4" />
-          )}
-        </button>
-      </div>
+      <button
+        onClick={handleDelete}
+        className={cn(
+          "flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all hover:scale-105 active:scale-95 border",
+          showConfirmDelete
+            ? "bg-red-500/10 border-red-500/20 text-red-500 hover:bg-red-500/20"
+            : "bg-green-500/10 border-green-500/20 text-green-500 hover:bg-green-500/20",
+          className
+        )}
+        title={showConfirmDelete ? "Confirm delete" : "Delete download"}
+      >
+        {showConfirmDelete ? (
+          <><Trash2 className="w-4 h-4" /><span>Confirm delete</span></>
+        ) : (
+          <><Check className="w-4 h-4" /><span>Saved Offline</span></>
+        )}
+      </button>
     );
   }
 
   if (isDownloading) {
     return (
-      <div className={cn("flex items-center gap-3", className)}>
-        <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span>
-            Downloading {downloadProgress.trackIndex + 1}/{downloadProgress.totalTracks} ({progressPercent}%)
-          </span>
-        </div>
-        <button
-          onClick={() => {
-            // Cancel not implemented - would need AbortController
-            clearDownloadProgress(book.ratingKey);
-          }}
-          className="p-2 rounded-lg hover:bg-zinc-100 text-zinc-500 dark:hover:bg-zinc-800 dark:text-zinc-400 transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
+      <div className={cn(
+        "flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm border bg-white/5 border-white/10 text-ink-dim",
+        className
+      )}>
+        <Loader2 className="w-4 h-4 animate-spin" />
+        <span>{downloadProgress.trackIndex + 1}/{downloadProgress.totalTracks} ({progressPercent}%)</span>
       </div>
     );
   }
@@ -197,14 +182,14 @@ export function DownloadButton({ book, tracks, className }: DownloadButtonProps)
       onClick={handleDownload}
       disabled={!selectedServer || tracks.length === 0}
       className={cn(
-        "flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-        "bg-zinc-100 hover:bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:text-zinc-300",
-        "disabled:opacity-50 disabled:cursor-not-allowed",
+        "flex items-center gap-2 px-6 py-3 rounded-full font-bold text-sm transition-all hover:scale-105 active:scale-95",
+        "border border-white/10 bg-white/5 text-ink-dim hover:text-ink hover:bg-white/10",
+        "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
         className
       )}
     >
       <Download className="w-4 h-4" />
-      <span>Download for offline</span>
+      <span>Save Offline</span>
     </button>
   );
 }

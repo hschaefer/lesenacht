@@ -248,7 +248,7 @@ export function BookDetailView({
                     onClick={handleDownload}
                     className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
                   >
-                    <Download size={16} /> {t('library.downloadBook')}
+                    <Download size={16} /> {t('library.exportFiles')}
                   </button>
                 </motion.div>
               )}
@@ -332,7 +332,7 @@ export function BookDetailView({
             )}
 
             {book && tracks.length > 0 && (
-              <DownloadButton book={book} tracks={tracks} className="mt-2 md:mt-0" />
+              <DownloadButton book={book} tracks={tracks} />
             )}
           </div>
         </div>
