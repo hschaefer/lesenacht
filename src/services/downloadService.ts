@@ -134,51 +134,40 @@ export const downloadService = {
       try {
         onProgress?.(i, tracks.length, 0);
 
-        // Download using fetch and write to filesystem
-        const response = await fetch(downloadUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const totalBytes = parseInt(response.headers.get('content-length') || '0');
-        const reader = response.body?.getReader();
-
-        if (!reader) {
-          throw new Error('No response body');
-        }
-
-        // Read chunks and track progress
-        const chunks: Uint8Array[] = [];
-        let receivedBytes = 0;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          receivedBytes += value.length;
-
-          if (totalBytes > 0) {
-            const progress = Math.round((receivedBytes / totalBytes) * 100);
-            onProgress?.(i, tracks.length, progress);
+        // Listen for progress
+        const progressListener = await Filesystem.addListener('progress', (progress) => {
+          if (progress.url === downloadUrl) {
+            // Note: Native progress ranges might vary by platform, sometimes bytes, sometimes percent
+            // Using bytes if total is provided, otherwise percent
+            let progressPercent = 0;
+            if (progress.bytes && progress.contentLength && progress.contentLength > 0) {
+              progressPercent = Math.round((progress.bytes / progress.contentLength) * 100);
+            }
+            onProgress?.(i, tracks.length, progressPercent);
           }
-        }
-
-        // Combine chunks
-        const allChunks = new Uint8Array(receivedBytes);
-        let position = 0;
-        for (const chunk of chunks) {
-          allChunks.set(chunk, position);
-          position += chunk.length;
-        }
-
-        // Convert to base64 for Capacitor Filesystem
-        const base64 = btoa(String.fromCharCode(...allChunks));
-
-        await Filesystem.writeFile({
-          path: filePath,
-          data: base64,
-          directory: Directory.Data,
         });
+
+        // Download using Capacitor native downloader
+        const result = await Filesystem.downloadFile({
+          url: downloadUrl,
+          path: filePath,
+          directory: Directory.Data,
+          progress: true // Enable progress events
+        });
+        
+        // Remove listener after download
+        await progressListener.remove();
+        
+        let fileSize = 0;
+        try {
+          const stat = await Filesystem.stat({
+            path: filePath,
+            directory: Directory.Data,
+          });
+          fileSize = stat.size;
+        } catch (e) {
+          console.warn('Failed to get file size:', e);
+        }
 
         downloadedTracks.push({
           ratingKey: track.ratingKey,
@@ -189,7 +178,7 @@ export const downloadService = {
           index: track.index || i + 1,
           localPath: filePath,
           downloadedAt: Date.now(),
-          fileSize: receivedBytes,
+          fileSize: fileSize,
         });
 
         onProgress?.(i, tracks.length, 100);
