@@ -55,90 +55,127 @@ export function BookDetailView({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (effectiveToken && selectedServer) {
-      const connections = selectedServer?.connections || [];
-      const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
-      
-      if (!baseUrl) {
-        setLoading(false);
+    let isMounted = true;
+
+    const loadBook = async () => {
+      setLoading(true);
+
+      // First, always try to load from offline/downloads (works offline)
+      try {
+        const offlineBooks = await downloadService.getDownloadedBooks();
+        const offlineBook = offlineBooks.find(b => b.ratingKey === ratingKey);
+        if (offlineBook && isMounted) {
+          // Resolve local cover image path to WebView-usable URL if available
+          let thumbUrl = offlineBook.thumb || '';
+          if (offlineBook.localThumb) {
+            try {
+              thumbUrl = await downloadService.getLocalFileUrl(offlineBook.localThumb);
+            } catch (e) {
+              console.warn('Failed to resolve local thumb URL:', e);
+            }
+          }
+
+          setBook({
+            ratingKey: offlineBook.ratingKey,
+            title: offlineBook.title,
+            parentTitle: offlineBook.parentTitle,
+            parentRatingKey: '',
+            thumb: thumbUrl,
+            summary: offlineBook.summary || '',
+          });
+          setTracks(offlineBook.tracks.map(t => ({
+            ratingKey: t.ratingKey,
+            title: t.title,
+            duration: t.duration,
+            index: t.index,
+            parentTitle: offlineBook.title,
+            grandparentTitle: offlineBook.parentTitle,
+            Media: [],
+          })));
+          setLoading(false);
+          return; // Book found offline, no need to fetch from server
+        }
+      } catch (offlineErr) {
+        console.error('Failed to load offline book:', offlineErr);
+      }
+
+      // Not found offline, try to fetch from server (requires auth)
+      if (!effectiveToken || !selectedServer) {
+        if (isMounted) {
+          setBook(null);
+          setLoading(false);
+        }
         return;
       }
-      
-      setLoading(true);
-      
-      // Fetch tracks
-      const tracksPromise = plexService.getItemDetails(baseUrl, ratingKey, effectiveToken);
-      // Fetch album/book metadata specifically for the summary
-      const metadataPromise = plexService.getItemMetadata(baseUrl, ratingKey, effectiveToken);
-      
-      Promise.all([tracksPromise, metadataPromise])
-        .then(([metadata, bookMeta]) => {
-          setTracks(metadata);
-          
-          if (bookMeta) {
-            setBook({
-              ratingKey: ratingKey,
-              title: bookMeta.title || 'Unknown Title',
-              parentTitle: bookMeta.parentTitle || 'Unknown Author',
-              parentRatingKey: bookMeta.parentRatingKey || '',
-              thumb: bookMeta.thumb || '',
-              summary: bookMeta.summary || ''
-            });
- 
-            // If there's only one track, fetch its chapters immediately
-            if (metadata.length === 1) {
-              plexService.getTrackMetadata(baseUrl, metadata[0].ratingKey, effectiveToken)
-                .then(trackMeta => {
-                  if (trackMeta?.Chapter) {
-                    setTrackChapters({ [metadata[0].ratingKey]: trackMeta.Chapter });
-                  }
-                });
-            }
-          } else if (metadata && metadata.length > 0) {
-            // Fallback to track data if metadata fetch fails
-            setBook({
-              ratingKey: ratingKey,
-              title: metadata[0]?.parentTitle || metadata[0]?.title || 'Unknown Title',
-              parentTitle: metadata[0]?.grandparentTitle || 'Unknown Author',
-              parentRatingKey: metadata[0]?.grandparentRatingKey || '',
-              thumb: metadata[0]?.parentThumb || metadata[0]?.thumb || '',
-              summary: metadata[0]?.summary || ''
-            });
-          } else {
-            setBook(null);
-          }
+
+      const connections = selectedServer?.connections || [];
+      const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
+
+      if (!baseUrl) {
+        if (isMounted) {
+          setBook(null);
           setLoading(false);
-        })
-        .catch(async (err) => {
-          console.error(err);
-          try {
-            const offlineBooks = await downloadService.getDownloadedBooks();
-            const offlineBook = offlineBooks.find(b => b.ratingKey === ratingKey);
-            if (offlineBook) {
-              setBook({
-                ratingKey: offlineBook.ratingKey,
-                title: offlineBook.title,
-                parentTitle: offlineBook.parentTitle,
-                parentRatingKey: '',
-                thumb: offlineBook.thumb || '',
-                summary: offlineBook.summary || '',
+        }
+        return;
+      }
+
+      try {
+        // Fetch tracks
+        const metadata = await plexService.getItemDetails(baseUrl, ratingKey, effectiveToken);
+        // Fetch album/book metadata specifically for the summary
+        const bookMeta = await plexService.getItemMetadata(baseUrl, ratingKey, effectiveToken);
+
+        if (!isMounted) return;
+
+        setTracks(metadata);
+
+        if (bookMeta) {
+          setBook({
+            ratingKey: ratingKey,
+            title: bookMeta.title || 'Unknown Title',
+            parentTitle: bookMeta.parentTitle || 'Unknown Author',
+            parentRatingKey: bookMeta.parentRatingKey || '',
+            thumb: bookMeta.thumb || '',
+            summary: bookMeta.summary || ''
+          });
+
+          // If there's only one track, fetch its chapters immediately
+          if (metadata.length === 1) {
+            plexService.getTrackMetadata(baseUrl, metadata[0].ratingKey, effectiveToken)
+              .then(trackMeta => {
+                if (trackMeta?.Chapter && isMounted) {
+                  setTrackChapters({ [metadata[0].ratingKey]: trackMeta.Chapter });
+                }
               });
-              setTracks(offlineBook.tracks.map(t => ({
-                ratingKey: t.ratingKey,
-                title: t.title,
-                duration: t.duration,
-                index: t.index,
-                parentTitle: offlineBook.title,
-                grandparentTitle: offlineBook.parentTitle,
-                Media: [],
-              })));
-            }
-          } catch (offlineErr) {
-            console.error('Offline fallback failed:', offlineErr);
           }
+        } else if (metadata && metadata.length > 0) {
+          // Fallback to track data if metadata fetch fails
+          setBook({
+            ratingKey: ratingKey,
+            title: metadata[0]?.parentTitle || metadata[0]?.title || 'Unknown Title',
+            parentTitle: metadata[0]?.grandparentTitle || 'Unknown Author',
+            parentRatingKey: metadata[0]?.grandparentRatingKey || '',
+            thumb: metadata[0]?.parentThumb || metadata[0]?.thumb || '',
+            summary: metadata[0]?.summary || ''
+          });
+        } else {
+          setBook(null);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch book from server:', err);
+        if (isMounted) {
+          setBook(null);
           setLoading(false);
-        });
-    }
+        }
+      }
+    };
+
+    loadBook();
+
+    return () => {
+      isMounted = false;
+    };
   }, [ratingKey, effectiveToken, selectedServer]);
 
   const handlePlayTrack = (track: any, startTime = 0) => {
