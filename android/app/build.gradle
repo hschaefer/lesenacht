@@ -1,5 +1,11 @@
 apply plugin: 'com.android.application'
 
+import groovy.json.JsonSlurper
+
+def packageJson = new JsonSlurper().parse(file('../../package.json'))
+def appVersionName = packageJson.version
+def appVersionCode = appVersionName.tokenize('.').inject(0) { acc, part -> acc * 100 + part.toInteger() }
+
 android {
     namespace = "io.lesenacht.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -7,8 +13,8 @@ android {
         applicationId "io.lesenacht.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 2
-        versionName "1.5.0"
+        versionCode appVersionCode
+        versionName appVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

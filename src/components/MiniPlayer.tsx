@@ -11,14 +11,12 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
   const { authToken, selectedServer } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
 
-  if (!currentBook || !selectedServer) return null;
+  if (!currentBook) return null;
 
   const connections = selectedServer?.connections || [];
-  const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
-  
-  if (!baseUrl) return null;
+  const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri || '';
 
-  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken!, 100, 100);
+  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken || '', 100, 100);
   const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
   return (

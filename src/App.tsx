@@ -11,10 +11,12 @@ import { LibraryView } from './views/LibraryView';
 import { SettingsView } from './views/SettingsView';
 import { BookDetailView } from './views/BookDetailView';
 import { NowPlayingView } from './views/NowPlayingView';
+import { DownloadsView } from './views/DownloadsView';
 import { MiniPlayer } from './components/MiniPlayer';
 import { AudioController } from './components/AudioController';
 import { useTranslation } from 'react-i18next';
 import { plexService } from './services/plexService';
+import { downloadService, syncDownloadsToStore } from './services/downloadService';
 import { App as CapApp } from '@capacitor/app';
 
 export default function App() {
@@ -24,6 +26,7 @@ export default function App() {
   const [selectedAuthorKey, setSelectedAuthorKey] = useState<string | null>(null);
   const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
   const [loginInitiatedFromHome, setLoginInitiatedFromHome] = useState(false);
+  const [showDownloads, setShowDownloads] = useState(false);
 
   const { authToken, selectedServer, setSelectedServer, selectedLibrary, theme, language } = useAuthStore();
   const { currentBook } = usePlayerStore();
@@ -37,15 +40,26 @@ export default function App() {
   // causing 500 errors until the user manually re-authenticates.
   useEffect(() => {
     if (!authToken || !selectedServer) return;
-    plexService.getResources(authToken)
-      .then((resources: any[]) => {
+    (async () => {
+      try {
+        const networkStatus = await downloadService.getNetworkStatus();
+        if (!networkStatus.connected) {
+          setServerReady(true);
+          return;
+        }
+        const resources: any[] = await plexService.getResources(authToken);
         const fresh = resources.find((s: any) =>
           s.clientIdentifier === selectedServer.clientIdentifier && s.provides === 'server'
         );
         if (fresh) setSelectedServer(fresh);
-      })
-      .catch(() => {})
-      .finally(() => setServerReady(true));
+      } catch {}
+      setServerReady(true);
+    })();
+  }, []);
+
+  // Sync downloaded tracks from Preferences (source of truth) to Zustand on startup
+  useEffect(() => {
+    syncDownloadsToStore().catch(() => {});
   }, []);
 
   // Sync i18n with stored language
@@ -78,16 +92,32 @@ export default function App() {
     setSelectedBookKey(key);
     if (key) {
       setSelectedAuthorKey(null);
+      setShowDownloads(false);
     }
+  };
+
+  const handleShowDownloads = () => {
+    setShowDownloads(true);
+    setSelectedBookKey(null);
+    setSelectedAuthorKey(null);
   };
 
   const renderContent = () => {
     if (selectedBookKey) {
       return (
-        <BookDetailView 
-          ratingKey={selectedBookKey} 
-          onBack={() => setSelectedBookKey(null)} 
+        <BookDetailView
+          ratingKey={selectedBookKey}
+          onBack={() => setSelectedBookKey(null)}
           onSelectAuthor={handleSelectAuthor}
+        />
+      );
+    }
+
+    if (showDownloads) {
+      return (
+        <DownloadsView
+          onBack={() => setShowDownloads(false)}
+          onSelectBook={handleSelectBook}
         />
       );
     }
@@ -95,9 +125,10 @@ export default function App() {
     switch (activeTab) {
       case 'home':
         return (
-          <HomeView 
-            onSelectBook={handleSelectBook} 
-            onSelectAuthor={handleSelectAuthor} 
+          <HomeView
+            onSelectBook={handleSelectBook}
+            onSelectAuthor={handleSelectAuthor}
+            onShowDownloads={handleShowDownloads}
             onLogin={() => {
               setLoginInitiatedFromHome(true);
               setActiveTab('settings');
@@ -106,23 +137,25 @@ export default function App() {
         );
       case 'library':
         return (
-          <LibraryView 
-            onSelectBook={handleSelectBook} 
+          <LibraryView
+            onSelectBook={handleSelectBook}
+            onShowDownloads={handleShowDownloads}
             initialAuthorKey={selectedAuthorKey}
             onAuthorBack={() => setSelectedAuthorKey(null)}
           />
         );
       case 'settings':
         return (
-          <SettingsView 
+          <SettingsView
+            onShowDownloads={handleShowDownloads}
             onLogin={() => {
               setLoginInitiatedFromHome(false);
-            }} 
+            }}
             autoStartLogin={loginInitiatedFromHome}
           />
         );
       default:
-        return <HomeView onSelectBook={handleSelectBook} onSelectAuthor={handleSelectAuthor} />;
+        return <HomeView onSelectBook={handleSelectBook} onSelectAuthor={handleSelectAuthor} onShowDownloads={handleShowDownloads} />;
     }
   };
 
