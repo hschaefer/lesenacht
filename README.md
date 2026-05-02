@@ -13,14 +13,6 @@ This application is completely **vibe coded**. If thats not for you, please move
 - **Progressive Web App**: Optimized for use on mobile and desktop browsers.
 - **Android app** with audiobook download and offline capabilities.
 
-## Getting Started
-
-### Prerequisites
-
-- A running Plex server with your audiobooks.
-- Node.js 
-- npm
-
 ## Deployment
 
 ### Local Deployment
@@ -68,7 +60,7 @@ Run this every time you make changes to your React code that you want to see in 
   npm run cap:open
   ```
 
-### Data Privacy & GDPR
+## Data Privacy & GDPR
 
 - **Local-First**: This app is "local-first". Your Plex authentication token and library metadata are stored in your browser's `localStorage`.
 - **No Central Backend**: There is no central database or analytics server. All communication happens between your browser and the Plex API (optionally proxied through your own Cloudflare Worker functions).
