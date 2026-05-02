@@ -10,7 +10,8 @@ This application is completely **vibe coded**. If thats not for you, please move
 
 - **Plex Integration**: Connect to your Plex server to access your audiobook library.
 - **Local Progress Tracking**: Automatically saves your position in every audiobook locally on your device.
-- **Progressive Web App**: Optimized for use on mobile and desktop browsers with offline capabilities.
+- **Progressive Web App**: Optimized for use on mobile and desktop browsers.
+- **Android app** with audiobook download and offline capabilities.
 
 ## Getting Started
 
