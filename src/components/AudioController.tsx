@@ -8,6 +8,7 @@ export function AudioController() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { 
     isPlaying, 
+    currentBook,
     currentTrack, 
     currentTime, 
     duration,
@@ -187,6 +188,86 @@ export function AudioController() {
     if (!audioRef.current) return;
     audioRef.current.playbackRate = playbackSpeed;
   }, [playbackSpeed]);
+
+  // Media Session API for background playback and notification controls
+  useEffect(() => {
+    if (!audioRef.current || !currentTrack || !('mediaSession' in navigator)) return;
+
+    const connections = selectedServer?.connections || [];
+    const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
+    const thumbUrl = currentTrack.thumb || currentBook?.thumb;
+    const artworkUrl = thumbUrl ? plexService.getThumbUrl(serverBaseUrl, thumbUrl, effectiveToken, 512, 512) : null;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: currentTrack.title,
+      artist: currentBook?.title || '',
+      album: currentBook?.title || '',
+      artwork: artworkUrl ? [{ src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }] : []
+    });
+
+    const updatePlaybackState = () => {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    };
+
+    updatePlaybackState();
+
+    const actionHandlers: [MediaSessionAction, MediaSessionActionHandler][] = [
+      ['play', () => setPlaying(true)],
+      ['pause', () => setPlaying(false)],
+      ['seekbackward', (details) => {
+        const skipTime = details.seekOffset || 15;
+        const newTime = Math.max(0, currentTime - skipTime);
+        setCurrentTime(newTime);
+      }],
+      ['seekforward', (details) => {
+        const skipTime = details.seekOffset || 15;
+        const newTime = Math.min(duration, currentTime + skipTime);
+        setCurrentTime(newTime);
+      }],
+      ['previoustrack', () => {
+        // Implementation for previous track if needed
+      }],
+      ['nexttrack', () => {
+        // Implementation for next track if needed
+      }],
+      ['seekto', (details) => {
+        if (details.seekTime !== undefined) {
+          setCurrentTime(details.seekTime);
+        }
+      }]
+    ];
+
+    for (const [action, handler] of actionHandlers) {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch (error) {
+        console.warn(`The media session action "${action}" is not supported yet.`);
+      }
+    }
+
+    return () => {
+      for (const [action] of actionHandlers) {
+        try {
+          navigator.mediaSession.setActionHandler(action, null);
+        } catch (error) {}
+      }
+    };
+  }, [currentTrack?.ratingKey, isPlaying, currentBook?.ratingKey, effectiveToken, selectedServer]);
+
+  // Update position state for media session
+  useEffect(() => {
+    if ('mediaSession' in navigator && audioRef.current && duration > 0) {
+      try {
+        navigator.mediaSession.setPositionState({
+          duration: duration,
+          playbackRate: playbackSpeed,
+          position: currentTime
+        });
+      } catch (e) {
+        // Some browsers might fail if values are inconsistent
+      }
+    }
+  }, [currentTime, duration, playbackSpeed]);
 
   useEffect(() => {
     if (!audioRef.current) return;
