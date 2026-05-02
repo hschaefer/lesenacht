@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { plexService } from '../services/plexService';
 import { useAuthStore } from '../store/useStore';
-import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info, Languages, ShieldCheck } from 'lucide-react';
+import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info, Languages, ShieldCheck, Check, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,10 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
     setTheme,
     language,
     setLanguage,
+    showVolumeControl,
+    setShowVolumeControl,
+    progressBarMode,
+    setProgressBarMode,
     clearAllData
   } = useAuthStore();
   const [servers, setServers] = useState<any[]>([]);
@@ -26,9 +30,15 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
   const [pin, setPin] = useState<any>(null);
   const [isAuthExpanded, setIsAuthExpanded] = useState(!authToken || !selectedServer || !selectedLibrary);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   const APP_VERSION = __APP_VERSION__;
   const LAST_UPDATED = __APP_LAST_UPDATED__;
+
+  const languages = [
+    { code: 'en', label: t('settings.language.en') },
+    { code: 'de', label: t('settings.language.de') }
+  ];
 
   // Trigger login if autoStartLogin is true
   useEffect(() => {
@@ -270,26 +280,62 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
             </AnimatePresence>
           </section>
 
-          {/* Language Section shadow removal if any */}
+          {/* Language Section */}
           <section className="space-y-4">
             <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
               <Languages size={16} /> {t('settings.language.title')}
             </h2>
-            <div className="relative group">
-              <select 
-                value={language}
-                onChange={(e) => {
-                  setLanguage(e.target.value);
-                  i18n.changeLanguage(e.target.value);
-                }}
-                className="w-full h-12 glass rounded-2xl px-5 text-sm font-bold text-ink appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/30 transition-all lowercase tracking-widest"
+            <div className="relative">
+              <button 
+                onClick={() => setIsLangMenuOpen(!isLangMenuOpen)}
+                className="w-full h-12 glass rounded-2xl px-5 flex items-center justify-between group transition-all"
               >
-                <option value="en">{t('settings.language.en')}</option>
-                <option value="de">{t('settings.language.de')}</option>
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-muted pointer-events-none group-hover:text-ink transition-colors">
-                <ChevronDown size={20} />
-              </div>
+                <span className="text-sm font-bold text-ink lowercase tracking-widest">
+                  {languages.find(l => l.code === language)?.label || language}
+                </span>
+                <div className={`text-ink-muted group-hover:text-ink transition-all duration-300 ${isLangMenuOpen ? 'rotate-180 text-accent' : ''}`}>
+                  <ChevronDown size={20} />
+                </div>
+              </button>
+
+              <AnimatePresence>
+                {isLangMenuOpen && (
+                  <>
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      onClick={() => setIsLangMenuOpen(false)}
+                      className="fixed inset-0 z-40"
+                    />
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      className="absolute top-14 left-0 right-0 glass rounded-2xl shadow-2xl z-50 p-2 border border-white/10 overflow-hidden"
+                    >
+                      {languages.map((item) => (
+                        <button
+                          key={item.code}
+                          onClick={() => {
+                            setLanguage(item.code);
+                            i18n.changeLanguage(item.code);
+                            setIsLangMenuOpen(false);
+                          }}
+                          className={`w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all ${
+                            language === item.code 
+                            ? 'bg-accent/20 text-accent shadow-sm' 
+                            : 'text-ink-dim hover:text-ink hover:bg-white/5'
+                          }`}
+                        >
+                          <span className="text-sm font-bold lowercase tracking-widest">{item.label}</span>
+                          {language === item.code && <Check size={16} className="text-accent" />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
           </section>
 
@@ -313,6 +359,48 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
                   {item.label}
                 </button>
               ))}
+            </div>
+          </section>
+
+          {/* Player Settings Section */}
+          <section className="space-y-4">
+            <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+              <Volume2 size={16} /> {t('settings.player.title')}
+            </h2>
+            
+            <div className="space-y-2">
+              <div className="p-4 glass rounded-2xl flex items-center justify-between group cursor-pointer" onClick={() => setShowVolumeControl(!showVolumeControl)}>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-ink lowercase tracking-widest">{t('settings.player.showVolume')}</h3>
+                  <p className="text-[10px] text-ink-dim uppercase tracking-wider">{t('settings.player.showVolumeDesc')}</p>
+                </div>
+                <div className={`w-12 h-6 rounded-full transition-all duration-300 relative ${showVolumeControl ? 'accent-bg' : 'bg-white/10'}`}>
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${showVolumeControl ? 'left-7' : 'left-1'}`} />
+                </div>
+              </div>
+
+              <div className="p-4 glass rounded-2xl space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-ink lowercase tracking-widest">{t('settings.player.progressMode')}</h3>
+                  <p className="text-[10px] text-ink-dim uppercase tracking-wider">{t('settings.player.progressModeDesc')}</p>
+                </div>
+                
+                <div className="flex gap-2 p-1 bg-black/5 dark:bg-white/5 rounded-xl">
+                  {[
+                    { id: 'main', label: t('settings.player.progressMain') },
+                    { id: 'chapter', label: t('settings.player.progressChapter') },
+                    { id: 'both', label: t('settings.player.progressBoth') },
+                  ].map((item) => (
+                    <button 
+                      key={item.id}
+                      onClick={() => setProgressBarMode(item.id as any)}
+                      className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${progressBarMode === item.id ? 'accent-bg text-white shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
         </div>
