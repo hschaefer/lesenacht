@@ -25,14 +25,64 @@ export function AudioController() {
     setNetworkConnected,
     isOfflineMode,
   } = usePlayerStore();
+  
   const { authToken, selectedServer } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
+  
+  // Refs for MediaSession handlers to avoid stale closures without re-binding
+  const stateRef = useRef({
+    isPlaying,
+    currentTime,
+    duration,
+    currentTrack,
+    currentBook,
+    effectiveToken,
+    selectedServer
+  });
+
+  useEffect(() => {
+    stateRef.current = {
+      isPlaying,
+      currentTime,
+      duration,
+      currentTrack,
+      currentBook,
+      effectiveToken,
+      selectedServer
+    };
+  }, [isPlaying, currentTime, duration, currentTrack, currentBook, effectiveToken, selectedServer]);
   const lastReportRef = useRef<number>(0);
   const lastStateRef = useRef<'playing' | 'paused' | 'stopped' | null>(null);
   const isMountRef = useRef(true);
   const hasReportedRef = useRef(false);
   const [audioSrc, setAudioSrc] = useState<string>('');
   const [isNative, setIsNative] = useState(false);
+  const [localThumb, setLocalThumb] = useState<string | null>(null);
+
+  // Check for local thumb if book is downloaded
+  useEffect(() => {
+    if (!currentBook || !isNative) {
+      setLocalThumb(null);
+      return;
+    }
+
+    const checkLocalThumb = async () => {
+      try {
+        const books = await downloadService.getDownloadedBooks();
+        const downloadedBook = books.find(b => b.ratingKey === currentBook.ratingKey);
+        if (downloadedBook?.localThumb) {
+          const localUrl = await downloadService.getLocalFileUrl(downloadedBook.localThumb);
+          setLocalThumb(localUrl);
+        } else {
+          setLocalThumb(null);
+        }
+      } catch (e) {
+        setLocalThumb(null);
+      }
+    };
+
+    checkLocalThumb();
+  }, [currentBook?.ratingKey, isNative]);
 
   // Network status monitoring
   useEffect(() => {
@@ -185,18 +235,33 @@ export function AudioController() {
   }, [isPlaying, currentTime, currentTrack, duration, saveProgress]);
 
   useEffect(() => {
+    if (audioRef.current && audioSrc) {
+      audioRef.current.load();
+    }
+  }, [audioSrc]);
+
+  useEffect(() => {
     if (!audioRef.current) return;
     audioRef.current.playbackRate = playbackSpeed;
   }, [playbackSpeed]);
 
-  // Media Session API for background playback and notification controls
+  // Media Session Metadata & Handlers
   useEffect(() => {
     if (!audioRef.current || !currentTrack || !('mediaSession' in navigator)) return;
 
     const connections = selectedServer?.connections || [];
     const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
     const thumbUrl = currentTrack.thumb || currentBook?.thumb;
-    const artworkUrl = thumbUrl ? plexService.getThumbUrl(serverBaseUrl, thumbUrl, effectiveToken, 512, 512) : null;
+    
+    // Attempt to get artwork - prefer local if available
+    let artworkUrl = localThumb;
+    if (!artworkUrl && thumbUrl) {
+      artworkUrl = plexService.getThumbUrl(serverBaseUrl, thumbUrl, effectiveToken, 512, 512);
+    }
+    
+    // If we have downloaded info, we might want to check for local thumb, 
+    // but currentBook doesn't have it easily available here yet.
+    // For now, at least ensure we have a valid URL.
 
     navigator.mediaSession.metadata = new MediaMetadata({
       title: currentTrack.title,
@@ -205,23 +270,17 @@ export function AudioController() {
       artwork: artworkUrl ? [{ src: artworkUrl, sizes: '512x512', type: 'image/jpeg' }] : []
     });
 
-    const updatePlaybackState = () => {
-      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
-    };
-
-    updatePlaybackState();
-
     const actionHandlers: [MediaSessionAction, MediaSessionActionHandler][] = [
       ['play', () => setPlaying(true)],
       ['pause', () => setPlaying(false)],
       ['seekbackward', (details) => {
         const skipTime = details.seekOffset || 15;
-        const newTime = Math.max(0, currentTime - skipTime);
+        const newTime = Math.max(0, stateRef.current.currentTime - skipTime);
         setCurrentTime(newTime);
       }],
       ['seekforward', (details) => {
         const skipTime = details.seekOffset || 15;
-        const newTime = Math.min(duration, currentTime + skipTime);
+        const newTime = Math.min(stateRef.current.duration, stateRef.current.currentTime + skipTime);
         setCurrentTime(newTime);
       }],
       ['previoustrack', () => {
@@ -252,9 +311,16 @@ export function AudioController() {
         } catch (error) {}
       }
     };
-  }, [currentTrack?.ratingKey, isPlaying, currentBook?.ratingKey, effectiveToken, selectedServer]);
+  }, [currentTrack?.ratingKey, currentBook?.ratingKey, effectiveToken, selectedServer]); // Removed isPlaying and currentTime
 
-  // Update position state for media session
+  // Update Media Session Playback State
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }
+  }, [isPlaying]);
+
+  // Update Media Session position state
   useEffect(() => {
     if ('mediaSession' in navigator && audioRef.current && duration > 0) {
       try {
@@ -323,6 +389,14 @@ export function AudioController() {
     // Future: Auto-play next track in queue
   };
 
+  const handlePlay = () => {
+    if (!isPlaying) setPlaying(true);
+  };
+
+  const handlePause = () => {
+    if (isPlaying) setPlaying(false);
+  };
+
   const handleCanPlay = () => {
     if (isPlaying && audioRef.current) {
       audioRef.current.play().catch(err => {
@@ -352,7 +426,9 @@ export function AudioController() {
       onLoadedMetadata={handleLoadedMetadata}
       onCanPlay={handleCanPlay}
       onEnded={handleEnded}
-      className="hidden"
+      onPlay={handlePlay}
+      onPause={handlePause}
+      style={{ position: 'absolute', width: '1px', height: '1px', opacity: 0.01, pointerEvents: 'none' }}
     />
   );
 }
