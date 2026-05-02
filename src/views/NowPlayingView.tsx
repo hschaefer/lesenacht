@@ -145,6 +145,16 @@ export function NowPlayingView({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const currentChapterIndex = currentChapter ? chapters.findIndex(c => c.index === currentChapter.index) : -1;
+  const chapterStart = currentChapter ? (currentChapter.startTimeOffset || currentChapter.start || 0) / 1000 : 0;
+  const chapterEnd = chapters[currentChapterIndex + 1] 
+    ? (chapters[currentChapterIndex + 1].startTimeOffset || chapters[currentChapterIndex + 1].start) / 1000 
+    : duration;
+  const chapterDuration = chapterEnd - chapterStart;
+  const chapterProgress = chapterDuration > 0 
+    ? Math.min(100, Math.max(0, ((currentTime - chapterStart) / chapterDuration) * 100)) 
+    : 0;
+
   return (
     <motion.div 
       initial={{ y: '100%' }}
@@ -233,6 +243,11 @@ export function NowPlayingView({
         <div className="w-full max-w-sm md:max-w-md space-y-8 flex flex-col justify-center">
           <div className="text-center md:text-left space-y-2">
             <h1 className="text-xl md:text-3xl font-bold text-ink truncate">{currentTrack.title}</h1>
+            {currentChapter && (
+              <p className="text-sm font-medium text-ink-dim truncate">
+                {currentChapter.tag || currentChapter.title}
+              </p>
+            )}
             <button 
               onClick={() => currentBook.parentRatingKey && onNavigateAuthor?.(currentBook.parentRatingKey)}
               className="accent-text font-bold uppercase tracking-widest text-[10px] md:text-xs hover:brightness-125 transition-all"
@@ -242,6 +257,30 @@ export function NowPlayingView({
           </div>
 
           <div className="w-full space-y-6">
+            {/* Chapter Progress Bar */}
+            {chapters.length > 0 && (
+              <div className="space-y-1">
+                <div 
+                  className="h-1 w-full bg-white/10 rounded-full overflow-hidden relative cursor-pointer"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const clickedPercent = x / rect.width;
+                    setCurrentTime(chapterStart + (clickedPercent * chapterDuration));
+                  }}
+                >
+                  <div 
+                    className="absolute h-full left-0 top-0 bg-accent/60" 
+                    style={{ width: `${chapterProgress}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[8px] font-mono text-ink-muted uppercase tracking-wider">
+                  <span>{t('player.chapter')} {currentChapterIndex + 1}</span>
+                  <span>{formatTime(currentTime - chapterStart)} / {formatTime(chapterDuration)}</span>
+                </div>
+              </div>
+            )}
+
             {/* Progress Bar */}
             <div className="space-y-2">
               <div 
