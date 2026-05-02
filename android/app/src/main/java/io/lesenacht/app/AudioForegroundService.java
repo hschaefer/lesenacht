@@ -171,6 +171,12 @@ public class AudioForegroundService extends android.app.Service {
             public void onRewind() { forwardAction("seekbackward", -1); }
 
             @Override
+            public void onSkipToNext() { forwardAction("seekforward", -1); }
+
+            @Override
+            public void onSkipToPrevious() { forwardAction("seekbackward", -1); }
+
+            @Override
             public void onSeekTo(long pos) { forwardAction("seekto", pos); }
 
             @Override
@@ -223,6 +229,8 @@ public class AudioForegroundService extends android.app.Service {
             | PlaybackStateCompat.ACTION_SEEK_TO
             | PlaybackStateCompat.ACTION_FAST_FORWARD
             | PlaybackStateCompat.ACTION_REWIND
+            | PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+            | PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
             | PlaybackStateCompat.ACTION_STOP;
 
         int state = isPlaying
@@ -246,23 +254,23 @@ public class AudioForegroundService extends android.app.Service {
         NotificationCompat.Action rewindAction = new NotificationCompat.Action(
             android.R.drawable.ic_media_rew,
             "15s zurück",
-            buildActionPendingIntent(ACTION_SEEK_BACKWARD, 1)
+            MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_REWIND)
         );
 
         NotificationCompat.Action playPauseAction = isPlaying
             ? new NotificationCompat.Action(
                 android.R.drawable.ic_media_pause,
                 "Pause",
-                buildActionPendingIntent(ACTION_PAUSE, 2))
+                MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PAUSE))
             : new NotificationCompat.Action(
                 android.R.drawable.ic_media_play,
                 "Abspielen",
-                buildActionPendingIntent(ACTION_PLAY, 2));
+                MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_PLAY));
 
         NotificationCompat.Action forwardAction = new NotificationCompat.Action(
             android.R.drawable.ic_media_ff,
             "30s vor",
-            buildActionPendingIntent(ACTION_SEEK_FORWARD, 3)
+            MediaButtonReceiver.buildMediaButtonPendingIntent(this, PlaybackStateCompat.ACTION_FAST_FORWARD)
         );
 
         MediaStyle style = new MediaStyle()
