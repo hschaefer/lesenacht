@@ -24,10 +24,19 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       exit={{ y: 100 }}
-      className="fixed bottom-20 left-4 right-4 glass rounded-2xl shadow-2xl z-40 overflow-hidden cursor-pointer"
+      className="fixed bottom-20 left-4 right-4 glass rounded-2xl shadow-2xl z-40 overflow-hidden cursor-pointer group"
       onClick={onClick}
     >
-      <div className="flex items-center p-3 gap-3">
+      {/* Background Atmosphere */}
+      <div className="absolute inset-0 overflow-hidden -z-10 opacity-40">
+        <div 
+          className="absolute inset-0 bg-cover bg-center blur-2xl scale-125" 
+          style={{ backgroundImage: `url(${thumbUrl})` }}
+        />
+        <div className="absolute inset-0 bg-bg/40" />
+      </div>
+
+      <div className="flex items-center p-3 gap-3 relative z-10">
         <CoverImage 
           src={thumbUrl} 
           className="w-12 h-12 rounded-lg shadow-lg"

@@ -164,12 +164,12 @@ export function NowPlayingView({
       className="fixed inset-0 bg-bg z-50 flex flex-col pt-safe px-8 pb-12 overflow-hidden"
     >
       {/* Background Atmosphere */}
-      <div className="absolute inset-0 overflow-hidden -z-10 opacity-30">
+      <div className="absolute inset-0 overflow-hidden -z-10 opacity-60">
         <div 
-          className="absolute inset-0 bg-cover bg-center blur-3xl scale-150 grayscale-[0.5]" 
+          className="absolute inset-0 bg-cover bg-center blur-3xl scale-150" 
           style={{ backgroundImage: `url(${thumbUrl})` }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-bg/50 via-bg to-bg" />
+        <div className="absolute inset-0 bg-gradient-to-b from-bg/20 via-bg/80 to-bg" />
       </div>
 
       <header className="flex items-center justify-between relative">

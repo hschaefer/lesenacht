@@ -14,6 +14,7 @@ interface AudioPluginInterface {
     speed?: number;
     title?: string;
     author?: string;
+    thumbUrl?: string | null;
   }): Promise<void>;
   stopPlayback(): Promise<void>;
   addListener(eventName: 'onAction', listenerFunc: (data: { type: string; seekTo?: number }) => void): Promise<any>;
@@ -122,15 +123,21 @@ export function AudioController() {
   useEffect(() => {
     if (!isNative || !currentTrack) return;
     
+    const connections = selectedServer?.connections || [];
+    const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri || '';
+    const thumbPath = currentTrack.thumb || currentBook?.thumb;
+    const thumbUrl = thumbPath ? plexService.getThumbUrl(serverBaseUrl, thumbPath, effectiveToken || '', 512, 512) : null;
+
     AudioPlugin.updatePlayback({
       isPlaying,
       position: currentTime,
       duration: duration,
       speed: playbackSpeed,
       title: currentTrack.title,
-      author: currentBook?.title || ''
+      author: currentBook?.title || '',
+      thumbUrl
     }).catch(() => {});
-  }, [isPlaying, currentTime, duration, playbackSpeed, currentTrack, currentBook, isNative]);
+  }, [isPlaying, currentTime, duration, playbackSpeed, currentTrack, currentBook, isNative, effectiveToken, selectedServer]);
 
   // Listen for actions from the native notification (Android)
   useEffect(() => {
@@ -145,7 +152,7 @@ export function AudioController() {
           setPlaying(false);
           break;
         case 'seekforward': {
-          const newTime = Math.min(stateRef.current.duration, stateRef.current.currentTime + 15);
+          const newTime = Math.min(stateRef.current.duration, stateRef.current.currentTime + 30);
           setCurrentTime(newTime);
           break;
         }
@@ -362,7 +369,7 @@ export function AudioController() {
         setCurrentTime(newTime);
       }],
       ['seekforward', (details) => {
-        const skipTime = details.seekOffset || 15;
+        const skipTime = details.seekOffset || 30;
         const newTime = Math.min(stateRef.current.duration, stateRef.current.currentTime + skipTime);
         setCurrentTime(newTime);
       }],

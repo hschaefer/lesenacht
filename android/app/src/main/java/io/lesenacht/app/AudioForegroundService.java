@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.IBinder;
@@ -20,6 +22,10 @@ import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.media.session.MediaButtonReceiver;
 import androidx.media.app.NotificationCompat.MediaStyle;
+
+import java.net.URL;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AudioForegroundService extends android.app.Service {
 
@@ -47,14 +53,18 @@ public class AudioForegroundService extends android.app.Service {
     public static final String EXTRA_POSITION = "position";
     public static final String EXTRA_DURATION = "duration";
     public static final String EXTRA_SPEED = "speed";
+    public static final String EXTRA_THUMB_URL = "thumbUrl";
 
     private MediaSessionCompat mediaSession;
     private String title = "Lesenacht";
     private String author = "";
+    private String currentThumbUrl = null;
+    private Bitmap artworkBitmap = null;
     private boolean isPlaying = false;
     private long positionMs = 0L;
     private long durationMs = 0L;
     private float speed = 1.0f;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private final BroadcastReceiver localReceiver = new BroadcastReceiver() {
         @Override
@@ -124,6 +134,14 @@ public class AudioForegroundService extends android.app.Service {
         if (intent.hasExtra(EXTRA_POSITION)) positionMs = intent.getLongExtra(EXTRA_POSITION, positionMs);
         if (intent.hasExtra(EXTRA_DURATION)) durationMs = intent.getLongExtra(EXTRA_DURATION, durationMs);
         if (intent.hasExtra(EXTRA_SPEED)) speed = intent.getFloatExtra(EXTRA_SPEED, speed);
+        
+        if (intent.hasExtra(EXTRA_THUMB_URL)) {
+            String newThumbUrl = intent.getStringExtra(EXTRA_THUMB_URL);
+            if (newThumbUrl != null && !newThumbUrl.equals(currentThumbUrl)) {
+                currentThumbUrl = newThumbUrl;
+                loadArtwork(newThumbUrl);
+            }
+        }
 
         updateMediaSession();
         Notification notification = buildNotification();
@@ -186,13 +204,18 @@ public class AudioForegroundService extends android.app.Service {
     }
 
     private void updateMediaSession() {
-        MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
+        MediaMetadataCompat.Builder builder = new MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title != null ? title : "")
             .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, author != null ? author : "")
             .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, author != null ? author : "")
-            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationMs)
-            .build();
-        mediaSession.setMetadata(metadata);
+            .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, durationMs);
+            
+        if (artworkBitmap != null) {
+            builder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, artworkBitmap);
+            builder.putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, artworkBitmap);
+        }
+
+        mediaSession.setMetadata(builder.build());
 
         long actions = PlaybackStateCompat.ACTION_PLAY
             | PlaybackStateCompat.ACTION_PAUSE
@@ -222,7 +245,7 @@ public class AudioForegroundService extends android.app.Service {
 
         NotificationCompat.Action rewindAction = new NotificationCompat.Action(
             android.R.drawable.ic_media_rew,
-            "Rewind",
+            "15s zurück",
             buildActionPendingIntent(ACTION_SEEK_BACKWARD, 1)
         );
 
@@ -233,12 +256,12 @@ public class AudioForegroundService extends android.app.Service {
                 buildActionPendingIntent(ACTION_PAUSE, 2))
             : new NotificationCompat.Action(
                 android.R.drawable.ic_media_play,
-                "Play",
+                "Abspielen",
                 buildActionPendingIntent(ACTION_PLAY, 2));
 
         NotificationCompat.Action forwardAction = new NotificationCompat.Action(
             android.R.drawable.ic_media_ff,
-            "Forward",
+            "30s vor",
             buildActionPendingIntent(ACTION_SEEK_FORWARD, 3)
         );
 
@@ -265,7 +288,31 @@ public class AudioForegroundService extends android.app.Service {
                 MediaButtonReceiver.buildMediaButtonPendingIntent(
                     this, PlaybackStateCompat.ACTION_STOP));
 
+        if (artworkBitmap != null) {
+            builder.setLargeIcon(artworkBitmap);
+        }
+
         return builder.build();
+    }
+
+    private void loadArtwork(String urlString) {
+        executor.execute(() -> {
+            try {
+                URL url = new URL(urlString);
+                Bitmap bitmap = BitmapFactory.decodeStream(url.openStream());
+                if (bitmap != null) {
+                    artworkBitmap = bitmap;
+                    // Trigger a UI update with the new bitmap
+                    updateMediaSession();
+                    NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                    if (nm != null) {
+                        nm.notify(NOTIFICATION_ID, buildNotification());
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private PendingIntent buildActionPendingIntent(String action, int requestCode) {

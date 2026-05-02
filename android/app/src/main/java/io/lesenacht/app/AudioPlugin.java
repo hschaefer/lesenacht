@@ -67,6 +67,7 @@ public class AudioPlugin extends Plugin {
         Double speed = call.getDouble("speed");
         String title = call.getString("title");
         String author = call.getString("author");
+        String thumbUrl = call.getString("thumbUrl");
 
         Intent intent = new Intent(getContext(), AudioForegroundService.class);
         intent.setAction(AudioForegroundService.ACTION_UPDATE);
@@ -76,6 +77,7 @@ public class AudioPlugin extends Plugin {
         if (speed != null) intent.putExtra(AudioForegroundService.EXTRA_SPEED, speed.floatValue());
         if (title != null) intent.putExtra(AudioForegroundService.EXTRA_TITLE, title);
         if (author != null) intent.putExtra(AudioForegroundService.EXTRA_AUTHOR, author);
+        if (thumbUrl != null) intent.putExtra(AudioForegroundService.EXTRA_THUMB_URL, thumbUrl);
 
         getContext().startService(intent);
         call.resolve();
