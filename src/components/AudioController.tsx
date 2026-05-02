@@ -3,6 +3,23 @@ import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
 import { downloadService } from '../services/downloadService';
 import { Network } from '@capacitor/network';
+import { registerPlugin } from '@capacitor/core';
+
+interface AudioPluginInterface {
+  startPlayback(options: { title: string; author: string }): Promise<void>;
+  updatePlayback(options: { 
+    isPlaying?: boolean; 
+    position?: number; 
+    duration?: number; 
+    speed?: number;
+    title?: string;
+    author?: string;
+  }): Promise<void>;
+  stopPlayback(): Promise<void>;
+  addListener(eventName: 'onAction', listenerFunc: (data: { type: string; seekTo?: number }) => void): Promise<any>;
+}
+
+const AudioPlugin = registerPlugin<AudioPluginInterface>('AudioPlugin');
 
 export function AudioController() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -83,6 +100,72 @@ export function AudioController() {
 
     checkLocalThumb();
   }, [currentBook?.ratingKey, isNative]);
+
+  // Start/stop Android foreground service to keep process alive in background
+  useEffect(() => {
+    if (!isNative) return;
+    if (isPlaying && currentTrack) {
+      AudioPlugin.startPlayback({
+        title: currentTrack.title || 'Lesenacht',
+        author: currentBook?.title || '',
+      }).catch(() => {});
+    } else if (!isPlaying) {
+      // We don't stop the service immediately when paused, 
+      // but we update it. We only stop it if currentTrack is gone.
+      if (!currentTrack) {
+        AudioPlugin.stopPlayback().catch(() => {});
+      }
+    }
+  }, [isPlaying, isNative, currentTrack?.ratingKey]);
+
+  // Sync state to native Android service for notification controls
+  useEffect(() => {
+    if (!isNative || !currentTrack) return;
+    
+    AudioPlugin.updatePlayback({
+      isPlaying,
+      position: currentTime,
+      duration: duration,
+      speed: playbackSpeed,
+      title: currentTrack.title,
+      author: currentBook?.title || ''
+    }).catch(() => {});
+  }, [isPlaying, currentTime, duration, playbackSpeed, currentTrack, currentBook, isNative]);
+
+  // Listen for actions from the native notification (Android)
+  useEffect(() => {
+    if (!isNative) return;
+
+    const listener = AudioPlugin.addListener('onAction', (data) => {
+      switch (data.type) {
+        case 'play':
+          setPlaying(true);
+          break;
+        case 'pause':
+          setPlaying(false);
+          break;
+        case 'seekforward': {
+          const newTime = Math.min(stateRef.current.duration, stateRef.current.currentTime + 15);
+          setCurrentTime(newTime);
+          break;
+        }
+        case 'seekbackward': {
+          const newTime = Math.max(0, stateRef.current.currentTime - 15);
+          setCurrentTime(newTime);
+          break;
+        }
+        case 'seekto':
+          if (data.seekTo !== undefined) {
+            setCurrentTime(data.seekTo);
+          }
+          break;
+      }
+    });
+
+    return () => {
+      listener.then(l => l.remove());
+    };
+  }, [isNative, setPlaying, setCurrentTime]);
 
   // Network status monitoring
   useEffect(() => {
