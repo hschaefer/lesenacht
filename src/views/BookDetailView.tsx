@@ -273,8 +273,8 @@ export function BookDetailView({
   };
 
   const connections = selectedServer?.connections || [];
-  const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
-  const thumbUrl = (baseUrl && book?.thumb) ? plexService.getThumbUrl(baseUrl, book.thumb, effectiveToken!, 600, 600) : null;
+  const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri || '';
+  const thumbUrl = book?.thumb ? plexService.getThumbUrl(baseUrl, book.thumb, effectiveToken || '', 600, 600) : null;
 
   return (
     <div className="space-y-6 pb-20 overflow-x-hidden">

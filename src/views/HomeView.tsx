@@ -27,9 +27,25 @@ export function HomeView({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    downloadService.isNative().then(native => {
+    downloadService.isNative().then(async native => {
       if (native) {
-        downloadService.getDownloadedBooks().then(setDownloadedBooks).catch(() => {});
+        try {
+          const books = await downloadService.getDownloadedBooks();
+          const resolved = await Promise.all(
+            books.map(async (book) => {
+              if (book.localThumb) {
+                try {
+                  const thumbUrl = await downloadService.getLocalFileUrl(book.localThumb);
+                  return { ...book, thumb: thumbUrl };
+                } catch {
+                  return book;
+                }
+              }
+              return book;
+            })
+          );
+          setDownloadedBooks(resolved);
+        } catch {}
       }
     });
   }, []);

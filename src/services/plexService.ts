@@ -213,7 +213,10 @@ export const plexService = {
 
   getThumbUrl(baseUrl: string, thumb: string, token: string, width = 300, height = 300) {
     if (!thumb) return null;
-    // Use Plex's built-in image transcoder
+    // Already an absolute URL (e.g. local capacitor:// or file:// path) — use as-is
+    if (/^(https?|capacitor|file):\/\//.test(thumb)) return thumb;
+    // Relative Plex path — needs a server base URL
+    if (!baseUrl) return null;
     return `${baseUrl}/photo/:/transcode?url=${encodeURIComponent(thumb)}&width=${width}&height=${height}&X-Plex-Token=${token}`;
   },
 

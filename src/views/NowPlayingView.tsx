@@ -87,14 +87,12 @@ export function NowPlayingView({
     }
   }, [currentTrack?.ratingKey, effectiveToken, selectedServer]);
 
-  if (!currentBook || !currentTrack || !selectedServer) return null;
+  if (!currentBook || !currentTrack) return null;
 
   const connections = selectedServer?.connections || [];
-  const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
-  
-  if (!baseUrl) return null;
+  const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri || '';
 
-  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken!, 800, 800);
+  const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken || '', 800, 800);
   
   const formatTime = (seconds: number) => {
     const s = Math.floor(seconds);
