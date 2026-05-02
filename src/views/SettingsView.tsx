@@ -27,8 +27,8 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
   const [isAuthExpanded, setIsAuthExpanded] = useState(!authToken || !selectedServer || !selectedLibrary);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  const APP_VERSION = '1.0.1';
-  const LAST_UPDATED = '2026-04-30';
+  const APP_VERSION = __APP_VERSION__;
+  const LAST_UPDATED = __APP_LAST_UPDATED__;
 
   // Trigger login if autoStartLogin is true
   useEffect(() => {
