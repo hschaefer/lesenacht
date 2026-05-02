@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { usePlayerStore } from '../store/useStore';
-import { downloadService, type DownloadedBook } from '../services/downloadService';
+import { downloadService, syncDownloadsToStore, type DownloadedBook } from '../services/downloadService';
 import { 
   Trash2, 
   Headphones, 
@@ -21,7 +21,7 @@ interface DownloadsViewProps {
 
 export function DownloadsView({ onBack, onSelectBook }: DownloadsViewProps) {
   const { t } = useTranslation();
-  const { downloadedTracks, removeDownloadedBook } = usePlayerStore();
+  const { downloadedTracks } = usePlayerStore();
   const [books, setBooks] = useState<DownloadedBook[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -34,7 +34,21 @@ export function DownloadsView({ onBack, onSelectBook }: DownloadsViewProps) {
   const loadDownloads = useCallback(async () => {
     try {
       const downloadedBooks = await downloadService.getDownloadedBooks();
-      setBooks(downloadedBooks);
+      // Resolve local cover image paths to WebView-usable URLs
+      const resolved = await Promise.all(
+        downloadedBooks.map(async (book) => {
+          if (book.localThumb) {
+            try {
+              const thumbUrl = await downloadService.getLocalFileUrl(book.localThumb);
+              return { ...book, thumb: thumbUrl };
+            } catch {
+              return book;
+            }
+          }
+          return book;
+        })
+      );
+      setBooks(resolved);
     } catch (error) {
       console.error('Failed to load downloads:', error);
     } finally {
@@ -55,9 +69,8 @@ export function DownloadsView({ onBack, onSelectBook }: DownloadsViewProps) {
     }
 
     try {
-      const trackKeys = book.tracks.map(t => t.ratingKey);
       await downloadService.deleteBook(book.ratingKey);
-      removeDownloadedBook(book.ratingKey, trackKeys);
+      await syncDownloadsToStore();
       setBooks(prev => prev.filter(b => b.ratingKey !== book.ratingKey));
       setDeleteConfirm(null);
     } catch (error) {

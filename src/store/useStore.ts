@@ -52,6 +52,7 @@ interface PlayerState {
   clearDownloadProgress: (bookKey: string) => void;
   addDownloadedTrack: (trackKey: string, info: DownloadedTrackInfo) => void;
   removeDownloadedBook: (bookKey: string, trackKeys: string[]) => void;
+  setDownloadedTracks: (tracks: Record<string, DownloadedTrackInfo>) => void;
   setOfflineMode: (offline: boolean) => void;
 }
 
@@ -150,6 +151,7 @@ export const usePlayerStore = create<PlayerState>()(
         }
         return { downloadedTracks: newDownloadedTracks };
       }),
+      setDownloadedTracks: (tracks) => set({ downloadedTracks: tracks }),
       setOfflineMode: (offline) => set({ isOfflineMode: offline }),
     }),
     {

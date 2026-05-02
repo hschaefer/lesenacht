@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Download, Trash2, Check, X, Loader2 } from 'lucide-react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
-import { downloadService } from '../services/downloadService';
+import { downloadService, syncDownloadsToStore } from '../services/downloadService';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -28,7 +28,6 @@ export function DownloadButton({ book, tracks, className }: DownloadButtonProps)
     downloadedTracks,
     setDownloadProgress,
     clearDownloadProgress,
-    addDownloadedTrack,
   } = usePlayerStore();
 
   const [isNative, setIsNative] = useState(false);
@@ -84,14 +83,8 @@ export function DownloadButton({ book, tracks, className }: DownloadButtonProps)
         }
       );
 
-      // Add all tracks to downloaded tracks
-      for (const track of downloadedBook.tracks) {
-        addDownloadedTrack(track.ratingKey, {
-          ratingKey: track.ratingKey,
-          localPath: track.localPath,
-          downloadedAt: track.downloadedAt,
-        });
-      }
+      // Sync Zustand store from Preferences (single source of truth)
+      await syncDownloadsToStore();
 
       setDownloadProgress(book.ratingKey, {
         bookKey: book.ratingKey,
@@ -124,9 +117,8 @@ export function DownloadButton({ book, tracks, className }: DownloadButtonProps)
     }
 
     try {
-      const trackKeys = tracks.map(t => t.ratingKey);
       await downloadService.deleteBook(book.ratingKey);
-      usePlayerStore.getState().removeDownloadedBook(book.ratingKey, trackKeys);
+      await syncDownloadsToStore();
       setIsDownloaded(false);
     } catch (error) {
       console.error('Failed to delete download:', error);

@@ -3,6 +3,7 @@ import { Preferences } from '@capacitor/preferences';
 import { Network } from '@capacitor/network';
 import { Capacitor } from '@capacitor/core';
 import { plexService } from './plexService';
+import { usePlayerStore } from '../store/useStore';
 
 export interface DownloadedTrack {
   ratingKey: string;
@@ -21,6 +22,7 @@ export interface DownloadedBook {
   title: string;
   parentTitle: string;
   thumb?: string;
+  localThumb?: string;
   summary?: string;
   tracks: DownloadedTrack[];
   downloadedAt: number;
@@ -46,9 +48,20 @@ function sanitizeFileName(name: string): string {
   return name.replace(/[^a-zA-Z0-9\-_\.]/g, '_').substring(0, 100);
 }
 
+function getFileExtension(track: any): string {
+  const container = track?.Media?.[0]?.Part?.[0]?.container;
+  if (container) return `.${container}`;
+
+  const key = track?.Media?.[0]?.Part?.[0]?.key || '';
+  const match = key.match(/\.(\w{2,5})$/);
+  if (match) return `.${match[1]}`;
+
+  return '.mp3';
+}
+
 export const downloadService = {
   async isNative(): Promise<boolean> {
-    return typeof (window as any).Capacitor !== 'undefined' && (window as any).Capacitor.isNativePlatform();
+    return Capacitor.isNativePlatform();
   },
 
   async getNetworkStatus() {
@@ -119,6 +132,23 @@ export const downloadService = {
       // Directory may already exist
     }
 
+    // Download cover image for offline use
+    let localThumb: string | undefined;
+    if (book.thumb) {
+      try {
+        const thumbUrl = `${baseUrl}/photo/:/transcode?url=${encodeURIComponent(book.thumb)}&width=600&height=600&X-Plex-Token=${token}`;
+        const thumbPath = `${bookDir}/cover.jpg`;
+        await Filesystem.downloadFile({
+          url: thumbUrl,
+          path: thumbPath,
+          directory: Directory.Data,
+        });
+        localThumb = thumbPath;
+      } catch (e) {
+        console.warn('Failed to download cover image:', e);
+      }
+    }
+
     for (let i = 0; i < tracks.length; i++) {
       const track = tracks[i];
       const partKey = track?.Media?.[0]?.Part?.[0]?.key;
@@ -129,7 +159,8 @@ export const downloadService = {
       }
 
       const downloadUrl = plexService.getDownloadUrl(baseUrl, partKey, token);
-      const fileName = `${sanitizeFileName(track.title || `track_${i + 1}`)}_${track.ratingKey}.mp3`;
+      const ext = getFileExtension(track);
+      const fileName = `${sanitizeFileName(track.title || `track_${i + 1}`)}_${track.ratingKey}${ext}`;
       const filePath = `${bookDir}/${fileName}`;
 
       try {
@@ -194,6 +225,7 @@ export const downloadService = {
       title: book.title,
       parentTitle: book.parentTitle,
       thumb: book.thumb,
+      localThumb,
       summary: book.summary,
       tracks: downloadedTracks,
       downloadedAt: Date.now(),
@@ -274,3 +306,20 @@ export const downloadService = {
     }
   },
 };
+
+export async function syncDownloadsToStore(): Promise<void> {
+  const books = await downloadService.getDownloadedBooks();
+  const tracksMap: Record<string, { ratingKey: string; localPath: string; downloadedAt: number }> = {};
+
+  for (const book of books) {
+    for (const track of book.tracks) {
+      tracksMap[track.ratingKey] = {
+        ratingKey: track.ratingKey,
+        localPath: track.localPath,
+        downloadedAt: track.downloadedAt,
+      };
+    }
+  }
+
+  usePlayerStore.getState().setDownloadedTracks(tracksMap);
+}

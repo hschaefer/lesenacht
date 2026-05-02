@@ -16,7 +16,7 @@ import { MiniPlayer } from './components/MiniPlayer';
 import { AudioController } from './components/AudioController';
 import { useTranslation } from 'react-i18next';
 import { plexService } from './services/plexService';
-import { downloadService } from './services/downloadService';
+import { downloadService, syncDownloadsToStore } from './services/downloadService';
 import { App as CapApp } from '@capacitor/app';
 
 export default function App() {
@@ -55,6 +55,11 @@ export default function App() {
       } catch {}
       setServerReady(true);
     })();
+  }, []);
+
+  // Sync downloaded tracks from Preferences (source of truth) to Zustand on startup
+  useEffect(() => {
+    syncDownloadsToStore().catch(() => {});
   }, []);
 
   // Sync i18n with stored language
