@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { plexService } from '../services/plexService';
 import { useAuthStore } from '../store/useStore';
-import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info, Languages, ShieldCheck, Check } from 'lucide-react';
+import { LogIn, Server, Library, CheckCircle2, ChevronDown, ChevronUp, Moon, Sun, Monitor, Trash2, AlertTriangle, Info, Languages, ShieldCheck, Check, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 
@@ -18,6 +18,10 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
     setTheme,
     language,
     setLanguage,
+    showVolumeControl,
+    setShowVolumeControl,
+    progressBarMode,
+    setProgressBarMode,
     clearAllData
   } = useAuthStore();
   const [servers, setServers] = useState<any[]>([]);
@@ -355,6 +359,48 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
                   {item.label}
                 </button>
               ))}
+            </div>
+          </section>
+
+          {/* Player Settings Section */}
+          <section className="space-y-4">
+            <h2 className="text-[10px] uppercase tracking-widest font-bold text-ink-dim flex items-center gap-2">
+              <Volume2 size={16} /> {t('settings.player.title')}
+            </h2>
+            
+            <div className="space-y-2">
+              <div className="p-4 glass rounded-2xl flex items-center justify-between group cursor-pointer" onClick={() => setShowVolumeControl(!showVolumeControl)}>
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-ink lowercase tracking-widest">{t('settings.player.showVolume')}</h3>
+                  <p className="text-[10px] text-ink-dim uppercase tracking-wider">{t('settings.player.showVolumeDesc')}</p>
+                </div>
+                <div className={`w-12 h-6 rounded-full transition-all duration-300 relative ${showVolumeControl ? 'accent-bg' : 'bg-white/10'}`}>
+                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ${showVolumeControl ? 'left-7' : 'left-1'}`} />
+                </div>
+              </div>
+
+              <div className="p-4 glass rounded-2xl space-y-4">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-bold text-ink lowercase tracking-widest">{t('settings.player.progressMode')}</h3>
+                  <p className="text-[10px] text-ink-dim uppercase tracking-wider">{t('settings.player.progressModeDesc')}</p>
+                </div>
+                
+                <div className="flex gap-2 p-1 bg-black/5 dark:bg-white/5 rounded-xl">
+                  {[
+                    { id: 'main', label: t('settings.player.progressMain') },
+                    { id: 'chapter', label: t('settings.player.progressChapter') },
+                    { id: 'both', label: t('settings.player.progressBoth') },
+                  ].map((item) => (
+                    <button 
+                      key={item.id}
+                      onClick={() => setProgressBarMode(item.id as any)}
+                      className={`flex-1 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${progressBarMode === item.id ? 'accent-bg text-white shadow-md' : 'text-ink-muted hover:text-ink-dim'}`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </section>
         </div>

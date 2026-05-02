@@ -177,12 +177,16 @@ interface AuthState {
   selectedLibrary: any | null;
   theme: 'light' | 'dark' | 'system';
   language: string;
+  showVolumeControl: boolean;
+  progressBarMode: 'main' | 'chapter' | 'both';
   
   setAuthToken: (token: string | null) => void;
   setSelectedServer: (server: any | null) => void;
   setSelectedLibrary: (library: any | null) => void;
   setTheme: (theme: 'light' | 'dark' | 'system') => void;
   setLanguage: (language: string) => void;
+  setShowVolumeControl: (show: boolean) => void;
+  setProgressBarMode: (mode: 'main' | 'chapter' | 'both') => void;
   clearAllData: () => void;
 }
 
@@ -194,19 +198,25 @@ export const useAuthStore = create<AuthState>()(
       selectedLibrary: null,
       theme: 'system',
       language: 'en',
+      showVolumeControl: true,
+      progressBarMode: 'both',
       
       setAuthToken: (token) => set({ authToken: token }),
       setSelectedServer: (server) => set({ selectedServer: server }),
       setSelectedLibrary: (library) => set({ selectedLibrary: library }),
       setTheme: (theme) => set({ theme }),
       setLanguage: (language) => set({ language }),
+      setShowVolumeControl: (show) => set({ showVolumeControl: show }),
+      setProgressBarMode: (mode) => set({ progressBarMode: mode }),
       clearAllData: () => {
         set({ 
           authToken: null, 
           selectedServer: null, 
           selectedLibrary: null, 
           theme: 'system',
-          language: 'en'
+          language: 'en',
+          showVolumeControl: true,
+          progressBarMode: 'both'
         });
         usePlayerStore.setState({
           isPlaying: false,

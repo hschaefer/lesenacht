@@ -55,7 +55,7 @@ export function NowPlayingView({
     bookmarks,
     removeBookmark
   } = usePlayerStore();
-  const { authToken, selectedServer } = useAuthStore();
+  const { authToken, selectedServer, showVolumeControl, progressBarMode } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
   const [isSpeedMenuOpen, setIsSpeedMenuOpen] = useState(false);
   const [isChapterMenuOpen, setIsChapterMenuOpen] = useState(false);
@@ -258,7 +258,7 @@ export function NowPlayingView({
 
           <div className="w-full space-y-6">
             {/* Chapter Progress Bar */}
-            {chapters.length > 0 && (
+            {chapters.length > 1 && (progressBarMode === 'chapter' || progressBarMode === 'both') && (
               <div className="space-y-1">
                 <div 
                   className="h-1 w-full bg-white/10 rounded-full overflow-hidden relative cursor-pointer"
@@ -282,30 +282,32 @@ export function NowPlayingView({
             )}
 
             {/* Progress Bar */}
-            <div className="space-y-2">
-              <div 
-                className="progress-track w-full group cursor-pointer"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const clickedPercent = x / rect.width;
-                  setCurrentTime(clickedPercent * duration);
-                }}
-              >
+            {(progressBarMode === 'main' || progressBarMode === 'both' || chapters.length <= 1) && (
+              <div className="space-y-2">
                 <div 
-                  className="absolute h-full left-0 top-0 accent-bg shadow-[0_0_15px_rgba(234,88,12,0.6)]" 
-                  style={{ width: `${progress}%` }}
-                />
-                <div 
-                  className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-ink rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" 
-                  style={{ left: `${progress}%` }}
-                />
+                  className="progress-track w-full group cursor-pointer"
+                  onClick={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const clickedPercent = x / rect.width;
+                    setCurrentTime(clickedPercent * duration);
+                  }}
+                >
+                  <div 
+                    className="absolute h-full left-0 top-0 accent-bg shadow-[0_0_15px_rgba(234,88,12,0.6)]" 
+                    style={{ width: `${progress}%` }}
+                  />
+                  <div 
+                    className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-ink rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" 
+                    style={{ left: `${progress}%` }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] font-mono text-ink-dim dark:text-ink-muted font-bold">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>-{formatTime(duration - currentTime)}</span>
+                </div>
               </div>
-              <div className="flex justify-between text-[10px] font-mono text-ink-dim dark:text-ink-muted font-bold">
-                <span>{formatTime(currentTime)}</span>
-                <span>-{formatTime(duration - currentTime)}</span>
-              </div>
-            </div>
+            )}
 
             {/* Controls Row 1 */}
             <div className="flex items-center justify-between">
@@ -396,15 +398,17 @@ export function NowPlayingView({
             </div>
 
             {/* Volume */}
-            <div className="flex items-center gap-4 text-ink-dim dark:text-ink-muted">
-              <VolumeX size={16} />
-              <input 
-                type="range" min="0" max="1" step="0.01" 
-                value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))}
-                className="flex-1"
-              />
-              <Volume2 size={16} />
-            </div>
+            {showVolumeControl && (
+              <div className="flex items-center gap-4 text-ink-dim dark:text-ink-muted">
+                <VolumeX size={16} />
+                <input 
+                  type="range" min="0" max="1" step="0.01" 
+                  value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))}
+                  className="flex-1"
+                />
+                <Volume2 size={16} />
+              </div>
+            )}
           </div>
         </div>
       </div>

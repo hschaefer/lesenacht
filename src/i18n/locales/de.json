@@ -25,6 +25,16 @@
       "dark": "Dunkel",
       "system": "System"
     },
+    "player": {
+      "title": "Wiedergabe",
+      "showVolume": "Lautstärkeregelung anzeigen",
+      "showVolumeDesc": "Zeigt den Lautstärkeregler im player an",
+      "progressMode": "Fortschrittsbalken",
+      "progressModeDesc": "Wähle aus, welche Balken angezeigt werden",
+      "progressBoth": "Beide",
+      "progressMain": "Nur Haupt",
+      "progressChapter": "Nur Kapitel"
+    },
     "language": {
       "title": "Sprache",
       "en": "englisch",

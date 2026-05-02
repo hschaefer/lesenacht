@@ -25,6 +25,16 @@
       "dark": "Dark",
       "system": "System"
     },
+    "player": {
+      "title": "Player",
+      "showVolume": "Show Volume Control",
+      "showVolumeDesc": "Display the volume slider in the main player",
+      "progressMode": "Progress Bars",
+      "progressModeDesc": "Choose which progress bars to display",
+      "progressBoth": "Both",
+      "progressMain": "Main Only",
+      "progressChapter": "Chapter Only"
+    },
     "language": {
       "title": "Language",
       "en": "english",
