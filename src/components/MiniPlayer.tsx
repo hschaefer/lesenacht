@@ -24,7 +24,7 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
       initial={{ y: 100 }}
       animate={{ y: 0 }}
       exit={{ y: 100 }}
-      className="fixed bottom-20 left-4 right-4 glass rounded-2xl shadow-2xl z-40 overflow-hidden cursor-pointer group"
+      className="mx-4 glass rounded-2xl shadow-2xl overflow-hidden cursor-pointer group"
       onClick={onClick}
     >
       {/* Background Atmosphere */}

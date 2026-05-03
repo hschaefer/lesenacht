@@ -261,7 +261,7 @@ export function NowPlayingView({
             {chapters.length > 1 && (progressBarMode === 'chapter' || progressBarMode === 'both') && (
               <div className="space-y-1">
                 <div 
-                  className="h-1 w-full bg-white/10 rounded-full overflow-hidden relative cursor-pointer"
+                  className="h-1 w-full bg-[#64748b] dark:bg-white/10 rounded-full overflow-hidden relative cursor-pointer"
                   onClick={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left;
@@ -270,7 +270,7 @@ export function NowPlayingView({
                   }}
                 >
                   <div 
-                    className="absolute h-full left-0 top-0 bg-accent/60" 
+                    className="absolute h-full left-0 top-0 accent-bg" 
                     style={{ width: `${chapterProgress}%` }}
                   />
                 </div>
