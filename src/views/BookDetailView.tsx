@@ -37,6 +37,7 @@ export function BookDetailView({
   const { 
     setCurrentBook, 
     setCurrentTrack, 
+    setQueue,
     setPlaying, 
     currentBook,
     currentTrack, 
@@ -180,6 +181,7 @@ export function BookDetailView({
 
   const handlePlayTrack = (track: any, startTime = 0) => {
     setCurrentBook(book);
+    setQueue(tracks);
     setCurrentTrack(track);
     if (startTime > 0) {
       usePlayerStore.getState().setCurrentTime(startTime);

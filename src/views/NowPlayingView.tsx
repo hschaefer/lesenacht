@@ -45,6 +45,7 @@ export function NowPlayingView({
     currentTime, 
     duration, 
     setCurrentTime,
+    setCurrentTrack,
     playbackSpeed,
     setPlaybackSpeed,
     volume,
@@ -53,7 +54,8 @@ export function NowPlayingView({
     sleepTimerEnd,
     setSleepTimer,
     bookmarks,
-    removeBookmark
+    removeBookmark,
+    queue
   } = usePlayerStore();
   const { authToken, selectedServer, showVolumeControl, progressBarMode } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
@@ -89,6 +91,17 @@ export function NowPlayingView({
 
   if (!currentBook || !currentTrack) return null;
 
+  const isTrackBased = chapters.length === 0 && queue.length > 1;
+  const effectiveChapters = isTrackBased
+    ? queue.map((track: any, i: number) => ({
+        index: i,
+        tag: track.title,
+        startTimeOffset: 0,
+        _ratingKey: track.ratingKey,
+        _duration: track.duration,
+      }))
+    : chapters;
+
   const connections = selectedServer?.connections || [];
   const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri || '';
 
@@ -106,33 +119,44 @@ export function NowPlayingView({
   const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2];
   const sleepOptions = [15, 30, 45, 60, null];
 
-  const currentChapter = chapters.length > 0 
-    ? [...chapters].reverse().find(c => {
-        const start = c.startTimeOffset || c.start || 0;
-        return (start / 1000) <= currentTime;
-      }) 
-    : null;
+  const currentChapter = isTrackBased
+    ? (effectiveChapters.find((c: any) => c._ratingKey === currentTrack.ratingKey) || null)
+    : effectiveChapters.length > 0
+      ? ([...effectiveChapters].reverse().find(c => {
+          const start = c.startTimeOffset || c.start || 0;
+          return (start / 1000) <= currentTime;
+        }) || null)
+      : null;
 
   const handleNextChapter = () => {
-    if (chapters.length === 0) return;
-    const currentIdx = currentChapter ? chapters.findIndex(c => c.index === currentChapter.index) : -1;
-    if (currentIdx < chapters.length - 1) {
-      const next = chapters[currentIdx + 1];
-      setCurrentTime((next.startTimeOffset || next.start || 0) / 1000);
+    if (effectiveChapters.length === 0) return;
+    const currentIdx = currentChapter ? effectiveChapters.findIndex(c => c.index === currentChapter.index) : -1;
+    if (currentIdx < effectiveChapters.length - 1) {
+      if (isTrackBased) {
+        setCurrentTrack(queue[currentIdx + 1]);
+        setPlaying(true);
+      } else {
+        const next = effectiveChapters[currentIdx + 1];
+        setCurrentTime((next.startTimeOffset || next.start || 0) / 1000);
+      }
     }
   };
 
   const handlePrevChapter = () => {
-    if (chapters.length === 0) return;
-    const currentIdx = currentChapter ? chapters.findIndex(c => c.index === currentChapter.index) : -1;
-    // If we're more than 3 seconds into the chapter, restart it, otherwise go to previous
+    if (effectiveChapters.length === 0) return;
+    const currentIdx = currentChapter ? effectiveChapters.findIndex(c => c.index === currentChapter.index) : -1;
     const chapterStart = currentChapter ? (currentChapter.startTimeOffset || currentChapter.start || 0) / 1000 : 0;
     
     if (currentTime - chapterStart > 3) {
       setCurrentTime(chapterStart);
     } else if (currentIdx > 0) {
-      const prev = chapters[currentIdx - 1];
-      setCurrentTime((prev.startTimeOffset || prev.start || 0) / 1000);
+      if (isTrackBased) {
+        setCurrentTrack(queue[currentIdx - 1]);
+        setPlaying(true);
+      } else {
+        const prev = effectiveChapters[currentIdx - 1];
+        setCurrentTime((prev.startTimeOffset || prev.start || 0) / 1000);
+      }
     }
   };
 
@@ -145,11 +169,13 @@ export function NowPlayingView({
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  const currentChapterIndex = currentChapter ? chapters.findIndex(c => c.index === currentChapter.index) : -1;
+  const currentChapterIndex = currentChapter ? effectiveChapters.findIndex(c => c.index === currentChapter.index) : -1;
   const chapterStart = currentChapter ? (currentChapter.startTimeOffset || currentChapter.start || 0) / 1000 : 0;
-  const chapterEnd = chapters[currentChapterIndex + 1] 
-    ? (chapters[currentChapterIndex + 1].startTimeOffset || chapters[currentChapterIndex + 1].start) / 1000 
-    : duration;
+  const chapterEnd = isTrackBased
+    ? duration
+    : (effectiveChapters[currentChapterIndex + 1]
+      ? (effectiveChapters[currentChapterIndex + 1].startTimeOffset || effectiveChapters[currentChapterIndex + 1].start) / 1000
+      : duration);
   const chapterDuration = chapterEnd - chapterStart;
   const chapterProgress = chapterDuration > 0 
     ? Math.min(100, Math.max(0, ((currentTime - chapterStart) / chapterDuration) * 100)) 
@@ -232,7 +258,7 @@ export function NowPlayingView({
             alt={currentBook.title} 
             size={80}
           />
-          {currentChapter && (
+          {currentChapter && !isTrackBased && (
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
               <p className="text-[10px] uppercase tracking-widest font-bold text-accent mb-1">{t('player.currentChapter')}</p>
               <p className="text-white text-xs font-medium truncate">{currentChapter.tag || currentChapter.title}</p>
@@ -243,7 +269,7 @@ export function NowPlayingView({
         <div className="w-full max-w-sm md:max-w-md space-y-8 flex flex-col justify-center">
           <div className="text-center md:text-left space-y-2">
             <h1 className="text-xl md:text-3xl font-bold text-ink truncate">{currentTrack.title}</h1>
-            {currentChapter && (
+            {currentChapter && !isTrackBased && (
               <p className="text-sm font-medium text-ink-dim truncate">
                 {currentChapter.tag || currentChapter.title}
               </p>
@@ -258,7 +284,7 @@ export function NowPlayingView({
 
           <div className="w-full space-y-6">
             {/* Chapter Progress Bar */}
-            {chapters.length > 1 && (progressBarMode === 'chapter' || progressBarMode === 'both') && (
+            {effectiveChapters.length > 1 && (progressBarMode === 'chapter' || progressBarMode === 'both') && (
               <div className="space-y-1">
                 <div 
                   className="h-1 w-full bg-[#64748b] dark:bg-white/10 rounded-full overflow-hidden relative cursor-pointer"
@@ -282,7 +308,7 @@ export function NowPlayingView({
             )}
 
             {/* Progress Bar */}
-            {(progressBarMode === 'main' || progressBarMode === 'both' || chapters.length <= 1) && (
+            {(progressBarMode === 'main' || progressBarMode === 'both' || effectiveChapters.length <= 1) && (
               <div className="space-y-2">
                 <div 
                   className="progress-track w-full group cursor-pointer"
@@ -313,7 +339,7 @@ export function NowPlayingView({
             <div className="flex items-center justify-between">
               <button 
                 onClick={handlePrevChapter}
-                disabled={chapters.length === 0}
+                disabled={effectiveChapters.length === 0}
                 className="text-ink-dim hover:text-ink transition-colors disabled:opacity-20"
                 title={t('player.chapters')}
               >
@@ -345,7 +371,7 @@ export function NowPlayingView({
 
               <button 
                 onClick={handleNextChapter}
-                disabled={chapters.length === 0}
+                disabled={effectiveChapters.length === 0}
                 className="text-ink-dim hover:text-ink transition-colors disabled:opacity-20"
                 title={t('player.chapters')}
               >
@@ -379,7 +405,7 @@ export function NowPlayingView({
 
               <button 
                 onClick={() => setIsChapterMenuOpen(true)}
-                disabled={chapters.length === 0}
+                disabled={effectiveChapters.length === 0}
                 className={`flex flex-col items-center gap-1 transition-colors ${isChapterMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'} disabled:opacity-20`}
               >
                 <List size={24} />
@@ -471,20 +497,31 @@ export function NowPlayingView({
 
             <div className="overflow-y-auto space-y-2 pr-2 custom-scrollbar flex-1">
               {activeMenuTab === 'chapters' ? (
-                chapters.map((chapter, idx) => {
+                effectiveChapters.map((chapter: any, idx: number) => {
                   const startTime = (chapter.startTimeOffset || chapter.start || 0) / 1000;
                   const isActive = currentChapter?.index === chapter.index;
+                  const displayTime = isTrackBased && chapter._duration
+                    ? formatTime(chapter._duration / 1000)
+                    : formatTime(startTime);
                   return (
                     <button
-                      key={chapter.index || idx}
-                      onClick={() => { setCurrentTime(startTime); setIsChapterMenuOpen(false); }}
+                      key={chapter.index ?? idx}
+                      onClick={() => {
+                        if (isTrackBased) {
+                          setCurrentTrack(queue[idx]);
+                          setPlaying(true);
+                        } else {
+                          setCurrentTime(startTime);
+                        }
+                        setIsChapterMenuOpen(false);
+                      }}
                       className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all ${isActive ? 'bg-accent/20 border border-accent/30 text-accent' : 'glass border-white/5 text-ink-dim hover:text-ink'}`}
                     >
                       <div className="flex items-center gap-4 min-w-0">
                         <span className="text-[10px] font-mono">{(idx + 1).toString().padStart(2, '0')}</span>
                         <span className="text-sm font-medium truncate">{chapter.tag || chapter.title}</span>
                       </div>
-                      <span className={`text-[10px] font-mono font-bold ${isActive ? 'text-accent' : 'text-ink-muted'}`}>{formatTime(startTime)}</span>
+                      <span className={`text-[10px] font-mono font-bold ${isActive ? 'text-accent' : 'text-ink-muted'}`}>{displayTime}</span>
                     </button>
                   );
                 })

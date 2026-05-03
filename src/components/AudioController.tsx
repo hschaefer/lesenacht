@@ -475,8 +475,16 @@ export function AudioController() {
   };
 
   const handleEnded = () => {
+    const { queue, currentTrack: endedTrack, setCurrentTrack: switchTrack } = usePlayerStore.getState();
+    if (queue.length > 1 && endedTrack) {
+      const currentIdx = queue.findIndex((t: any) => t.ratingKey === endedTrack.ratingKey);
+      if (currentIdx >= 0 && currentIdx < queue.length - 1) {
+        switchTrack(queue[currentIdx + 1]);
+        setPlaying(true);
+        return;
+      }
+    }
     setPlaying(false);
-    // Future: Auto-play next track in queue
   };
 
   const handlePlay = () => {
