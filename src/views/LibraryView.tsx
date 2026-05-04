@@ -135,10 +135,10 @@ export function LibraryView({
   }, []);
 
   useEffect(() => {
-    if (!isNetworkConnected) {
+    if (!isNetworkConnected && isNative) {
       setActiveTab('offline');
     }
-  }, [isNetworkConnected]);
+  }, [isNetworkConnected, isNative]);
 
   const loadDownloads = useCallback(async () => {
     if (activeTab !== 'offline') return;
@@ -316,12 +316,14 @@ export function LibraryView({
         >
           {t('library.authors')}
         </button>
-        <button 
-          onClick={() => { setActiveTab('offline'); setSearchQuery(''); }}
-          className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'offline' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink-dim'}`}
-        >
-          {t('library.offline', 'Offline')}
-        </button>
+        {isNative && (
+          <button 
+            onClick={() => { setActiveTab('offline'); setSearchQuery(''); }}
+            className={`px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${activeTab === 'offline' ? 'accent-bg text-white shadow-lg' : 'text-ink-muted hover:text-ink-dim'}`}
+          >
+            {t('library.offline', 'Offline')}
+          </button>
+        )}
       </div>
 
       {activeTab !== 'offline' && (
