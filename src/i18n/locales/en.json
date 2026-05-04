@@ -56,12 +56,10 @@
     },
     "privacy": {
       "title": "Privacy & Transparency",
-      "dataTitle": "Your Data",
-      "dataText": "Lesenacht is a local-first application. Your Plex credentials and library data are sent only to Plex and your own server. No personal data is collected, stored, or shared by the application developers.",
       "hostingTitle": "Hosting",
       "hostingText": "This application instance is hosted on Cloudflare Pages. Cloudflare may collect basic diagnostic and traffic data required for security and delivery.",
-      "gdprTitle": "GDPR Statement",
-      "gdprText": "As this is a tool to access your own self-hosted media, you remain the data controller. The application does not store PII (Personally Identifiable Information) on external servers."
+      "privacyStatementTitle": "Privacy Statement",
+      "privacyStatementText": "This application is designed with privacy in mind. Your Plex authentication token and library metadata are stored locally in your browser or on your device. There is no central database or analytics server; all communication happens directly between your application and the Plex servers (some web requests may be routed through your own self-hosted thin proxy for connectivity). No personal data is collected, stored, or shared by the developers, and all data processing remains under your control."
     }
   },
   "home": {

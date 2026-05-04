@@ -11,6 +11,7 @@ export default defineConfig(({mode}) => {
     define: {
       __APP_VERSION__: JSON.stringify(pkg.version),
       __APP_LAST_UPDATED__: JSON.stringify(pkg.lastUpdated),
+      __IS_CLOUDFLARE__: !!process.env.CF_PAGES,
     },
     resolve: {
       alias: {

@@ -56,12 +56,10 @@
     },
     "privacy": {
       "title": "Datenschutz & Transparenz",
-      "dataTitle": "Deine Daten",
-      "dataText": "Lesenacht ist eine Local-First-Anwendung. Deine Plex-Zugangsdaten und Bibliotheksdaten werden nur an Plex und deinen eigenen Server gesendet. Es werden keine personenbezogenen Daten von den App-Entwicklern gesammelt, gespeichert oder weitergegeben.",
       "hostingTitle": "Hosting",
       "hostingText": "Diese Anwendungsinstanz wird auf Cloudflare Pages gehostet. Cloudflare kann grundlegende Diagnose- und Verkehrsdaten erfassen, die für Sicherheit und Bereitstellung erforderlich sind.",
-      "gdprTitle": "DSGVO-Erklärung",
-      "gdprText": "Da dies ein Tool ist, um auf deine eigenen selbstgehosteten Medien zuzugreifen, bleibst du der Datenverantwortliche. Die Anwendung speichert keine PII (personenbezogene Daten) auf externen Servern."
+      "privacyStatementTitle": "Datenschutzerklärung",
+      "privacyStatementText": "Diese Anwendung wurde mit Fokus auf Datenschutz entwickelt. Dein Plex-Authentifizierungstoken und deine Bibliotheksmetadaten werden lokal in deinem Browser oder auf deinem Gerät gespeichert. Es gibt keine zentrale Datenbank oder Analyse-Server; die gesamte Kommunikation findet direkt zwischen deiner Anwendung und den Plex-Servern statt (einige Web-Anfragen können über deinen eigenen selbstgehosteten Thin Proxy zur Konnektivität geleitet werden). Es werden keine personenbezogenen Daten von den Entwicklern gesammelt, gespeichert oder weitergegeben, und die gesamte Datenverarbeitung bleibt unter deiner Kontrolle."
     }
   },
   "home": {

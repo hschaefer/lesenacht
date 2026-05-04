@@ -158,6 +158,8 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
     }
   };
 
+  const isCloudflare = __IS_CLOUDFLARE__ || window.location.hostname.endsWith('.pages.dev');
+
   return (
     <div className="space-y-8 pb-10">
       <header>
@@ -435,30 +437,23 @@ export function SettingsView({ onLogin, autoStartLogin, onShowDownloads }: { onL
             <div className="p-6 glass rounded-2xl space-y-6">
               <div className="space-y-2">
                 <h3 className="text-xs font-bold text-ink flex items-center gap-2">
-                  <CheckCircle2 size={14} className="text-accent" /> {t('settings.privacy.dataTitle')}
+                  <CheckCircle2 size={14} className="text-accent" /> {t('settings.privacy.privacyStatementTitle')}
                 </h3>
                 <p className="text-xs text-ink-dim leading-relaxed text-left">
-                  {t('settings.privacy.dataText')}
+                  {t('settings.privacy.privacyStatementText')}
                 </p>
               </div>
               
-              <div className="space-y-2">
-                <h3 className="text-xs font-bold text-ink flex items-center gap-2">
-                  <Server size={14} className="text-accent" /> {t('settings.privacy.hostingTitle')}
-                </h3>
-                <p className="text-xs text-ink-dim leading-relaxed text-left">
-                  {t('settings.privacy.hostingText')}
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-white/5">
-                <h3 className="text-[10px] font-bold text-ink-muted uppercase tracking-widest mb-1">
-                  {t('settings.privacy.gdprTitle')}
-                </h3>
-                <p className="text-[10px] text-ink-muted leading-tight text-left">
-                  {t('settings.privacy.gdprText')}
-                </p>
-              </div>
+              {isCloudflare && (
+                <div className="space-y-2 pt-4 border-t border-white/5">
+                  <h3 className="text-xs font-bold text-ink flex items-center gap-2">
+                    <Server size={14} className="text-accent" /> {t('settings.privacy.hostingTitle')}
+                  </h3>
+                  <p className="text-xs text-ink-dim leading-relaxed text-left">
+                    {t('settings.privacy.hostingText')}
+                  </p>
+                </div>
+              )}
             </div>
           </section>
 

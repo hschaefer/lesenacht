@@ -55,16 +55,27 @@ Run this every time you make changes to your React code that you want to see in 
   ```bash
   npm run cap:sync
   ```
+- **Build APK (Command Line)**:
+  Run this to generate a debug APK without opening Android Studio:
+  ```bash
+  npm run build && npx cap sync
+  cd android && ./gradlew assembleDebug
+  ```
+  The generated APK will be located at: `android/app/build/outputs/apk/debug/app-debug.apk`
+
 - **Open in Android Studio**:
   ```bash
   npm run cap:open
   ```
+  From there, you can build and run the app using the standard Android Studio tools.
 
-## Data Privacy & GDPR
+## Privacy Statement
 
-- **Local-First**: This app is "local-first". Your Plex authentication token and library metadata are stored in your browser's `localStorage`.
-- **No Central Backend**: There is no central database or analytics server. All communication happens between your browser and the Plex API (optionally proxied through your own Cloudflare Worker functions).
-- **Compliance**: Since you are hosting the app to access your own data, you are generally the "Data Controller" under GDPR. The app itself complies by not collecting, storing, or transmitting PII to any third party other than Plex.
+This application is designed with privacy in mind. It does not collect or store personal information on external servers. All data processing related to your media remains under your control.
+
+- **Local-First**: This app is "local-first". Your Plex authentication token and library metadata are stored locally in your browser or on your device.
+- **No Central Backend**: There is no central database or analytics server. All communication happens directly between your application and the Plex servers. For the web app, some requests may be routed through your own self-hosted thin proxy for connectivity.
+- **Data Control**: You remain in control of your data. The application does not transmit PII (Personally Identifiable Information) to any third party other than Plex.
 
 ---
 
