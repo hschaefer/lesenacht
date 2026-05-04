@@ -200,40 +200,38 @@ export default function App() {
         </div>
       </main>
 
-      {/* Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 glass border-t border-white/5 pb-[env(safe-area-inset-bottom)] z-40">
-        <div className="max-w-lg md:max-w-none mx-auto grid grid-cols-3 h-16">
-          <NavButton 
-            active={activeTab === 'home' && !selectedBookKey && !selectedAuthorKey} 
-            onClick={() => { setActiveTab('home'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
-            icon={<HomeIcon size={20} />}
-            label={t('common.home')}
-          />
-          <NavButton 
-            active={activeTab === 'library' && !selectedBookKey && !selectedAuthorKey} 
-            onClick={() => { setActiveTab('library'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
-            icon={<LibraryIcon size={20} />}
-            label={t('common.library')}
-          />
-          <NavButton 
-            active={activeTab === 'settings' && !selectedBookKey && !selectedAuthorKey} 
-            onClick={() => { setActiveTab('settings'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
-            icon={<SettingsIcon size={20} />}
-            label={t('common.settings')}
-          />
-        </div>
-      </nav>
-
-      {/* Mini Player */}
-      <AnimatePresence>
-        {currentBook && (
-          <div className="fixed left-0 right-0 z-30" style={{ bottom: 'calc(4rem + env(safe-area-inset-bottom))' }}>
-            <div className="max-w-lg md:max-w-none mx-auto">
+      {/* Bottom Panel: MiniPlayer stacked directly above NavBar */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 flex flex-col">
+        <AnimatePresence>
+          {currentBook && (
+            <div className="max-w-lg md:max-w-none mx-auto w-full pb-2">
               <MiniPlayer onClick={() => setIsNowPlayingOpen(true)} />
             </div>
+          )}
+        </AnimatePresence>
+        <nav className="glass border-t border-white/5 pb-[env(safe-area-inset-bottom)]">
+          <div className="max-w-lg md:max-w-none mx-auto grid grid-cols-3 h-16">
+            <NavButton 
+              active={activeTab === 'home' && !selectedBookKey && !selectedAuthorKey} 
+              onClick={() => { setActiveTab('home'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
+              icon={<HomeIcon size={20} />}
+              label={t('common.home')}
+            />
+            <NavButton 
+              active={activeTab === 'library' && !selectedBookKey && !selectedAuthorKey} 
+              onClick={() => { setActiveTab('library'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
+              icon={<LibraryIcon size={20} />}
+              label={t('common.library')}
+            />
+            <NavButton 
+              active={activeTab === 'settings' && !selectedBookKey && !selectedAuthorKey} 
+              onClick={() => { setActiveTab('settings'); setSelectedBookKey(null); setSelectedAuthorKey(null); }}
+              icon={<SettingsIcon size={20} />}
+              label={t('common.settings')}
+            />
           </div>
-        )}
-      </AnimatePresence>
+        </nav>
+      </div>
 
       {/* Now Playing Fullscreen */}
       <AnimatePresence>
