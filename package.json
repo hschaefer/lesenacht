@@ -1,8 +1,8 @@
 {
   "name": "lesenacht",
   "private": true,
-  "version": "1.1.0",
-  "lastUpdated": "2026-05-02",
+  "version": "1.2.0",
+  "lastUpdated": "2026-05-04",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
