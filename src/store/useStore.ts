@@ -25,7 +25,7 @@ interface PlayerState {
   volume: number;
   queue: any[];
   bookmarks: { trackKey: string; time: number; label: string; date: number }[];
-  progressMap: Record<string, { time: number; duration: number }>; // Map track ratingKey to its last position and total duration
+  progressMap: Record<string, { time: number; duration: number; lastPlayed: number }>; // Map track ratingKey to its last position and total duration
   lastTrackByBook: Record<string, string>; // Map book ratingKey to last played track ratingKey
   bookQueues: Record<string, { ratingKey: string; duration: number }[]>; // Map book ratingKey to its ordered track stubs
   sleepTimerEnd: number | null; // Timestamp when player should stop
@@ -114,7 +114,7 @@ export const usePlayerStore = create<PlayerState>()(
         bookmarks: state.bookmarks.filter(b => !(b.trackKey === trackKey && b.date === date))
       })),
       saveProgress: (trackKey, time, duration) => set((state) => ({
-        progressMap: { ...state.progressMap, [trackKey]: { time, duration } }
+        progressMap: { ...state.progressMap, [trackKey]: { time, duration, lastPlayed: Date.now() } }
       })),
       resetProgress: (bookKey) => set((state) => {
         const lastTrackKey = state.lastTrackByBook[bookKey];
@@ -130,7 +130,7 @@ export const usePlayerStore = create<PlayerState>()(
         newLastTracks[bookKey] = trackKey;
 
         const newProgressMap = { ...state.progressMap };
-        newProgressMap[trackKey] = { time: duration, duration };
+        newProgressMap[trackKey] = { time: duration, duration, lastPlayed: Date.now() };
 
         return {
           lastTrackByBook: newLastTracks,

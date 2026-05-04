@@ -108,8 +108,8 @@ export function HomeView({
       .sort((a, b) => {
         const lastTrackKeyA = lastTrackByBook[a.ratingKey];
         const lastTrackKeyB = lastTrackByBook[b.ratingKey];
-        const timeA = progressMap[lastTrackKeyA || '']?.time || 0;
-        const timeB = progressMap[lastTrackKeyB || '']?.time || 0;
+        const timeA = progressMap[lastTrackKeyA || '']?.lastPlayed || 0;
+        const timeB = progressMap[lastTrackKeyB || '']?.lastPlayed || 0;
         return timeB - timeA;
       })
       .slice(0, 5);
@@ -164,7 +164,6 @@ export function HomeView({
       <header className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-light tracking-tight text-ink">{t('home.title')}</h1>
-          <p className="text-ink-dim text-[10px] mt-1 uppercase tracking-widest font-bold">{t('home.subtitle')}</p>
         </div>
         {isOffline && (
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400 text-xs font-bold">
