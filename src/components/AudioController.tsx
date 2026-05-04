@@ -287,15 +287,16 @@ export function AudioController() {
     const token = effectiveToken;
 
     return () => {
-      if (track && server && token && hasReportedRef.current && lastStateRef.current !== 'stopped') {
+      const storeState = usePlayerStore.getState();
+      if (track && server && token && hasReportedRef.current && lastStateRef.current !== 'stopped' && storeState.duration > 0) {
         const connections = server?.connections || [];
         const serverBaseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri;
         if (serverBaseUrl) {
           plexService.reportPlayback(serverBaseUrl, token, {
             ratingKey: track.ratingKey,
             state: 'stopped',
-            time: usePlayerStore.getState().currentTime * 1000,
-            duration: usePlayerStore.getState().duration * 1000
+            time: storeState.currentTime * 1000,
+            duration: storeState.duration * 1000
           });
         }
       }

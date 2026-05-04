@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { version as APP_VERSION } from '../../package.json';
 import { Capacitor } from '@capacitor/core';
 
 // Use a stored UUID or generate a new one for this browser
@@ -15,7 +16,7 @@ const getStoredClientId = () => {
 const PLEX_CLIENT_ID = getStoredClientId();
 const PLEX_HEADERS = {
   'X-Plex-Product': 'Lesenacht',
-  'X-Plex-Version': '1.0.0',
+  'X-Plex-Version': APP_VERSION,
   'X-Plex-Client-Identifier': PLEX_CLIENT_ID,
   'X-Plex-Device': Capacitor.getPlatform() === 'web' ? 'Web Browser' : 'Mobile App',
   'X-Plex-Platform': Capacitor.getPlatform(),
@@ -241,10 +242,14 @@ export const plexService = {
       if (!Capacitor.isNativePlatform()) {
         const directUrl = new URL(url.toString());
         directUrl.searchParams.append('X-Plex-Token', token);
+        directUrl.searchParams.append('X-Plex-Client-Identifier', PLEX_CLIENT_ID);
+        directUrl.searchParams.append('X-Plex-Product', 'Lesenacht');
+        directUrl.searchParams.append('X-Plex-Version', APP_VERSION);
         
         try {
           // 'no-cors' mode allows sending the request to another origin without full CORS compliance,
           // but we won't be able to read the response. For a timeline update, this is sufficient.
+          // Required Plex headers are passed as query params since no-cors strips custom headers.
           fetch(directUrl.toString(), { mode: 'no-cors', keepalive: true }).catch(() => {});
           // We still proceed to call the proxy version to be sure it's recorded if direct fails,
           // though this may result in double reporting if the user is technical, Tautulli 
