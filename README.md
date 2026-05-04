@@ -23,6 +23,13 @@ To run Lesenacht on your local machine with full proxy support:
 2. **Start**: `npm run dev`
 3. **Access**: Open `http://localhost:3000`
 
+### Docker Deployment
+
+You can also run Lesenacht using Docker:
+
+1. **Build and Run**: `docker compose up -d`
+2. **Access**: Open `http://localhost:3000`
+
 ### Cloudflare Pages Deployment
 
 This app is optimized for deployment on [Cloudflare Pages](https://pages.cloudflare.com/).
