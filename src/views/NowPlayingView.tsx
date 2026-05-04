@@ -55,7 +55,9 @@ export function NowPlayingView({
     setSleepTimer,
     bookmarks,
     removeBookmark,
-    queue
+    queue,
+    progressMap,
+    saveProgress
   } = usePlayerStore();
   const { authToken, selectedServer, showVolumeControl, progressBarMode } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
@@ -106,7 +108,19 @@ export function NowPlayingView({
   const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri || '';
 
   const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken || '', 800, 800);
-  
+
+  // For track-based multi-file audiobooks, compute global progress across all tracks
+  const currentTrackQueueIndex = isTrackBased
+    ? queue.findIndex((t: any) => t.ratingKey === currentTrack.ratingKey)
+    : -1;
+  const currentTrackOffset = isTrackBased && currentTrackQueueIndex > 0
+    ? queue.slice(0, currentTrackQueueIndex).reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0)
+    : 0;
+  const totalDuration = isTrackBased
+    ? queue.reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0)
+    : duration;
+  const globalCurrentTime = isTrackBased ? currentTrackOffset + currentTime : currentTime;
+
   const formatTime = (seconds: number) => {
     const s = Math.floor(seconds);
     const h = Math.floor(s / 3600);
@@ -115,7 +129,7 @@ export function NowPlayingView({
     return `${h > 0 ? `${h}:` : ''}${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+  const progress = totalDuration > 0 ? Math.min(100, Math.max(0, (globalCurrentTime / totalDuration) * 100)) : 0;
   const speeds = [0.75, 1, 1.25, 1.5, 1.75, 2];
   const sleepOptions = [15, 30, 45, 60, null];
 
@@ -301,7 +315,7 @@ export function NowPlayingView({
                   />
                 </div>
                 <div className="flex justify-between text-[8px] font-mono text-ink-muted uppercase tracking-wider">
-                  <span>{t('player.chapter')} {currentChapterIndex + 1}</span>
+                  <span>{currentChapter?.tag || currentChapter?.title || `${t('player.chapter')} ${currentChapterIndex + 1}`}</span>
                   <span>{formatTime(currentTime - chapterStart)} / {formatTime(chapterDuration)}</span>
                 </div>
               </div>
@@ -316,7 +330,23 @@ export function NowPlayingView({
                     const rect = e.currentTarget.getBoundingClientRect();
                     const x = e.clientX - rect.left;
                     const clickedPercent = x / rect.width;
-                    setCurrentTime(clickedPercent * duration);
+                    if (isTrackBased && totalDuration > 0) {
+                      const targetSeconds = clickedPercent * totalDuration;
+                      let acc = 0;
+                      for (let i = 0; i < queue.length; i++) {
+                        const trackDur = (queue[i].duration || 0) / 1000;
+                        if (targetSeconds <= acc + trackDur || i === queue.length - 1) {
+                          const timeInTrack = Math.max(0, targetSeconds - acc);
+                          saveProgress(queue[i].ratingKey, timeInTrack, progressMap[queue[i].ratingKey]?.duration || trackDur);
+                          setCurrentTrack(queue[i]);
+                          setPlaying(true);
+                          break;
+                        }
+                        acc += trackDur;
+                      }
+                    } else {
+                      setCurrentTime(clickedPercent * duration);
+                    }
                   }}
                 >
                   <div 
@@ -329,8 +359,8 @@ export function NowPlayingView({
                   />
                 </div>
                 <div className="flex justify-between text-[10px] font-mono text-ink-dim dark:text-ink-muted font-bold">
-                  <span>{formatTime(currentTime)}</span>
-                  <span>-{formatTime(duration - currentTime)}</span>
+                  <span>{formatTime(globalCurrentTime)}</span>
+                  <span>-{formatTime(totalDuration - globalCurrentTime)}</span>
                 </div>
               </div>
             )}

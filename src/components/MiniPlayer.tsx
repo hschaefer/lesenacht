@@ -7,7 +7,7 @@ import { plexService } from '../services/plexService';
 import { CoverImage } from './CoverImage';
 
 export function MiniPlayer({ onClick }: { onClick: () => void }) {
-  const { currentBook, isPlaying, setPlaying, currentTime, duration } = usePlayerStore();
+  const { currentBook, currentTrack, isPlaying, setPlaying, currentTime, duration, queue } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
 
@@ -17,7 +17,17 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
   const baseUrl = connections.find((c: any) => !c.local)?.uri || connections[0]?.uri || '';
 
   const thumbUrl = plexService.getThumbUrl(baseUrl, currentBook.thumb, effectiveToken || '', 100, 100);
-  const progress = duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+  const currentTrackQueueIndex = queue.length > 1 && currentTrack
+    ? queue.findIndex((t: any) => t.ratingKey === currentTrack.ratingKey)
+    : -1;
+  const currentTrackOffset = currentTrackQueueIndex > 0
+    ? queue.slice(0, currentTrackQueueIndex).reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0)
+    : 0;
+  const totalDuration = queue.length > 1
+    ? queue.reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0)
+    : duration;
+  const globalCurrentTime = queue.length > 1 ? currentTrackOffset + currentTime : currentTime;
+  const progress = totalDuration > 0 ? Math.min(100, Math.max(0, (globalCurrentTime / totalDuration) * 100)) : 0;
 
   return (
     <motion.div 
