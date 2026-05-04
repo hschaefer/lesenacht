@@ -27,6 +27,7 @@ interface PlayerState {
   bookmarks: { trackKey: string; time: number; label: string; date: number }[];
   progressMap: Record<string, { time: number; duration: number }>; // Map track ratingKey to its last position and total duration
   lastTrackByBook: Record<string, string>; // Map book ratingKey to last played track ratingKey
+  bookQueues: Record<string, { ratingKey: string; duration: number }[]>; // Map book ratingKey to its ordered track stubs
   sleepTimerEnd: number | null; // Timestamp when player should stop
   isNetworkConnected: boolean;
   activeDownloads: Record<string, DownloadProgress>; // Map bookKey to download progress
@@ -70,6 +71,7 @@ export const usePlayerStore = create<PlayerState>()(
       bookmarks: [],
       progressMap: {},
       lastTrackByBook: {},
+      bookQueues: {},
       sleepTimerEnd: null,
       isNetworkConnected: true,
       activeDownloads: {},
@@ -98,7 +100,13 @@ export const usePlayerStore = create<PlayerState>()(
       setDuration: (duration) => set({ duration: duration }),
       setPlaybackSpeed: (speed) => set({ playbackSpeed: speed }),
       setVolume: (volume) => set({ volume: volume }),
-      setQueue: (queue) => set({ queue: queue }),
+      setQueue: (queue) => set((state) => {
+        const bookKey = state.currentBook?.ratingKey;
+        const newBookQueues = bookKey
+          ? { ...state.bookQueues, [bookKey]: queue.map((t: any) => ({ ratingKey: t.ratingKey, duration: t.duration || 0 })) }
+          : state.bookQueues;
+        return { queue, bookQueues: newBookQueues };
+      }),
       addBookmark: (trackKey, time, label) => set((state) => ({
         bookmarks: [...state.bookmarks, { trackKey, time, label, date: Date.now() }]
       })),
@@ -165,6 +173,7 @@ export const usePlayerStore = create<PlayerState>()(
         bookmarks: state.bookmarks,
         progressMap: state.progressMap,
         lastTrackByBook: state.lastTrackByBook,
+        bookQueues: state.bookQueues,
         downloadedTracks: state.downloadedTracks,
       }),
     }

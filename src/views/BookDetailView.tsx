@@ -40,7 +40,8 @@ export function BookDetailView({
     setQueue,
     setPlaying, 
     currentBook,
-    currentTrack, 
+    currentTrack,
+    currentTime,
     isPlaying, 
     progressMap, 
     lastTrackByBook,
@@ -239,13 +240,29 @@ export function BookDetailView({
 
   const lastTrackKey = lastTrackByBook[book.ratingKey];
   const progressData = lastTrackKey ? progressMap[lastTrackKey] : null;
-  const progressPercent = progressData && progressData.duration > 0 
-    ? (progressData.time / progressData.duration) * 100 
-    : 0;
-  const isFinished = progressPercent >= 95;
-  const hasProgress = !!progressData && progressData.time > 0;
 
+  // Global progress across all tracks for multi-file audiobooks
+  const totalDuration = tracks.reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0);
   const isThisBookLoaded = !!currentBook && currentBook.ratingKey === book.ratingKey;
+  const currentTrackIndex = isThisBookLoaded && currentTrack
+    ? tracks.findIndex((t: any) => t.ratingKey === currentTrack.ratingKey)
+    : -1;
+
+  let totalTime: number;
+  if (isThisBookLoaded && currentTrackIndex >= 0) {
+    // Mirror NowPlayingView exactly: full duration of previous tracks + live currentTime
+    const offset = tracks
+      .slice(0, currentTrackIndex)
+      .reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0);
+    totalTime = offset + currentTime;
+  } else {
+    totalTime = tracks.reduce((acc: number, t: any) => acc + (progressMap[t.ratingKey]?.time || 0), 0);
+  }
+
+  const progressPercent = totalDuration > 0 ? (totalTime / totalDuration) * 100 : 0;
+  const isFinished = progressPercent >= 95;
+  const hasProgress = totalTime > 0;
+
   const isThisBookPlaying = isThisBookLoaded && isPlaying;
 
   const formatTime = (seconds: number) => {
@@ -360,8 +377,8 @@ export function BookDetailView({
                 />
               </div>
               <div className="text-[10px] font-mono text-ink-dim dark:text-ink-muted flex justify-between">
-                <span>{formatTime(progressData?.time || 0)}</span>
-                <span>{formatTime(progressData?.duration || 0)}</span>
+                <span>{formatTime(totalTime)}</span>
+                <span>{formatTime(totalDuration)}</span>
               </div>
             </div>
           )}

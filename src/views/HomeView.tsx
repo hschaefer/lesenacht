@@ -239,15 +239,34 @@ function BookCard({
   large?: boolean;
   key?: any;
 }) {
-  const { progressMap, lastTrackByBook } = usePlayerStore();
+  const { progressMap, lastTrackByBook, currentBook, currentTrack, currentTime, queue, bookQueues } = usePlayerStore();
   const thumbUrl = plexService.getThumbUrl(baseUrl, book.thumb, authToken, large ? 400 : 300, large ? 400 : 300);
 
-  // Calculate progress percentage
-  const lastTrackKey = lastTrackByBook[book.ratingKey];
-  const progressData = lastTrackKey ? progressMap[lastTrackKey] : null;
-  const progressPercent = progressData && progressData.duration > 0 
-    ? (progressData.time / progressData.duration) * 100 
-    : 0;
+  // Calculate progress percentage – global across all tracks for multi-file audiobooks
+  const isThisBookLoaded = !!currentBook && currentBook.ratingKey === book.ratingKey;
+  const bookTrackList = isThisBookLoaded ? queue : (bookQueues[book.ratingKey] || []);
+  let progressPercent = 0;
+  if (bookTrackList.length > 1) {
+    const totalDuration = bookTrackList.reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0);
+    if (totalDuration > 0) {
+      if (isThisBookLoaded && currentTrack) {
+        const idx = queue.findIndex((t: any) => t.ratingKey === currentTrack.ratingKey);
+        if (idx >= 0) {
+          const offset = queue.slice(0, idx).reduce((acc: number, t: any) => acc + (t.duration || 0) / 1000, 0);
+          progressPercent = Math.min(100, Math.max(0, ((offset + currentTime) / totalDuration) * 100));
+        }
+      } else {
+        const totalTime = bookTrackList.reduce((acc: number, t: any) => acc + (progressMap[t.ratingKey]?.time || 0), 0);
+        progressPercent = Math.min(100, Math.max(0, (totalTime / totalDuration) * 100));
+      }
+    }
+  } else {
+    const lastTrackKey = lastTrackByBook[book.ratingKey];
+    const progressData = lastTrackKey ? progressMap[lastTrackKey] : null;
+    progressPercent = progressData && progressData.duration > 0
+      ? (progressData.time / progressData.duration) * 100
+      : 0;
+  }
 
   return (
     <motion.div 
