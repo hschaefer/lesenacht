@@ -520,7 +520,7 @@ export function AudioController() {
   return (
     <audio
       ref={audioRef}
-      src={audioSrc}
+      src={audioSrc || undefined}
       onTimeUpdate={handleTimeUpdate}
       onLoadedMetadata={handleLoadedMetadata}
       onCanPlay={handleCanPlay}
