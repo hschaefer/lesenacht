@@ -13,7 +13,8 @@
     "cap:sync": "npm run build && npx cap sync",
     "cap:open": "npx cap open android",
     "cap:add": "npx cap add android",
-    "cap:assets": "npx @capacitor/assets generate --android"
+    "cap:assets": "npx @capacitor/assets generate --android",
+    "cap:deploy-android": "npm run build && npx cap sync && cd android && ./gradlew assembleDebug && adb uninstall io.lesenacht.app; adb install app/build/outputs/apk/debug/app-debug.apk"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
