@@ -240,7 +240,7 @@ export function LibraryView({
         <div className="flex flex-col md:flex-row gap-6">
           <div className="w-40 h-40 rounded-3xl overflow-hidden bg-slate-800 flex-shrink-0 shadow-xl overflow-hidden relative">
              <CoverImage 
-              src={plexService.getThumbUrl(baseUrl || '', selectedAuthor.thumb, authToken!, 300, 300)} 
+              src={plexService.getThumbUrl(baseUrl || '', selectedAuthor.thumb, effectiveToken!, 300, 300)} 
               className="w-full h-full"
               alt={selectedAuthor.title}
               type="author"

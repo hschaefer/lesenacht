@@ -521,6 +521,7 @@ export function AudioController() {
     <audio
       ref={audioRef}
       src={audioSrc || undefined}
+      crossOrigin="anonymous"
       onTimeUpdate={handleTimeUpdate}
       onLoadedMetadata={handleLoadedMetadata}
       onCanPlay={handleCanPlay}
