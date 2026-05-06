@@ -17,6 +17,19 @@ async function startServer() {
       return res.status(400).json({ error: "URL is required" });
     }
 
+    try {
+      const parsedUrl = new URL(url);
+      const isPlexDirect = parsedUrl.hostname.endsWith(".plex.direct");
+      const isPlexTv = parsedUrl.hostname === "plex.tv" || parsedUrl.hostname.endsWith(".plex.tv");
+
+      if (!isPlexDirect && !isPlexTv) {
+        console.warn(`Blocked potentially malicious proxy attempt to: ${url}`);
+        return res.status(403).json({ error: "Forbidden: Only Plex domains are allowed" });
+      }
+    } catch (e) {
+      return res.status(400).json({ error: "Invalid URL" });
+    }
+
     // Sanitize URL for logging (remove potential tokens from query string)
     const sanitizeUrl = (u: string) => u.replace(/X-Plex-Token=[^&]+/g, "X-Plex-Token=REDACTED");
 

@@ -10,6 +10,24 @@ export async function onRequest(context) {
     });
   }
 
+  try {
+    const parsedUrl = new URL(targetUrl);
+    const isPlexDirect = parsedUrl.hostname.endsWith('.plex.direct');
+    const isPlexTv = parsedUrl.hostname === 'plex.tv' || parsedUrl.hostname.endsWith('.plex.tv');
+
+    if (!isPlexDirect && !isPlexTv) {
+      return new Response(JSON.stringify({ error: 'Forbidden: Only Plex domains are allowed' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'Invalid URL' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   const plexHeaders = new Headers();
   plexHeaders.set('Accept', 'application/json');
   
@@ -35,12 +53,19 @@ export async function onRequest(context) {
 
     const data = await plexResponse.text();
     
+    const responseHeaders = new Headers({
+      'Content-Type': 'application/json',
+    });
+
+    // Simple CORS hardening: reflect origin if it exists
+    const origin = request.headers.get('Origin');
+    if (origin) {
+      responseHeaders.set('Access-Control-Allow-Origin', origin);
+    }
+
     return new Response(data, {
       status: plexResponse.status,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      }
+      headers: responseHeaders
     });
   } catch (error) {
     return new Response(JSON.stringify({ error: error.message }), {
