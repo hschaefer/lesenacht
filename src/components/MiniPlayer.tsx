@@ -1,13 +1,13 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Play, Pause, ChevronUp } from 'lucide-react';
+import { Play, Pause, ChevronUp, X } from 'lucide-react';
 import { usePlayerStore, useAuthStore } from '../store/useStore';
 import { plexService } from '../services/plexService';
 
 import { CoverImage } from './CoverImage';
 
 export function MiniPlayer({ onClick }: { onClick: () => void }) {
-  const { currentBook, currentTrack, isPlaying, setPlaying, currentTime, duration, queue } = usePlayerStore();
+  const { currentBook, currentTrack, isPlaying, setPlaying, setCurrentTrack, setCurrentBook, currentTime, duration, queue } = usePlayerStore();
   const { authToken, selectedServer } = useAuthStore();
   const effectiveToken = selectedServer?.accessToken || authToken;
 
@@ -57,6 +57,18 @@ export function MiniPlayer({ onClick }: { onClick: () => void }) {
           <p className="text-xs text-ink-dim truncate">{currentBook.parentTitle || currentBook.grandparentTitle}</p>
         </div>
         <div className="flex items-center gap-2">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              setPlaying(false);
+              setCurrentTrack(null);
+              setCurrentBook(null);
+            }}
+            className="w-8 h-8 flex items-center justify-center text-ink-dim hover:text-ink transition-colors mr-1"
+            title="Stop & Close"
+          >
+            <X size={20} />
+          </button>
           <button 
             onClick={(e) => {
               e.stopPropagation();

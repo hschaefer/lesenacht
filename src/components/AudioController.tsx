@@ -35,6 +35,8 @@ export function AudioController() {
     playbackSpeed, 
     volume,
     setPlaying,
+    setCurrentTrack,
+    setCurrentBook,
     saveProgress,
     sleepTimerEnd,
     setSleepTimer,
@@ -150,6 +152,11 @@ export function AudioController() {
           break;
         case 'pause':
           setPlaying(false);
+          break;
+        case 'stop':
+          setPlaying(false);
+          setCurrentTrack(null);
+          setCurrentBook(null);
           break;
         case 'seekforward': {
           const newTime = Math.min(stateRef.current.duration, stateRef.current.currentTime + 30);
