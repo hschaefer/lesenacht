@@ -42,6 +42,17 @@ This app is optimized for deployment on [Cloudflare Pages](https://pages.cloudfl
     - **Build Command**: `npm run build`
     - **Build Output Directory**: `dist`
 
+### Private Instance (Optional)
+
+If you are hosting a public instance (e.g., on Cloudflare) but want to restrict access to friends, you can set a shared secret:
+
+1. **Set Environment Variable**: Add `ACCESS_CODE="your_secret_here"` to your server or Cloudflare environment variables.
+2. **Share the Link**: Friends must visit the app once using `?code=your_secret_here` to unlock access.
+3. **Persistence**: The code is saved in `localStorage`, so they only need to use the link once.
+
+> [!TIP]
+> For extra security, it is recommended to enable a **Cloudflare WAF Rate Limiting Rule** on `/api/plex-proxy` for `401` responses.
+
 ## Android app
 
 This project uses **Capacitor** to turn the web application into a native Android app.

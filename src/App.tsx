@@ -27,6 +27,7 @@ export default function App() {
   const [isNowPlayingOpen, setIsNowPlayingOpen] = useState(false);
   const [loginInitiatedFromHome, setLoginInitiatedFromHome] = useState(false);
   const [showDownloads, setShowDownloads] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
 
   const { authToken, selectedServer, setSelectedServer, selectedLibrary, theme, language } = useAuthStore();
   const { currentBook } = usePlayerStore();
@@ -39,20 +40,34 @@ export default function App() {
   // Stored server data can become stale (Plex direct URLs / managed tokens rotate),
   // causing 500 errors until the user manually re-authenticates.
   useEffect(() => {
-    if (!authToken || !selectedServer) return;
     (async () => {
-      try {
-        const networkStatus = await downloadService.getNetworkStatus();
-        if (!networkStatus.connected) {
-          setServerReady(true);
-          return;
+      // 1. First, check if the instance is private and requires a code
+      const isAuthorized = await plexService.checkProxyAuth();
+      if (!isAuthorized) {
+        setIsLocked(true);
+        setServerReady(true);
+        return;
+      }
+
+      // 2. If authorized, proceed with Plex server refresh if logged in
+      if (authToken && selectedServer) {
+        try {
+          const networkStatus = await downloadService.getNetworkStatus();
+          if (!networkStatus.connected) {
+            setServerReady(true);
+            return;
+          }
+          const resources: any[] = await plexService.getResources(authToken);
+          const fresh = resources.find((s: any) =>
+            s.clientIdentifier === selectedServer.clientIdentifier && s.provides === 'server'
+          );
+          if (fresh) setSelectedServer(fresh);
+        } catch (error: any) {
+          if (error?.response?.status === 401) {
+            setIsLocked(true);
+          }
         }
-        const resources: any[] = await plexService.getResources(authToken);
-        const fresh = resources.find((s: any) =>
-          s.clientIdentifier === selectedServer.clientIdentifier && s.provides === 'server'
-        );
-        if (fresh) setSelectedServer(fresh);
-      } catch {}
+      }
       setServerReady(true);
     })();
   }, []);
@@ -81,6 +96,18 @@ export default function App() {
       root.classList.add(theme);
     }
   }, [theme]);
+
+  // Check for access code in URL (e.g. ?code=MY_SECRET) to restrict public instances
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code') || params.get('access_code');
+    if (code) {
+      localStorage.setItem('lesenacht_access_code', code);
+      // Clean up URL without refreshing
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, []);
   
   const handleSelectAuthor = (key: string | null) => {
     setSelectedAuthorKey(key);
@@ -103,6 +130,22 @@ export default function App() {
   };
 
   const renderContent = () => {
+    if (isLocked) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 px-4">
+          <div className="w-20 h-20 bg-accent/10 rounded-full flex items-center justify-center text-accent">
+            <SettingsIcon size={40} />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-bold tracking-tight">Private Instance</h2>
+            <p className="text-ink-dim max-w-xs mx-auto">
+              This instance is restricted. Please use your personal invite link to gain access.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     if (selectedBookKey) {
       return (
         <BookDetailView

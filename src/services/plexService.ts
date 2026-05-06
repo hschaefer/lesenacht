@@ -37,6 +37,24 @@ export const plexService = {
     return PLEX_CLIENT_ID;
   },
 
+  async checkProxyAuth(): Promise<boolean> {
+    if (Capacitor.isNativePlatform()) return true;
+    
+    try {
+      // Ping the proxy with a dummy request to see if it requires a code
+      const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent('https://plex.tv')}`;
+      const accessCode = localStorage.getItem('lesenacht_access_code');
+      const headers: any = {};
+      if (accessCode) headers['X-Access-Code'] = accessCode;
+      
+      await axios.get(proxyUrl, { headers, timeout: 5000 });
+      return true;
+    } catch (error: any) {
+      if (error?.response?.status === 401) return false;
+      return true; // Assume true for other errors (like network) to avoid false positives
+    }
+  },
+
   async getPin(): Promise<PlexPin> {
     const response = await axios.post('https://plex.tv/api/v2/pins', {
       strong: true
@@ -87,13 +105,19 @@ export const plexService = {
       } else {
         // Use proxy on web to avoid CORS
         const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent(url)}`;
-        const response = await axios.get(proxyUrl, {
-          headers: {
-            ...PLEX_HEADERS,
-            'X-Plex-Token': token,
-            'Accept': 'application/json'
-          }
-        });
+        
+        // Add optional access code from localStorage to authorize against the proxy
+        const headers: any = {
+          ...PLEX_HEADERS,
+          'X-Plex-Token': token,
+          'Accept': 'application/json'
+        };
+        const accessCode = localStorage.getItem('lesenacht_access_code');
+        if (accessCode) {
+          headers['X-Access-Code'] = accessCode;
+        }
+
+        const response = await axios.get(proxyUrl, { headers });
         
         // If the response is a string (like HTML from a fallback), it's an error
         if (typeof response.data === 'string' && response.data.includes('<!DOCTYPE html>')) {

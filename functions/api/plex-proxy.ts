@@ -28,6 +28,19 @@ export async function onRequest(context) {
     });
   }
 
+  // Optional: Restrict access via a shared secret code if set in environment
+  const requiredCode = env.ACCESS_CODE;
+  const providedCode = request.headers.get('X-Access-Code');
+  
+  if (requiredCode && providedCode !== requiredCode) {
+    // Artificial delay to slow down brute force attempts
+    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
+    return new Response(JSON.stringify({ error: 'Unauthorized: Invalid access code' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   const plexHeaders = new Headers();
   plexHeaders.set('Accept', 'application/json');
   

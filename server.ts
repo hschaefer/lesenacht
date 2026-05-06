@@ -2,6 +2,9 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 async function startServer() {
   const app = express();
@@ -28,6 +31,18 @@ async function startServer() {
       }
     } catch (e) {
       return res.status(400).json({ error: "Invalid URL" });
+    }
+
+    // Optional: Restrict access via a shared secret code if set in environment
+    const requiredCode = process.env.ACCESS_CODE;
+    const providedCode = req.headers["x-access-code"];
+    
+    if (requiredCode && providedCode !== requiredCode) {
+      // Artificial delay to slow down brute force attempts
+      setTimeout(() => {
+        res.status(401).json({ error: "Unauthorized: Invalid access code" });
+      }, 500 + Math.random() * 500);
+      return;
     }
 
     // Sanitize URL for logging (remove potential tokens from query string)
