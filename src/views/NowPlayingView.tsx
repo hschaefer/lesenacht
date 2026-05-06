@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronDown, 
+  X,
   Play, 
   Pause, 
   SkipBack, 
@@ -46,6 +47,7 @@ export function NowPlayingView({
     duration, 
     setCurrentTime,
     setCurrentTrack,
+    setCurrentBook,
     playbackSpeed,
     setPlaybackSpeed,
     volume,
@@ -220,43 +222,57 @@ export function NowPlayingView({
           <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-ink-muted">{t('player.currentlyListening')}</p>
           <h2 className="text-sm font-bold text-ink truncate max-w-[200px]">{currentBook.title}</h2>
         </div>
-        <div className="relative">
+        <div className="flex items-center gap-2">
           <button 
-            onClick={() => setIsOptionsMenuOpen(!isOptionsMenuOpen)}
-            className={`w-12 h-12 glass rounded-full flex items-center justify-center transition-colors ${isOptionsMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'}`}
+            onClick={() => {
+              setPlaying(false);
+              setCurrentTrack(null);
+              setCurrentBook(null);
+              onClose();
+            }}
+            className="w-12 h-12 glass rounded-full flex items-center justify-center text-ink-dim hover:text-ink transition-colors"
+            title="Stop & Close"
           >
-            <MoreVertical size={24} />
+            <X size={24} />
           </button>
-          
-          <AnimatePresence>
-            {isOptionsMenuOpen && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 top-14 w-48 glass rounded-2xl shadow-2xl z-50 p-2"
-              >
-                <button 
-                  onClick={() => {
-                    onNavigateBook?.(currentBook.ratingKey);
-                    setIsOptionsMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
+          <div className="relative">
+            <button 
+              onClick={() => setIsOptionsMenuOpen(!isOptionsMenuOpen)}
+              className={`w-12 h-12 glass rounded-full flex items-center justify-center transition-colors ${isOptionsMenuOpen ? 'text-accent' : 'text-ink-dim hover:text-ink'}`}
+            >
+              <MoreVertical size={24} />
+            </button>
+            
+            <AnimatePresence>
+              {isOptionsMenuOpen && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute right-0 top-14 w-48 glass rounded-2xl shadow-2xl z-50 p-2"
                 >
-                  <BookOpen size={16} /> {t('player.goToBook')}
-                </button>
-                <button 
-                  onClick={() => {
-                    if (currentBook.parentRatingKey) onNavigateAuthor?.(currentBook.parentRatingKey);
-                    setIsOptionsMenuOpen(false);
-                  }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
-                >
-                  <Library size={16} /> {t('player.goToAuthor')}
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <button 
+                    onClick={() => {
+                      onNavigateBook?.(currentBook.ratingKey);
+                      setIsOptionsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
+                  >
+                    <BookOpen size={16} /> {t('player.goToBook')}
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (currentBook.parentRatingKey) onNavigateAuthor?.(currentBook.parentRatingKey);
+                      setIsOptionsMenuOpen(false);
+                    }}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm font-bold text-ink-dim hover:text-ink hover:bg-ink/5 rounded-xl transition-colors"
+                  >
+                    <Library size={16} /> {t('player.goToAuthor')}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </header>
 
