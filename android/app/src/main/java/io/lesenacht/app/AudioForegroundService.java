@@ -182,6 +182,8 @@ public class AudioForegroundService extends android.app.Service {
             @Override
             public void onStop() {
                 forwardAction("stop", -1);
+                stopForeground(true);
+                stopSelf();
             }
 
             @Override
