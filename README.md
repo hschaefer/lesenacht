@@ -2,9 +2,9 @@
 
 Lesenacht is a progressive web app designed for streaming and listening to audiobooks, utilizing your self-hosted Plex server as the backend.
 
-## AI statement
+## AI-Assisted Development
 
-This application is completely **vibe coded**. If thats not for you, please move on.
+This project is 100% AI-generated code. 
 
 ## Features
 
