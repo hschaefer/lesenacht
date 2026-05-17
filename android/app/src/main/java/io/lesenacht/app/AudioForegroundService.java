@@ -280,7 +280,7 @@ public class AudioForegroundService extends android.app.Service {
             .setShowActionsInCompactView(0, 1, 2);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher)
+            .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(author)
             .setContentIntent(contentPi)
