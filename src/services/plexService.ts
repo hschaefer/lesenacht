@@ -42,7 +42,7 @@ export const plexService = {
     
     try {
       // Ping the proxy with a dummy request to see if it requires a code
-      const proxyUrl = `/api/plex-proxy?url=${encodeURIComponent('https://plex.tv')}`;
+      const proxyUrl = `/api/plex-proxy?url=health`;
       const accessCode = localStorage.getItem('lesenacht_access_code');
       const headers: any = {};
       if (accessCode) headers['X-Access-Code'] = accessCode;

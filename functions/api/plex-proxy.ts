@@ -10,6 +10,23 @@ export async function onRequest(context) {
     });
   }
 
+  // Health check — verify access code without forwarding to Plex
+  if (targetUrl === 'health') {
+    const requiredCode = env.ACCESS_CODE;
+    const providedCode = request.headers.get('X-Access-Code');
+    if (requiredCode && providedCode !== requiredCode) {
+      await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 500));
+      return new Response(JSON.stringify({ error: 'Unauthorized: Invalid access code' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    return new Response(JSON.stringify({ ok: true }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   try {
     const parsedUrl = new URL(targetUrl);
     const isPlexDirect = parsedUrl.hostname.endsWith('.plex.direct');

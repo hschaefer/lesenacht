@@ -20,6 +20,16 @@ async function startServer() {
       return res.status(400).json({ error: "URL is required" });
     }
 
+    // Health check — verify access code without forwarding to Plex
+    if (url === "health") {
+      const requiredCode = process.env.ACCESS_CODE;
+      const providedCode = req.headers["x-access-code"];
+      if (requiredCode && providedCode !== requiredCode) {
+        return setTimeout(() => res.status(401).json({ error: "Unauthorized: Invalid access code" }), 500 + Math.random() * 500);
+      }
+      return res.json({ ok: true });
+    }
+
     try {
       const parsedUrl = new URL(url);
       const isPlexDirect = parsedUrl.hostname.endsWith(".plex.direct");
